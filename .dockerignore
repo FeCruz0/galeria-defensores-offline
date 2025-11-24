@@ -1,0 +1,32 @@
+# Ignore the build directory
+/build/
+
+# Ignore the local Gradle cache
+.gradle/
+
+# Ignore the Gradle wrapper files
+gradle/wrapper/gradle-wrapper.jar
+gradle/wrapper/gradle-wrapper.properties
+
+# Ignore the generated files
+*.iml
+*.hprof
+
+# Ignore the Android Studio specific files
+.idea/
+*.log
+
+# Ignore the local configuration files
+local.properties
+
+# Ignore the output of the build
+app/build/
+
+# Ignore the .DS_Store files (macOS)
+.DS_Store
+
+# Ignore the .env files
+.env
+
+# Ignore the node_modules directory (if applicable)
+node_modules/

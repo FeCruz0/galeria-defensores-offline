@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  android-build:
+    build: .
+    user: "1000:1000"
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace:cached
+      - gradle-cache:/home/developer/.gradle
+      - android-sdk:/opt/android-sdk
+      - android-dotandroid:/home/developer/.android
+    environment:
+      - ANDROID_SDK_ROOT=/opt/android-sdk
+      - GRADLE_USER_HOME=/home/developer/.gradle
+    tty: true
+    stdin_open: true
+
+volumes:
+  gradle-cache:
+  android-sdk:
+  android-dotandroid:
