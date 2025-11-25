@@ -1,4 +1,0 @@
-/workspace/app/src/main/java/com/galeria/defensores/models/Character.kt
-/workspace/app/src/main/java/com/galeria/defensores/ui/CharacterDetailFragment.kt
-/workspace/app/src/main/java/com/galeria/defensores/MainActivity.kt
-/workspace/app/src/main/java/com/galeria/defensores/ui/CharacterListFragment.kt

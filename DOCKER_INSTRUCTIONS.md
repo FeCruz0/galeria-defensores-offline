@@ -23,16 +23,23 @@ Este projeto já está configurado para rodar com Docker. Abaixo estão os passo
 3.  **Gerar o APK (dentro do container):**
     Uma vez dentro do terminal do container, execute o comando do Gradle para montar o APK de debug:
     ```bash
+    sed -i 's/\r$//' gradlew 
+    chmod +x gradlew
     ./gradlew assembleDebug
     ```
     
     *Nota: Na primeira execução, o Gradle irá baixar todas as dependências. Isso pode levar de 5 a 10 minutos e o terminal pode parecer "travado" sem mostrar nada. Tenha paciência.*
+
+    *Nota:
+    "sed -i 's/\r$//' gradlew" corrige quebras de linhas do windows para linux.
+    "chmod +x gradlew" adiciona permissão de execução ao arquivo gradlew.
+    "./gradlew assembleDebug" executa o gradle para montar o apk.
     
     *Dica: Se quiser ver o que está acontecendo, use o comando com `--info`:*
     ```bash
     ./gradlew assembleDebug --info
     ```
-
+    
 4.  **Localizar o APK:**
     Após o término do build, o APK gerado estará disponível na sua máquina local (fora do docker) em:
     `app/build/outputs/apk/debug/app-debug.apk`

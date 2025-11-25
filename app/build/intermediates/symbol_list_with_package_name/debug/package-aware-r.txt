@@ -3024,8 +3024,8 @@ id chain
 id chains
 id character_description
 id character_list_title
-id character_list_view
 id character_name
+id character_recycler_view
 id checkbox
 id checked
 id chronometer
@@ -3513,6 +3513,7 @@ layout design_text_input_end_icon
 layout design_text_input_start_icon
 layout fragment_character_detail
 layout fragment_character_list
+layout item_character
 layout m3_alert_dialog
 layout m3_alert_dialog_actions
 layout m3_alert_dialog_title

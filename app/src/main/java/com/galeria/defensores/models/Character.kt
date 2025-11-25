@@ -1,3 +1,5 @@
+package com.galeria.defensores.models
+
 data class Character(
     val name: String,
     val age: Int,
