@@ -64,6 +64,24 @@ class CharacterListFragment : Fragment() {
     }
 
     private fun loadCharacters() {
+        if (tableId == null) return
+        lifecycleScope.launch {
+            val table = TableRepository.getTable(tableId!!)
+            val characters = CharacterRepository.getCharacters(tableId)
+            val currentUser = com.galeria.defensores.data.SessionManager.currentUser
+            if (table != null && currentUser != null) {
+                val filtered = characters.filter { char ->
+                    !char.isPrivate || char.ownerId == currentUser.id || table.masterId == currentUser.id
+                }.sortedWith(
+                    compareByDescending<Character> { it.ownerId == currentUser.id }
+                        .thenBy { it.name.lowercase() }
+                )
+                adapter = CharacterAdapter(filtered) { character ->
+                    openCharacterSheet(character.id)
+                }
+                characterRecyclerView.adapter = adapter
+                
+                // Permission Check for Add Buttons
                 val isMaster = table.masterId == currentUser.id
                 val isPlayer = table.players.contains(currentUser.id)
                 val canEdit = isMaster || isPlayer
