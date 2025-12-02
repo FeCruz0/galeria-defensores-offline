@@ -18,3 +18,5 @@ local.properties
 /app/build
 /app/release
 /app/*.apk
+
+build_log*.txt
