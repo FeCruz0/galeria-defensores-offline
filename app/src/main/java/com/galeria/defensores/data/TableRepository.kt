@@ -1,42 +1,75 @@
 package com.galeria.defensores.data
 
 import com.galeria.defensores.models.Table
+import kotlinx.coroutines.tasks.await
 
 object TableRepository {
-    private val tables = mutableListOf<Table>()
+    private val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+    private val tablesCollection = db.collection("tables")
 
-    init {
-        // Add a default table for testing
-        tables.add(Table(name = "Mesa Exemplo", description = "Uma mesa de teste", masterId = "mock-master-id"))
-    }
-
-    fun getTables(): List<Table> {
-        return tables.toList()
-    }
-
-    fun getTable(id: String): Table? {
-        return tables.find { it.id == id }
-    }
-
-    fun addTable(table: Table) {
-        tables.add(table)
-    }
-
-    fun updateTable(table: Table) {
-        val index = tables.indexOfFirst { it.id == table.id }
-        if (index >= 0) {
-            tables[index] = table
+    suspend fun getTables(): List<Table> {
+        return try {
+            val snapshot = tablesCollection.get().await()
+            snapshot.toObjects(Table::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
         }
     }
 
-    fun deleteTable(id: String) {
-        tables.removeAll { it.id == id }
+    suspend fun getTable(id: String): Table? {
+        return try {
+            val doc = tablesCollection.document(id).get().await()
+            doc.toObject(Table::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
-    fun addPlayerToTable(tableId: String, playerId: String) {
-        val table = getTable(tableId)
-        if (table != null && !table.players.contains(playerId)) {
-            table.players.add(playerId)
+    suspend fun addTable(table: Table): Boolean {
+        return try {
+            tablesCollection.document(table.id).set(table).await()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    suspend fun updateTable(table: Table): Boolean {
+        return try {
+            tablesCollection.document(table.id).set(table).await()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    suspend fun deleteTable(id: String): Boolean {
+        return try {
+            tablesCollection.document(id).delete().await()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    suspend fun addPlayerToTable(tableId: String, playerId: String) {
+        try {
+            val tableRef = tablesCollection.document(tableId)
+            db.runTransaction { transaction ->
+                val snapshot = transaction.get(tableRef)
+                val table = snapshot.toObject(Table::class.java)
+                if (table != null && !table.players.contains(playerId)) {
+                    table.players.add(playerId)
+                    transaction.set(tableRef, table)
+                }
+            }.await()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

@@ -16,11 +16,13 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.galeria.defensores.R
 import com.galeria.defensores.models.RollType
 import com.galeria.defensores.viewmodels.CharacterViewModel
+import kotlinx.coroutines.launch
 
 class CharacterSheetFragment : Fragment() {
 
@@ -69,33 +71,10 @@ class CharacterSheetFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Bind UI
+        // Bind UI
         nameEdit = view.findViewById(R.id.edit_char_name)
-        rollResultCard = view.findViewById(R.id.card_roll_result)
-        rollTotalText = view.findViewById(R.id.text_roll_total)
-        rollDetailText = view.findViewById(R.id.text_roll_detail)
-        rollNameText = view.findViewById(R.id.text_roll_name)
-
-        // Setup Attributes
-        setupAttributeInput(view.findViewById(R.id.attr_forca), "Força", 0, "#DC2626", "forca")
-        setupAttributeInput(view.findViewById(R.id.attr_habilidade), "Habilidade", 0, "#D97706", "habilidade")
-        setupAttributeInput(view.findViewById(R.id.attr_resistencia), "Resistência", 0, "#059669", "resistencia")
-        setupAttributeInput(view.findViewById(R.id.attr_armadura), "Armadura", 0, "#2563EB", "armadura")
-        setupAttributeInput(view.findViewById(R.id.attr_pdf), "Poder de Fogo", 0, "#7C3AED", "poderFogo")
-
-        // Setup Status
-        setupStatusManager(view.findViewById(R.id.status_pv), "Pontos de Vida", 0, "#DC2626", "pv")
-        setupStatusManager(view.findViewById(R.id.status_pm), "Pontos de Magia", 0, "#2563EB", "pm")
-
-        // Setup Combat Buttons
-        view.findViewById<Button>(R.id.btn_attack_f).setOnClickListener { viewModel.rollDice(RollType.ATTACK_F) }
-        view.findViewById<Button>(R.id.btn_attack_pdf).setOnClickListener { viewModel.rollDice(RollType.ATTACK_PDF) }
-        view.findViewById<Button>(R.id.btn_defense).setOnClickListener { viewModel.rollDice(RollType.DEFENSE) }
+        val hiddenCheck = view.findViewById<android.widget.CheckBox>(R.id.check_hidden)
         
-        view.findViewById<View>(R.id.btn_reset).setOnClickListener { 
-            parentFragmentManager.popBackStack()
-        }
-
-        // Name Listener
         nameEdit.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 if (nameEdit.hasFocus()) {
@@ -106,13 +85,77 @@ class CharacterSheetFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        // Observe Data
+        // Setup Attribute Labels and Inputs
+        setupAttributeInput(view.findViewById(R.id.attr_forca), "Força", 0, "#EF4444", "forca") // Red
+        setupAttributeInput(view.findViewById(R.id.attr_habilidade), "Habilidade", 0, "#3B82F6", "habilidade") // Blue
+        setupAttributeInput(view.findViewById(R.id.attr_resistencia), "Resistência", 0, "#10B981", "resistencia") // Green
+        setupAttributeInput(view.findViewById(R.id.attr_armadura), "Armadura", 0, "#6B7280", "armadura") // Gray
+        setupAttributeInput(view.findViewById(R.id.attr_pdf), "Poder de Fogo", 0, "#8B5CF6", "poderFogo") // Purple
+
+        // Setup Status Labels
+        setupStatusManager(view.findViewById(R.id.status_pv), "Pontos de Vida", 0, "#EF4444", "currentPv")
+        setupStatusManager(view.findViewById(R.id.status_pm), "Pontos de Magia", 0, "#3B82F6", "currentPm")
+
         // Observe Data
         viewModel.loadCharacter(characterId, tableId)
 
         viewModel.character.observe(viewLifecycleOwner) { char ->
             if (!nameEdit.hasFocus()) {
                 nameEdit.setText(char.name)
+            }
+            
+            // Handle Hidden Checkbox
+            // Handle Hidden Checkbox
+            // Handle Permissions
+            viewLifecycleOwner.lifecycleScope.launch {
+                // Ensure user is loaded
+                if (com.galeria.defensores.data.SessionManager.currentUser == null) {
+                    com.galeria.defensores.data.SessionManager.refreshUser()
+                }
+                val currentUserId = com.galeria.defensores.data.SessionManager.currentUser?.id
+                
+                // Fallback to character's tableId if argument is null
+                val effectiveTableId = tableId ?: char.tableId
+                val table = if (effectiveTableId.isNotEmpty()) com.galeria.defensores.data.TableRepository.getTable(effectiveTableId) else null
+                
+                val isMaster = table?.masterId == currentUserId || table?.masterId == "mock-master-id"
+                val isOwner = char.ownerId == currentUserId
+                val canEdit = isMaster || isOwner
+                
+                android.util.Log.d("CharacterDebug", "Permissions: userId=$currentUserId, ownerId=${char.ownerId}, masterId=${table?.masterId}")
+                android.util.Log.d("CharacterDebug", "Result: isMaster=$isMaster, isOwner=$isOwner, canEdit=$canEdit")
+                
+                // Enable/Disable Editing based on permissions
+                nameEdit.isEnabled = canEdit
+                view.findViewById<Button>(R.id.btn_add_advantage).visibility = if (canEdit) View.VISIBLE else View.GONE
+                view.findViewById<Button>(R.id.btn_add_disadvantage).visibility = if (canEdit) View.VISIBLE else View.GONE
+                
+                // Hidden Checkbox (Master Only)
+                if (isMaster) {
+                    hiddenCheck.visibility = View.VISIBLE
+                    hiddenCheck.isChecked = char.isHidden
+                    hiddenCheck.setOnCheckedChangeListener { _, isChecked ->
+                        if (char.isHidden != isChecked) {
+                            viewModel.updateHidden(isChecked)
+                        }
+                    }
+                } else {
+                    hiddenCheck.visibility = View.GONE
+                }
+                // Enable/Disable Attribute Inputs
+                val attributeContainers = listOf(
+                    view.findViewById<View>(R.id.attr_forca),
+                    view.findViewById<View>(R.id.attr_habilidade),
+                    view.findViewById<View>(R.id.attr_resistencia),
+                    view.findViewById<View>(R.id.attr_armadura),
+                    view.findViewById<View>(R.id.attr_pdf)
+                )
+                
+                attributeContainers.forEach { container ->
+                    container.findViewById<EditText>(R.id.attribute_input).isEnabled = canEdit
+                    container.findViewById<Button>(R.id.btn_minus).isEnabled = canEdit
+                    container.findViewById<Button>(R.id.btn_plus).isEnabled = canEdit
+                }
             }
             
             updateAttributeValue(view.findViewById(R.id.attr_forca), char.forca)

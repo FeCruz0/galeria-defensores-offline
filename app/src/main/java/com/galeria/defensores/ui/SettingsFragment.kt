@@ -47,5 +47,12 @@ class SettingsFragment : Fragment() {
             }
             AppCompatDelegate.setDefaultNightMode(mode)
         }
+
+        view.findViewById<View>(R.id.btn_logout).setOnClickListener {
+            com.galeria.defensores.data.FirebaseAuthManager.logout()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, LoginFragment())
+                .commit()
+        }
     }
 }

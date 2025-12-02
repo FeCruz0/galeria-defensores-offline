@@ -10,37 +10,39 @@ object SessionManager {
     private const val KEY_USER_NAME = "user_name"
     private const val KEY_USER_PHONE = "user_phone"
 
-    private lateinit var preferences: SharedPreferences
-    var currentUser: User? = null
-        private set
-
     fun init(context: Context) {
-        preferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        val id = preferences.getString(KEY_USER_ID, null)
-        val name = preferences.getString(KEY_USER_NAME, null)
-        val phone = preferences.getString(KEY_USER_PHONE, null)
+        // Firebase Auth handles persistence automatically
+    }
 
-        if (id != null && name != null && phone != null) {
-            currentUser = User(id, name, phone)
-            // Ensure user exists in repository (sync)
-            UserRepository.registerUser(currentUser!!)
+    private var _currentUser: User? = null
+    
+    val currentUser: User?
+        get() = _currentUser
+
+    suspend fun refreshUser() {
+        val firebaseUser = FirebaseAuthManager.getCurrentUser()
+        if (firebaseUser != null) {
+            _currentUser = UserRepository.getUser(firebaseUser.id)
+            // If user not found in Firestore (e.g. new auth), create basic profile
+            if (_currentUser == null) {
+                val newUser = User(
+                    id = firebaseUser.id,
+                    name = firebaseUser.name.ifBlank { "Usuário" },
+                    email = firebaseUser.email,
+                    phoneNumber = firebaseUser.phoneNumber
+                )
+                UserRepository.registerUser(newUser)
+                _currentUser = newUser
+            }
+        } else {
+            _currentUser = null
         }
     }
 
-    fun login(user: User) {
-        currentUser = user
-        preferences.edit()
-            .putString(KEY_USER_ID, user.id)
-            .putString(KEY_USER_NAME, user.name)
-            .putString(KEY_USER_PHONE, user.phoneNumber)
-            .apply()
-        UserRepository.registerUser(user)
-    }
-
     fun logout() {
-        currentUser = null
-        preferences.edit().clear().apply()
+        FirebaseAuthManager.logout()
+        _currentUser = null
     }
     
-    fun isLoggedIn(): Boolean = currentUser != null
+    fun isLoggedIn(): Boolean = FirebaseAuthManager.getCurrentUser() != null
 }

@@ -55,7 +55,16 @@
                 android:textColor="@color/text_primary"
                 android:background="@null"
                 android:padding="8dp"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="8dp" />
+
+            <CheckBox
+                android:id="@+id/check_hidden"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Personagem Oculto (Apenas Mestre)"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone" />
 
             <!-- Attributes -->
             <LinearLayout

@@ -1,82 +1,98 @@
 [
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/layout_view_status_manager.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/layout/view_status_manager.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/drawable_bg_rounded_border.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/drawable/bg_rounded_border.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/layout_fragment_settings.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/layout/fragment_settings.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_activity_main.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/activity_main.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/layout_item_character.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/layout/item_character.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_dialog_select_advantage.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/dialog_select_advantage.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/layout_fragment_character_list.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/layout/fragment_character_list.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_fragment_table_list.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/fragment_table_list.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/mipmap-anydpi-v26/ic_launcher_round.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_item_table.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/item_table.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/layout_fragment_character_detail.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/layout/fragment_character_detail.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/drawable/ic_launcher_foreground.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/layout_fragment_character_sheet.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/layout/fragment_character_sheet.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_dialog_add_character.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/dialog_add_character.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/mipmap-anydpi-v26_ic_launcher.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/mipmap-anydpi-v26/ic_launcher.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_item_character.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/item_character.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/drawable_bg_rounded_border.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/drawable/bg_rounded_border.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/drawable_ic_more_vert.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/drawable/ic_more_vert.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/layout_dialog_edit_advantage.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/layout/dialog_edit_advantage.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_dialog_select_disadvantage.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/dialog_select_disadvantage.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/layout_dialog_select_advantage.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/layout/dialog_select_advantage.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/drawable_progress_drawable.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/drawable/progress_drawable.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/drawable_progress_drawable.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/drawable/progress_drawable.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_item_advantage.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/item_advantage.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/layout_dialog_select_disadvantage.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/layout/dialog_select_disadvantage.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_view_status_manager.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/view_status_manager.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/layout_fragment_login.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/layout/fragment_login.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_fragment_character_sheet.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/fragment_character_sheet.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/layout_activity_main.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/layout/activity_main.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/mipmap-anydpi-v26/ic_launcher.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/layout_fragment_table_list.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/layout/fragment_table_list.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_dialog_edit_advantage.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/dialog_edit_advantage.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/layout_item_advantage.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/layout/item_advantage.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_fragment_settings.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/fragment_settings.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/layout_view_attribute_input.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/layout/view_attribute_input.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_fragment_character_list.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/fragment_character_list.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/drawable_ic_launcher_foreground.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/drawable/ic_launcher_foreground.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/drawable_ic_settings_gear.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/drawable/ic_settings_gear.xml"
     },
     {
-        "merged": "com.galeria.defensores.app-merged_res-39:/layout_item_table.xml.flat",
-        "source": "com.galeria.defensores.app-main-41:/layout/item_table.xml"
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_view_attribute_input.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/view_attribute_input.xml"
+    },
+    {
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_fragment_character_detail.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/fragment_character_detail.xml"
+    },
+    {
+        "merged": "com.galeria.defensores.app-merged_res-44:/drawable_ic_lock.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/drawable/ic_lock.xml"
+    },
+    {
+        "merged": "com.galeria.defensores.app-merged_res-44:/layout_fragment_login.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/layout/fragment_login.xml"
+    },
+    {
+        "merged": "com.galeria.defensores.app-merged_res-44:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.galeria.defensores.app-main-46:/mipmap-anydpi-v26/ic_launcher_round.xml"
     }
 ]

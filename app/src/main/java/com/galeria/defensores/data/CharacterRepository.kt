@@ -1,37 +1,50 @@
 package com.galeria.defensores.data
 
 import com.galeria.defensores.models.Character
+import kotlinx.coroutines.tasks.await
 
 object CharacterRepository {
-    private val characters = mutableListOf<Character>()
+    private val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+    private val charactersCollection = db.collection("characters")
 
-    init {
-        // Add a default character for testing
-        characters.add(Character(name = "Defensor Inicial"))
-    }
-
-    fun getCharacters(tableId: String? = null): List<Character> {
-        return if (tableId != null) {
-            characters.filter { it.tableId == tableId }
-        } else {
-            characters.toList()
+    suspend fun getCharacters(tableId: String? = null): List<Character> {
+        return try {
+            val query = if (tableId != null) {
+                charactersCollection.whereEqualTo("tableId", tableId)
+            } else {
+                charactersCollection
+            }
+            val snapshot = query.get().await()
+            snapshot.toObjects(Character::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
         }
     }
 
-    fun getCharacter(id: String): Character? {
-        return characters.find { it.id == id }
-    }
-
-    fun saveCharacter(character: Character) {
-        val index = characters.indexOfFirst { it.id == character.id }
-        if (index >= 0) {
-            characters[index] = character
-        } else {
-            characters.add(character)
+    suspend fun getCharacter(id: String): Character? {
+        return try {
+            val doc = charactersCollection.document(id).get().await()
+            doc.toObject(Character::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 
-    fun deleteCharacter(id: String) {
-        characters.removeAll { it.id == id }
+    suspend fun saveCharacter(character: Character) {
+        try {
+            charactersCollection.document(character.id).set(character).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun deleteCharacter(id: String) {
+        try {
+            charactersCollection.document(id).delete().await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

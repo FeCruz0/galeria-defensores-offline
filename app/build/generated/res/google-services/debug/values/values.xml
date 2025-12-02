@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">912163952960</string>
+    <string name="google_api_key" translatable="false">AIzaSyDx6w6YPX6x8Yk6bOm6JIMcjc1nbFdTths</string>
+    <string name="google_app_id" translatable="false">1:912163952960:android:71c94038b73c73ff7c82a5</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDx6w6YPX6x8Yk6bOm6JIMcjc1nbFdTths</string>
+    <string name="google_storage_bucket" translatable="false">galeria-de-defensores.firebasestorage.app</string>
+    <string name="project_id" translatable="false">galeria-de-defensores</string>
+</resources>

@@ -29,19 +29,34 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
     var isAnimationEnabled = true
 
     fun loadCharacter(id: String?, tableId: String? = null) {
-        if (id != null) {
-            val char = CharacterRepository.getCharacter(id)
-            if (char != null) {
-                _character.value = char
-                return
+        viewModelScope.launch {
+            android.util.Log.d("CharacterDebug", "Loading character: id=$id, tableId=$tableId")
+            if (id != null) {
+                val char = CharacterRepository.getCharacter(id)
+                if (char != null) {
+                    android.util.Log.d("CharacterDebug", "Character found: ${char.id}, owner=${char.ownerId}")
+                    _character.value = char
+                    return@launch
+                } else {
+                    android.util.Log.e("CharacterDebug", "Character NOT found for id=$id")
+                }
             }
+            // Default new character if ID not found or null
+            android.util.Log.d("CharacterDebug", "Creating default character fallback")
+            val currentUser = com.galeria.defensores.data.SessionManager.currentUser
+            _character.value = Character(
+                tableId = tableId ?: "",
+                ownerId = currentUser?.id ?: "" // Try to set owner if falling back
+            )
         }
-        // Default new character if ID not found or null
-        _character.value = Character(tableId = tableId ?: "")
     }
 
     fun saveCharacter() {
-        _character.value?.let { CharacterRepository.saveCharacter(it) }
+        _character.value?.let { char ->
+            viewModelScope.launch {
+                CharacterRepository.saveCharacter(char)
+            }
+        }
     }
 
     /**
@@ -93,6 +108,13 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         saveCharacter()
     }
 
+    fun updateHidden(isHidden: Boolean) {
+        val currentChar = _character.value ?: return
+        currentChar.isHidden = isHidden
+        _character.value = currentChar
+        saveCharacter()
+    }
+
     fun rollDice(type: RollType) {
         val char = _character.value ?: return
         viewModelScope.launch {
@@ -133,7 +155,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
             val animationEnabled = prefs.getBoolean("animation_enabled", true)
 
             if (animationEnabled) {
-                val animationDuration = 3000L
+                val animationDuration = 2500L
                 val startTime = System.currentTimeMillis()
                 while (System.currentTimeMillis() - startTime < animationDuration) {
                     val fakeDie = Random.nextInt(6) + 1

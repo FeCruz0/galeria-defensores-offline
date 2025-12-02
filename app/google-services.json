@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "912163952960",
+    "project_id": "galeria-de-defensores",
+    "storage_bucket": "galeria-de-defensores.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:912163952960:android:71c94038b73c73ff7c82a5",
+        "android_client_info": {
+          "package_name": "com.fecmal.galeriadedefensores"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDx6w6YPX6x8Yk6bOm6JIMcjc1nbFdTths"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

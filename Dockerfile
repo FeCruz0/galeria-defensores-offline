@@ -1,14 +1,14 @@
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:17-jdk-jammy
 
-ENV ANDROID_SDK_ROOT=/opt/android-sdk
-ENV PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools
-ENV JAVA_HOME=/usr/local/openjdk-17
-ENV GRADLE_USER_HOME=/home/developer/.gradle
-ENV DEBIAN_FRONTEND=noninteractive
+ENV ANDROID_SDK_ROOT /opt/android-sdk
+RUN mkdir -p ${ANDROID_SDK_ROOT}
 
+# Instalar dependências básicas
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget unzip curl git ca-certificates tzdata && \
-    rm -rf /var/lib/apt/lists/*
+    curl \
+    unzip \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
 # instalar command-line tools
 RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
@@ -24,7 +24,10 @@ RUN if id -u ${USER_ID} >/dev/null 2>&1; then \
       useradd -m -u $((USER_ID+1)) developer; \
     else \
       useradd -m -u ${USER_ID} developer; \
-    fi && chown -R developer:developer ${ANDROID_SDK_ROOT}
+    fi && \
+    mkdir -p /home/developer/.android && \
+    touch /home/developer/.android/repositories.cfg && \
+    chown -R developer:developer ${ANDROID_SDK_ROOT} /home/developer/.android
 
 USER developer
 WORKDIR /workspace
