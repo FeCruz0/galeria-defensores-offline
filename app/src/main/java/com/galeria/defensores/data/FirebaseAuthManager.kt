@@ -83,4 +83,27 @@ object FirebaseAuthManager {
     fun logout() {
         auth.signOut()
     }
+
+    // Google Sign-In
+    fun getGoogleSignInClient(activity: Activity): com.google.android.gms.auth.api.signin.GoogleSignInClient {
+        val gso = com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(activity.getString(com.galeria.defensores.R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        return com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(activity, gso)
+    }
+
+    fun firebaseAuthWithGoogle(idToken: String, onSuccess: (User) -> Unit, onError: (String) -> Unit) {
+        val credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    getCurrentUser()?.let { onSuccess(it) }
+                } else {
+                    onError(task.exception?.message ?: "Erro no login com Google")
+                }
+            }
+    }
+
+
 }

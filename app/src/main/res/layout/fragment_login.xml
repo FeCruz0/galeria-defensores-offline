@@ -14,29 +14,50 @@
         android:textStyle="bold"
         android:layout_marginBottom="32dp" />
 
-    <EditText
-        android:id="@+id/input_name"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layout_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Seu Nome"
-        android:inputType="textPersonName"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:hint="Seu E-mail">
 
-    <EditText
-        android:id="@+id/input_email"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Seu E-mail"
-        android:inputType="textEmailAddress"
-        android:layout_marginBottom="16dp" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/input_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <EditText
-        android:id="@+id/input_password"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layout_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
         android:hint="Senha"
-        android:inputType="textPassword"
-        android:layout_marginBottom="8dp" />
+        app:endIconMode="password_toggle"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/input_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Entrar" />
+
+    <Button
+        android:id="@+id/btn_login_google"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Entrar com Google"
+        android:backgroundTint="#DB4437"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="16dp" />
 
     <TextView
         android:id="@+id/text_forgot_password"
@@ -44,16 +65,19 @@
         android:layout_height="wrap_content"
         android:text="Esqueci minha senha"
         android:textColor="?attr/colorPrimary"
-        android:layout_gravity="end"
-        android:layout_marginBottom="24dp"
+        android:layout_marginTop="16dp"
         android:clickable="true"
         android:focusable="true" />
 
-    <Button
-        android:id="@+id/btn_login"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/text_register"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Entrar / Cadastrar" />
+        android:text="Não tem conta? Cadastre-se!"
+        android:textColor="?attr/colorPrimary"
+        android:layout_marginTop="16dp"
+        android:clickable="true"
+        android:focusable="true" />
 
     <ProgressBar
         android:id="@+id/login_progress"

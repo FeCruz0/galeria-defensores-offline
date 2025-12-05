@@ -1,0 +1,47 @@
+--- Verificando Gradle 7.5 ---
+Usando GRADLE_USER_HOME=/tmp/gradle_home
+Gradle não encontrado. Baixando...
+Extraindo...
+Gradle instalado em /tmp/gradle_install
+Executando build...
+
+Welcome to Gradle 7.5!
+
+Here are the highlights of this release:
+ - Support for Java 18
+ - Support for building with Groovy 4
+ - Much more responsive continuous builds
+ - Improved diagnostics for dependency resolution
+
+For more details see https://docs.gradle.org/7.5/release-notes.html
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. See https://docs.gradle.org/7.5/userguide/gradle_daemon.html#sec:disabling_the_daemon.
+Daemon will be stopped at the end of the build 
+
+> Task :app:signingReport
+Variant: debug
+Config: debug
+Store: /home/developer/.android/debug.keystore
+Alias: AndroidDebugKey
+MD5: 35:EE:B5:74:E6:42:0E:A5:47:E2:0A:49:11:C0:81:45
+SHA1: F2:8E:13:83:F2:B8:3A:DF:3F:91:AB:5A:72:FE:9E:7B:D9:1F:81:7C
+SHA-256: F4:77:AD:88:2C:76:34:65:CC:60:A3:B7:61:11:A4:E5:08:9D:FB:F2:35:54:BF:D1:41:E3:34:90:59:32:6F:BA
+Valid until: Thursday, November 25, 2055
+----------
+Variant: release
+Config: null
+Store: null
+Alias: null
+----------
+Variant: debugAndroidTest
+Config: debug
+Store: /home/developer/.android/debug.keystore
+Alias: AndroidDebugKey
+MD5: 35:EE:B5:74:E6:42:0E:A5:47:E2:0A:49:11:C0:81:45
+SHA1: F2:8E:13:83:F2:B8:3A:DF:3F:91:AB:5A:72:FE:9E:7B:D9:1F:81:7C
+SHA-256: F4:77:AD:88:2C:76:34:65:CC:60:A3:B7:61:11:A4:E5:08:9D:FB:F2:35:54:BF:D1:41:E3:34:90:59:32:6F:BA
+Valid until: Thursday, November 25, 2055
+----------
+
+BUILD SUCCESSFUL in 1m 8s
+1 actionable task: 1 executed

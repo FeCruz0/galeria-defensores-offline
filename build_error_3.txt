@@ -1,0 +1,40 @@
+--- Verificando Gradle 7.5 ---
+Usando GRADLE_USER_HOME=/tmp/gradle_home
+Gradle não encontrado. Baixando...
+Extraindo...
+Gradle instalado em /tmp/gradle_install
+Executando build...
+
+Welcome to Gradle 7.5!
+
+Here are the highlights of this release:
+ - Support for Java 18
+ - Support for building with Groovy 4
+ - Much more responsive continuous builds
+ - Improved diagnostics for dependency resolution
+
+For more details see https://docs.gradle.org/7.5/release-notes.html
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. See https://docs.gradle.org/7.5/userguide/gradle_daemon.html#sec:disabling_the_daemon.
+Daemon will be stopped at the end of the build 
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Gradle could not start your build.
+> Could not create service of type ChecksumService using BuildSessionScopeServices.createChecksumService().
+   > Timeout waiting to lock checksums cache (/workspace/.gradle/7.5/checksums). It is currently in use by another Gradle instance.
+     Owner PID: 45
+     Our PID: 47
+     Owner Operation: 
+     Our operation: 
+     Lock file: /workspace/.gradle/7.5/checksums/checksums.lock
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+
+* Get more help at https://help.gradle.org
+
+BUILD FAILED in 1m 9s

@@ -46,4 +46,14 @@ object UserRepository {
             null
         }
     }
+
+    suspend fun isUsernameTaken(name: String): Boolean {
+        return try {
+            val snapshot = usersCollection.whereEqualTo("name", name).get().await()
+            !snapshot.isEmpty
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false // Assume not taken on error to avoid blocking, or handle differently
+        }
+    }
 }
