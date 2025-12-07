@@ -39,6 +39,35 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+        <!-- Profile FAB (Sub-menu) -->
+        <LinearLayout
+            android:id="@+id/layout_fab_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Perfil"
+                android:textColor="@color/text_primary"
+                android:background="@color/card_background"
+                android:padding="4dp"
+                android:layout_marginEnd="8dp" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_account_circle"
+                app:fabSize="mini"
+                app:backgroundTint="?attr/colorSurface"
+                app:tint="?attr/colorControlNormal" />
+        </LinearLayout>
+
         <!-- Settings FAB (Sub-menu) -->
         <LinearLayout
             android:id="@+id/layout_fab_settings"

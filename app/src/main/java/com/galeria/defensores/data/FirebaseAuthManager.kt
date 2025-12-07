@@ -18,7 +18,8 @@ object FirebaseAuthManager {
             User(
                 id = firebaseUser.uid,
                 name = firebaseUser.displayName ?: "Usuário",
-                phoneNumber = firebaseUser.email ?: "" // Using email as identifier now
+                email = firebaseUser.email ?: "",
+                phoneNumber = firebaseUser.phoneNumber ?: "" 
             )
         } else {
             null
@@ -29,7 +30,23 @@ object FirebaseAuthManager {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    getCurrentUser()?.let { onSuccess(it) }
+                    getCurrentUser()?.let { 
+                        // Update last login timestamp
+                        // We use GlobalScope or similar mechanism if we can't be suspended, 
+                        // but here we are in a callback. Ideally we launch a coroutine.
+                        // For simplicity in this callback context (Java style), we might miss it if app closes.
+                        // Better to rely on the UI/ViewModel to trigger it, OR fire and forget.
+                        // However, we can't easily access CoroutineScope here without passing it.
+                        // Let's defer to SessionManager.refreshUser which is called after login to handle it?
+                        // User specifically asked for it. 
+                        // Let's assume SessionManager.refreshUser handles it or we do it here.
+                        // Since `onSuccess` is called, the UI will likely trigger a refresh.
+                        // Let's add it there or here. 
+                        // Adding simple fire-and-forget logic if possible? No, we don't have scope.
+                        // Let's trust the Architecture: onSuccess -> UI -> SessionManager.refreshUser.
+                        // We should add it to SessionManager.refreshUser then, as that's suspendable.
+                        onSuccess(it) 
+                    }
                 } else {
                     onError(task.exception?.message ?: "Erro ao fazer login")
                 }

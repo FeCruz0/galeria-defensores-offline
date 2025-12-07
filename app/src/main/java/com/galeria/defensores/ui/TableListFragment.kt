@@ -118,8 +118,10 @@ class TableListFragment : Fragment() {
         val fabMenu = view.findViewById<FloatingActionButton>(R.id.fab_menu)
         val layoutFabSettings = view.findViewById<View>(R.id.layout_fab_settings)
         val layoutFabCreateTable = view.findViewById<View>(R.id.layout_fab_create_table)
+        val layoutFabProfile = view.findViewById<View>(R.id.layout_fab_profile)
         val fabSettings = view.findViewById<FloatingActionButton>(R.id.fab_settings)
         val fabCreateTable = view.findViewById<FloatingActionButton>(R.id.fab_create_table)
+        val fabProfile = view.findViewById<FloatingActionButton>(R.id.fab_profile)
         
         var isMenuOpen = false
 
@@ -128,10 +130,12 @@ class TableListFragment : Fragment() {
             if (isMenuOpen) {
                 layoutFabSettings.visibility = View.VISIBLE
                 layoutFabCreateTable.visibility = View.VISIBLE
+                layoutFabProfile.visibility = View.VISIBLE
                 fabMenu.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
             } else {
                 layoutFabSettings.visibility = View.GONE
                 layoutFabCreateTable.visibility = View.GONE
+                layoutFabProfile.visibility = View.GONE
                 fabMenu.setImageResource(R.drawable.ic_more_vert)
             }
         }
@@ -143,6 +147,7 @@ class TableListFragment : Fragment() {
                 isMenuOpen = false
                 layoutFabSettings.visibility = View.GONE
                 layoutFabCreateTable.visibility = View.GONE
+                layoutFabProfile.visibility = View.GONE
                 fabMenu.setImageResource(R.drawable.ic_more_vert)
             }
         }
@@ -157,6 +162,21 @@ class TableListFragment : Fragment() {
             isMenuOpen = false
             layoutFabSettings.visibility = View.GONE
             layoutFabCreateTable.visibility = View.GONE
+            layoutFabProfile.visibility = View.GONE
+            fabMenu.setImageResource(R.drawable.ic_more_vert)
+        }
+
+        fabProfile.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, UserProfileFragment())
+                .addToBackStack(null)
+                .commit()
+
+            // Close menu
+            isMenuOpen = false
+            layoutFabSettings.visibility = View.GONE
+            layoutFabCreateTable.visibility = View.GONE
+            layoutFabProfile.visibility = View.GONE
             fabMenu.setImageResource(R.drawable.ic_more_vert)
         }
     }

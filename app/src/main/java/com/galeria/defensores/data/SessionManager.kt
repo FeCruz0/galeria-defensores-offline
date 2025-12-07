@@ -25,6 +25,15 @@ object SessionManager {
         if (firebaseUser != null) {
             _currentUser = UserRepository.getUser(firebaseUser.id)
             android.util.Log.d("SessionDebug", "Fetched user from Firestore: ${_currentUser?.name}, ID: ${_currentUser?.id}")
+            
+            // Auto-heal: If user exists but has no email in Firestore (legacy/error), sync with Auth email
+            if (_currentUser != null && _currentUser!!.email.isBlank() && firebaseUser.email.isNotBlank()) {
+                 android.util.Log.d("SessionDebug", "Auto-healing user email. Syncing from Auth: ${firebaseUser.email}")
+                 val healedUser = _currentUser!!.copy(email = firebaseUser.email)
+                 UserRepository.updateUser(healedUser)
+                 _currentUser = healedUser
+            }
+
             // If user not found in Firestore (e.g. new auth), create basic profile
             if (_currentUser == null) {
                 val newUser = User(

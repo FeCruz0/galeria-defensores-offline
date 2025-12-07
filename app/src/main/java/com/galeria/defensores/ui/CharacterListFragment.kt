@@ -53,8 +53,29 @@ class CharacterListFragment : Fragment() {
         characterRecyclerView = view.findViewById(R.id.character_recycler_view)
         characterRecyclerView.layoutManager = LinearLayoutManager(context)
         
-        val fabAddCharacter = view.findViewById<FloatingActionButton>(R.id.fab_add_character)
-        fabAddCharacter.setOnClickListener {
+        // FAB Menu Logic
+        val fabMenu = view.findViewById<FloatingActionButton>(R.id.fab_menu)
+        val layoutFabNewSheet = view.findViewById<View>(R.id.layout_fab_new_sheet)
+        val layoutFabViewPlayers = view.findViewById<View>(R.id.layout_fab_view_players)
+        val fabNewSheet = view.findViewById<FloatingActionButton>(R.id.fab_new_sheet)
+        val fabViewPlayers = view.findViewById<FloatingActionButton>(R.id.fab_view_players)
+        
+        var isMenuOpen = false
+
+        fabMenu.setOnClickListener {
+            isMenuOpen = !isMenuOpen
+            if (isMenuOpen) {
+                layoutFabNewSheet.visibility = View.VISIBLE
+                layoutFabViewPlayers.visibility = View.VISIBLE
+                fabMenu.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+            } else {
+                layoutFabNewSheet.visibility = View.GONE
+                layoutFabViewPlayers.visibility = View.GONE
+                fabMenu.setImageResource(R.drawable.ic_more_vert)
+            }
+        }
+
+        fabNewSheet.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
                 val currentUser = com.galeria.defensores.data.SessionManager.currentUser
                 if (currentUser != null && tableId != null) {
@@ -71,10 +92,28 @@ class CharacterListFragment : Fragment() {
                     )
                     CharacterRepository.saveCharacter(newCharacter)
                     openCharacterSheet(newCharacter.id)
+                    
+                    // Close menu on action
+                    isMenuOpen = false
+                    layoutFabNewSheet.visibility = View.GONE
+                    layoutFabViewPlayers.visibility = View.GONE
+                    fabMenu.setImageResource(R.drawable.ic_more_vert)
                 } else {
                     Toast.makeText(context, "Erro ao criar ficha. Verifique se está logado.", Toast.LENGTH_SHORT).show()
                 }
             }
+        }
+
+        fabViewPlayers.setOnClickListener {
+            if (tableId != null) {
+                val dialog = TablePlayersDialogFragment.newInstance(tableId!!)
+                dialog.show(parentFragmentManager, "TablePlayersDialog")
+            }
+             // Close menu
+            isMenuOpen = false
+            layoutFabNewSheet.visibility = View.GONE
+            layoutFabViewPlayers.visibility = View.GONE
+            fabMenu.setImageResource(R.drawable.ic_more_vert)
         }
 
         val btnLogs = view.findViewById<ImageButton>(R.id.btn_logs)

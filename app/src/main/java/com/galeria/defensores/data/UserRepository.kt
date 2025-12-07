@@ -24,14 +24,34 @@ object UserRepository {
 
     suspend fun registerUser(user: User) {
         try {
-            // Check if user exists first to avoid duplicates (optional, but good practice)
-            val existing = findUserByPhone(user.phoneNumber)
-            if (existing == null) {
-                usersCollection.document(user.id).set(user).await()
-            } else {
-                // Update existing user if needed, or just skip
-                usersCollection.document(existing.id).set(user).await()
+            val docRef = usersCollection.document(user.id)
+            val snapshot = docRef.get().await()
+
+            if (!snapshot.exists()) {
+                val newUser = user.copy(
+                    createdAt = System.currentTimeMillis(),
+                    updatedAt = System.currentTimeMillis()
+                )
+                docRef.set(newUser).await()
             }
+            // If user exists, do nothing. We do not want to overwrite profile data with Auth data on login.
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+    
+    suspend fun updateUser(user: User) {
+        try {
+            val updatedUser = user.copy(updatedAt = System.currentTimeMillis())
+            usersCollection.document(user.id).set(updatedUser).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun updateLastLogin(userId: String) {
+        try {
+            usersCollection.document(userId).update("lastLoginAt", System.currentTimeMillis()).await()
         } catch (e: Exception) {
             e.printStackTrace()
         }
