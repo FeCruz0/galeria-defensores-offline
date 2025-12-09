@@ -10,6 +10,7 @@ import androidx.fragment.app.DialogFragment
 import com.galeria.defensores.data.FirebaseAuthManager
 import com.galeria.defensores.data.SessionManager
 import com.galeria.defensores.data.UserRepository
+import com.galeria.defensores.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,52 +24,91 @@ class DeleteAccountDialogFragment : DialogFragment() {
         input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         input.hint = "Digite sua senha para confirmar"
 
-        return AlertDialog.Builder(context)
+        val dialog = AlertDialog.Builder(context)
             .setTitle("Excluir Conta")
             .setMessage("Tem certeza? Esta ação é irreversível e apagará todos os seus dados.")
             .setView(input)
-            .setPositiveButton("Excluir") { _, _ ->
+            .setPositiveButton("Excluir", null) // Set null to override later
+            .setNegativeButton("Cancelar", null)
+            .create()
+
+        dialog.setOnShowListener {
+            val button = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            button.setOnClickListener {
                 val password = input.text.toString()
                 if (password.isNotBlank()) {
-                    performDelete(password)
+                    button.isEnabled = false // Prevent double clicks
+                    performDelete(password, button)
                 } else {
                     Toast.makeText(context, "Senha necessária.", Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNegativeButton("Cancelar", null)
-            .create()
+        }
+        
+        return dialog
     }
 
-    private fun performDelete(password: String) {
+    private fun performDelete(password: String, dbButton: android.widget.Button) {
         val userId = SessionManager.currentUser?.id ?: return
         
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                // 1. Re-auth and Delete Auth Account
-                withContext(Dispatchers.IO) {
-                    FirebaseAuthManager.deleteAccount(password)
+                // 0. Check for active tables
+                val hasActiveTables = withContext(Dispatchers.IO) {
+                    com.galeria.defensores.data.TableRepository.checkUserHasActiveTables(userId)
                 }
-                
-                // 2. Delete Firestore Data (if Auth deleted successfully)
+
+                if (hasActiveTables) {
+                    Toast.makeText(context, "Você possui mesas ativas com jogadores. Exclua as mesas ou transfira a posse antes de deletar sua conta.", Toast.LENGTH_LONG).show()
+                    dbButton.isEnabled = true
+                    return@launch
+                }
+
+                // 1. Re-authenticate FIRST
+                withContext(Dispatchers.IO) {
+                    FirebaseAuthManager.reauthenticate(password)
+                }
+
+                // 2. Delete Firestore Data
                 withContext(Dispatchers.IO) {
                     UserRepository.deleteUser(userId)
                 }
 
-                // 3. Logout locally
+                // 3. Delete Auth Account
+                withContext(Dispatchers.IO) {
+                    FirebaseAuthManager.deleteAccount(password) 
+                }
+
+                // 4. Logout locally
                 SessionManager.logout()
 
-                Toast.makeText(context, "Conta excluída com sucesso.", Toast.LENGTH_LONG).show()
+                if (isAdded && context != null) {
+                   Toast.makeText(context, "Conta excluída com sucesso.", Toast.LENGTH_LONG).show()
+                }
 
-                // 4. Navigate to Login
-                parentFragmentManager.beginTransaction()
-                    .replace(com.galeria.defensores.R.id.fragment_container, LoginFragment())
-                    .run { 
-                        parentFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
-                        commit()
-                    }
+                // 5. Navigate to Login
+                if (isAdded) {
+                    dismiss() // Dismiss dialog
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, LoginFragment())
+                        .run { 
+                            parentFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                            commit()
+                        }
+                }
 
             } catch (e: Exception) {
-                Toast.makeText(context, "Erro ao excluir: ${e.message}", Toast.LENGTH_LONG).show()
+                e.printStackTrace()
+                dbButton.isEnabled = true // Re-enable button on error
+                
+                if (isAdded && context != null) {
+                    val msg = if (e.message?.contains("password", true) == true || e.message?.contains("credential", true) == true) {
+                        "Senha incorreta ou erro de autenticação."
+                    } else {
+                        "Erro ao excluir: ${e.message}"
+                    }
+                    Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                }
             }
         }
     }

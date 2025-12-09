@@ -35,9 +35,9 @@ Este projeto já está configurado para rodar com Docker. Abaixo estão os passo
     "chmod +x gradlew" adiciona permissão de execução ao arquivo gradlew.
     "./gradlew assembleDebug" executa o gradle para montar o apk.
     
-    *Dica: Se quiser ver o que está acontecendo, use o comando com `--info`:*
+    *Dica: Se quiser ver o que está acontecendo, use o comando com `-i`:*
     ```bash
-    ./gradlew assembleDebug --info
+    ./gradlew assembleDebug -i
     ```
     
 4.  **Localizar o APK:**

@@ -124,16 +124,16 @@ object FirebaseAuthManager {
     }
 
 
-
-    suspend fun deleteAccount(password: String) {
+    suspend fun reauthenticate(password: String) {
         val user = auth.currentUser ?: throw Exception("Usuário não logado")
         val credential = com.google.firebase.auth.EmailAuthProvider.getCredential(user.email!!, password)
-        
-        try {
-            user.reauthenticate(credential).await()
-            user.delete().await()
-        } catch (e: Exception) {
-            throw e
-        }
+        user.reauthenticate(credential).await()
+    }
+
+    suspend fun deleteAccount(password: String) {
+        val user = auth.currentUser ?: return
+        // We already re-authenticated in the dialog, but good practice to allow standalone call.
+        // However, if we just want to delete:
+        user.delete().await()
     }
 }

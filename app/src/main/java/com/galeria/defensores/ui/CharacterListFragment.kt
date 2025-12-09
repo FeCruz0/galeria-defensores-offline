@@ -53,6 +53,8 @@ class CharacterListFragment : Fragment() {
         }
     }
 
+    private var isCurrentUserMaster = false // Added property
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -71,8 +73,10 @@ class CharacterListFragment : Fragment() {
         val fabMenu = view.findViewById<FloatingActionButton>(R.id.fab_menu)
         val layoutFabNewSheet = view.findViewById<View>(R.id.layout_fab_new_sheet)
         val layoutFabViewPlayers = view.findViewById<View>(R.id.layout_fab_view_players)
+        val layoutFabTransferOwnership = view.findViewById<View>(R.id.layout_fab_transfer_ownership) // Added
         val fabNewSheet = view.findViewById<FloatingActionButton>(R.id.fab_new_sheet)
         val fabViewPlayers = view.findViewById<FloatingActionButton>(R.id.fab_view_players)
+        val fabTransferOwnership = view.findViewById<FloatingActionButton>(R.id.fab_transfer_ownership) // Added
         
         var isMenuOpen = false
 
@@ -81,10 +85,14 @@ class CharacterListFragment : Fragment() {
             if (isMenuOpen) {
                 layoutFabNewSheet.visibility = View.VISIBLE
                 layoutFabViewPlayers.visibility = View.VISIBLE
+                if (isCurrentUserMaster) {
+                    layoutFabTransferOwnership.visibility = View.VISIBLE
+                }
                 fabMenu.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
             } else {
                 layoutFabNewSheet.visibility = View.GONE
                 layoutFabViewPlayers.visibility = View.GONE
+                layoutFabTransferOwnership.visibility = View.GONE
                 fabMenu.setImageResource(R.drawable.ic_more_vert)
             }
         }
@@ -107,10 +115,11 @@ class CharacterListFragment : Fragment() {
                     CharacterRepository.saveCharacter(newCharacter)
                     openCharacterSheet(newCharacter.id)
                     
-                    // Close menu on action
+                    // Close menu
                     isMenuOpen = false
                     layoutFabNewSheet.visibility = View.GONE
                     layoutFabViewPlayers.visibility = View.GONE
+                    layoutFabTransferOwnership.visibility = View.GONE
                     fabMenu.setImageResource(R.drawable.ic_more_vert)
                 } else {
                     Toast.makeText(context, "Erro ao criar ficha. Verifique se está logado.", Toast.LENGTH_SHORT).show()
@@ -127,6 +136,17 @@ class CharacterListFragment : Fragment() {
             isMenuOpen = false
             layoutFabNewSheet.visibility = View.GONE
             layoutFabViewPlayers.visibility = View.GONE
+            layoutFabTransferOwnership.visibility = View.GONE
+            fabMenu.setImageResource(R.drawable.ic_more_vert)
+        }
+
+        fabTransferOwnership.setOnClickListener {
+             showTransferOwnershipDialog()
+             // Close menu
+            isMenuOpen = false
+            layoutFabNewSheet.visibility = View.GONE
+            layoutFabViewPlayers.visibility = View.GONE
+            layoutFabTransferOwnership.visibility = View.GONE
             fabMenu.setImageResource(R.drawable.ic_more_vert)
         }
 
@@ -143,6 +163,65 @@ class CharacterListFragment : Fragment() {
         return view
     }
 
+    private fun showTransferOwnershipDialog() {
+        if (tableId == null) return
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            val table = com.galeria.defensores.data.TableRepository.getTable(tableId!!) ?: return@launch
+            val playerIds = table.players.filter { it != table.masterId }
+            
+            if (playerIds.isEmpty()) {
+                Toast.makeText(context, "Não há outros jogadores para transferir a titularidade.", Toast.LENGTH_LONG).show()
+                return@launch
+            }
+
+            val players = mutableListOf<com.galeria.defensores.models.User>()
+            for (id in playerIds) {
+                val user = com.galeria.defensores.data.UserRepository.getUser(id)
+                if (user != null) players.add(user)
+            }
+            
+            val playerNames = players.map { it.name }.toTypedArray()
+            
+            AlertDialog.Builder(requireContext())
+                .setTitle("Transferir Titularidade")
+                .setItems(playerNames) { _, which ->
+                    val selectedUser = players[which]
+                    confirmTransfer(table, selectedUser)
+                }
+                .setNegativeButton("Cancelar", null)
+                .show()
+        }
+    }
+
+    private fun confirmTransfer(table: com.galeria.defensores.models.Table, newMaster: com.galeria.defensores.models.User) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Confirmar Transferência")
+            .setMessage("Tem certeza que deseja transferir a mesa '${table.name}' para ${newMaster.name}? Você deixará de ser o Mestre.")
+            .setPositiveButton("Transferir") { _, _ ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val updatedTable = table.copy(masterId = newMaster.id)
+                    // Optionally add old master to players list if not there?
+                    // Usually yes.
+                    if (!updatedTable.players.contains(com.galeria.defensores.data.SessionManager.currentUser?.id)) {
+                        updatedTable.players.add(com.galeria.defensores.data.SessionManager.currentUser?.id ?: "")
+                    }
+                    
+                    val success = com.galeria.defensores.data.TableRepository.updateTable(updatedTable)
+                    if (success) {
+                        Toast.makeText(context, "Titularidade transferida com sucesso.", Toast.LENGTH_SHORT).show()
+                        loadCharacters() // Refresh UI (will hide master options)
+                    } else {
+                        Toast.makeText(context, "Erro ao transferir titularidade.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+    
+    // ... loadCharacters ...
+
     override fun onResume() {
         super.onResume()
         loadCharacters()
@@ -154,11 +233,16 @@ class CharacterListFragment : Fragment() {
             if (tableId != null) {
                 val currentUserId = com.galeria.defensores.data.SessionManager.currentUser?.id ?: return@launch
                 val table = com.galeria.defensores.data.TableRepository.getTable(tableId!!)
-                val isMaster = table?.masterId == currentUserId || table?.masterId == "mock-master-id"
+                isCurrentUserMaster = table?.masterId == currentUserId || table?.masterId == "mock-master-id"
+                val isMaster = isCurrentUserMaster
                 val isMember = table?.players?.contains(currentUserId) == true || isMaster
 
                 val fabMenu = view?.findViewById<FloatingActionButton>(R.id.fab_menu)
                 val btnLogs = view?.findViewById<ImageButton>(R.id.btn_logs)
+                
+                // Hide Transfer Option initially (will be shown if menu opens + isMaster)
+                val layoutFabTransferOwnership = view?.findViewById<View>(R.id.layout_fab_transfer_ownership)
+                layoutFabTransferOwnership?.visibility = View.GONE
 
                 // Join Request Logic
                 if (!isMember && table != null) {

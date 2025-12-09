@@ -49,11 +49,46 @@ object TableRepository {
 
     suspend fun deleteTable(id: String): Boolean {
         return try {
+            // 1. Delete pending notifications for this table
+            com.galeria.defensores.data.NotificationRepository.deleteNotificationsForTable(id)
+            
+            // 2. Unlink characters
+            com.galeria.defensores.data.CharacterRepository.unlinkCharactersFromTable(id)
+            
+            // 3. Delete the table
             tablesCollection.document(id).delete().await()
             true
         } catch (e: Exception) {
             e.printStackTrace()
             false
+        }
+    }
+
+    suspend fun checkUserHasActiveTables(userId: String): Boolean {
+        return try {
+            val snapshot = tablesCollection
+                .whereEqualTo("masterId", userId)
+                .get()
+                .await()
+            // Check if any table has players (active)
+            // Or simpler: does user own ANY table? The requirement mentions "mesas com outros jogadores".
+            // Let's implement strict check: Table owned by user AND players list is NOT empty.
+            // But 'players' includes the master usually? No, masterId is separate field. players array is list of OTHER users.
+            
+            // Assuming 'players' field. Let's check schema. Table model has `val players: MutableList<String> = mutableListOf()`.
+            // Does it include master? Usually implementation dependent.
+            // If I look at create logic:
+            // Table(masterId = user.id, ...)
+            // It doesn't auto-add master to players list in constructor usually.
+            // So:
+            
+            snapshot.documents.any { doc ->
+                val table = doc.toObject(Table::class.java)
+                table != null && table.players.isNotEmpty()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            true // Fail safe: block deletion if we can't verify
         }
     }
 

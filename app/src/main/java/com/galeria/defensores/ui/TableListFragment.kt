@@ -18,6 +18,7 @@ import com.galeria.defensores.data.SessionManager
 import com.galeria.defensores.data.TableRepository
 import com.galeria.defensores.data.UserRepository
 import com.galeria.defensores.models.Table
+import com.galeria.defensores.ui.MyCharactersFragment // Added
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class TableListFragment : Fragment() {
@@ -37,78 +38,83 @@ class TableListFragment : Fragment() {
 
         fun loadTables() {
             viewLifecycleOwner.lifecycleScope.launch {
-                // Safeguard: Ensure user is loaded
-                if (SessionManager.currentUser == null) {
-                    SessionManager.refreshUser()
-                }
-                
-                val currentUser = SessionManager.currentUser
-                val tables = TableRepository.getTables()
-                val sortedTables = tables.sortedWith(
-                    compareByDescending<Table> { it.masterId == currentUser?.id }
-                        .thenBy { it.name }
-                )
-
-                val adapter = TablesAdapter(
-                    tables = sortedTables,
-                    currentUserId = currentUser?.id,
-                    scope = viewLifecycleOwner.lifecycleScope,
-                    onTableClick = { table ->
-                        val currentUser = SessionManager.currentUser
-                        val isMaster = table.masterId == currentUser?.id
-                        val isPlayer = table.players.contains(currentUser?.id)
-
-                        if (!table.isPrivate || isMaster || isPlayer) {
-                            // Access Granted
-                            val fragment = CharacterListFragment.newInstance(table.id)
-                            parentFragmentManager.beginTransaction()
-                                .replace(R.id.fragment_container, fragment)
-                                .addToBackStack(null)
-                                .commit()
-                        } else {
-                            // Access Denied - Show Password Dialog
-                            val input = EditText(context)
-                            input.hint = "Senha da Mesa"
-                            input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-                            
-                            AlertDialog.Builder(requireContext())
-                                .setTitle("Mesa Privada")
-                                .setMessage("Digite a senha para entrar:")
-                                .setView(input)
-                                .setPositiveButton("Entrar") { _, _ ->
-                                    val password = input.text.toString()
-                                    if (password == table.password) {
-                                        // Password Correct - Add user to table and enter
-                                        viewLifecycleOwner.lifecycleScope.launch {
-                                            if (currentUser != null) {
-                                                TableRepository.addPlayerToTable(table.id, currentUser.id)
-                                                
-                                                val fragment = CharacterListFragment.newInstance(table.id)
-                                                parentFragmentManager.beginTransaction()
-                                                    .replace(R.id.fragment_container, fragment)
-                                                    .addToBackStack(null)
-                                                    .commit()
-                                            }
-                                        }
-                                    } else {
-                                        Toast.makeText(context, "Senha incorreta!", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                                .setNegativeButton("Cancelar", null)
-                                .show()
-                        }
-                    },
-                    onInviteClick = { table ->
-                        showInviteDialog(table)
-                    },
-                    onEditClick = { table ->
-                        showEditTableDialog(table) { loadTables() }
-                    },
-                    onDeleteClick = { table ->
-                        showDeleteTableDialog(table) { loadTables() }
+                try {
+                    // Safeguard: Ensure user is loaded
+                    if (SessionManager.currentUser == null) {
+                        SessionManager.refreshUser()
                     }
-                )
-                recyclerView.adapter = adapter
+                    
+                    val currentUser = SessionManager.currentUser
+                    val tables = TableRepository.getTables()
+                    val sortedTables = tables.sortedWith(
+                        compareByDescending<Table> { it.masterId == currentUser?.id }
+                            .thenBy { it.name }
+                    )
+
+                    val adapter = TablesAdapter(
+                        tables = sortedTables,
+                        currentUserId = currentUser?.id,
+                        scope = viewLifecycleOwner.lifecycleScope,
+                        onTableClick = { table ->
+                            val currentUser = SessionManager.currentUser
+                            val isMaster = table.masterId == currentUser?.id
+                            val isPlayer = table.players.contains(currentUser?.id)
+
+                            if (!table.isPrivate || isMaster || isPlayer) {
+                                // Access Granted
+                                val fragment = CharacterListFragment.newInstance(table.id)
+                                parentFragmentManager.beginTransaction()
+                                    .replace(R.id.fragment_container, fragment)
+                                    .addToBackStack(null)
+                                    .commit()
+                            } else {
+                                // Access Denied - Show Password Dialog
+                                val input = EditText(context)
+                                input.hint = "Senha da Mesa"
+                                input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                                
+                                AlertDialog.Builder(requireContext())
+                                    .setTitle("Mesa Privada")
+                                    .setMessage("Digite a senha para entrar:")
+                                    .setView(input)
+                                    .setPositiveButton("Entrar") { _, _ ->
+                                        val password = input.text.toString()
+                                        if (password == table.password) {
+                                            // Password Correct - Add user to table and enter
+                                            viewLifecycleOwner.lifecycleScope.launch {
+                                                if (currentUser != null) {
+                                                    TableRepository.addPlayerToTable(table.id, currentUser.id)
+                                                    
+                                                    val fragment = CharacterListFragment.newInstance(table.id)
+                                                    parentFragmentManager.beginTransaction()
+                                                        .replace(R.id.fragment_container, fragment)
+                                                        .addToBackStack(null)
+                                                        .commit()
+                                                }
+                                            }
+                                        } else {
+                                            Toast.makeText(context, "Senha incorreta!", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                    .setNegativeButton("Cancelar", null)
+                                    .show()
+                            }
+                        },
+                        onInviteClick = { table ->
+                            showInviteDialog(table)
+                        },
+                        onEditClick = { table ->
+                            showEditTableDialog(table) { loadTables() }
+                        },
+                        onDeleteClick = { table ->
+                            showDeleteTableDialog(table) { loadTables() }
+                        }
+                    )
+                    recyclerView.adapter = adapter
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(context, "Erro ao carregar mesas: ${e.message}", Toast.LENGTH_LONG).show()
+                }
             }
         }
 
@@ -119,9 +125,11 @@ class TableListFragment : Fragment() {
         val layoutFabSettings = view.findViewById<View>(R.id.layout_fab_settings)
         val layoutFabCreateTable = view.findViewById<View>(R.id.layout_fab_create_table)
         val layoutFabProfile = view.findViewById<View>(R.id.layout_fab_profile)
+        val layoutFabMyCharacters = view.findViewById<View>(R.id.layout_fab_my_characters) // Added
         val fabSettings = view.findViewById<FloatingActionButton>(R.id.fab_settings)
         val fabCreateTable = view.findViewById<FloatingActionButton>(R.id.fab_create_table)
         val fabProfile = view.findViewById<FloatingActionButton>(R.id.fab_profile)
+        val fabMyCharacters = view.findViewById<FloatingActionButton>(R.id.fab_my_characters) // Added
         
         var isMenuOpen = false
 
@@ -131,11 +139,13 @@ class TableListFragment : Fragment() {
                 layoutFabSettings.visibility = View.VISIBLE
                 layoutFabCreateTable.visibility = View.VISIBLE
                 layoutFabProfile.visibility = View.VISIBLE
+                layoutFabMyCharacters.visibility = View.VISIBLE // Added
                 fabMenu.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
             } else {
                 layoutFabSettings.visibility = View.GONE
                 layoutFabCreateTable.visibility = View.GONE
                 layoutFabProfile.visibility = View.GONE
+                layoutFabMyCharacters.visibility = View.GONE // Added
                 fabMenu.setImageResource(R.drawable.ic_more_vert)
             }
         }
@@ -148,6 +158,7 @@ class TableListFragment : Fragment() {
                 layoutFabSettings.visibility = View.GONE
                 layoutFabCreateTable.visibility = View.GONE
                 layoutFabProfile.visibility = View.GONE
+                layoutFabMyCharacters.visibility = View.GONE // Added
                 fabMenu.setImageResource(R.drawable.ic_more_vert)
             }
         }
@@ -163,6 +174,7 @@ class TableListFragment : Fragment() {
             layoutFabSettings.visibility = View.GONE
             layoutFabCreateTable.visibility = View.GONE
             layoutFabProfile.visibility = View.GONE
+            layoutFabMyCharacters.visibility = View.GONE // Added
             fabMenu.setImageResource(R.drawable.ic_more_vert)
         }
 
@@ -177,6 +189,23 @@ class TableListFragment : Fragment() {
             layoutFabSettings.visibility = View.GONE
             layoutFabCreateTable.visibility = View.GONE
             layoutFabProfile.visibility = View.GONE
+            layoutFabMyCharacters.visibility = View.GONE // Added
+            fabMenu.setImageResource(R.drawable.ic_more_vert)
+        }
+
+        // New Listener
+        fabMyCharacters.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, MyCharactersFragment())
+                .addToBackStack(null)
+                .commit()
+
+            // Close menu
+            isMenuOpen = false
+            layoutFabSettings.visibility = View.GONE
+            layoutFabCreateTable.visibility = View.GONE
+            layoutFabProfile.visibility = View.GONE
+            layoutFabMyCharacters.visibility = View.GONE
             fabMenu.setImageResource(R.drawable.ic_more_vert)
         }
     }

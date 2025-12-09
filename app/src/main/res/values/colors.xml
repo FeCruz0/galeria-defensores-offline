@@ -11,4 +11,5 @@
     <color name="text_secondary">#6B7280</color>
     <color name="card_background">#FFFFFF</color>
     <color name="header_background">#B91C1C</color>
+    <color name="teal_700">#018786</color>
 </resources>

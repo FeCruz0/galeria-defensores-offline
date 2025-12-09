@@ -60,6 +60,19 @@ object NotificationRepository {
         }
     }
 
+    suspend fun deleteNotificationsForTable(tableId: String) {
+        try {
+            val snapshot = notificationsCollection.whereEqualTo("tableId", tableId).get().await()
+            val batch = db.batch()
+            for (document in snapshot.documents) {
+                batch.delete(document.reference)
+            }
+            batch.commit().await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     fun observeNotificationsCount(userId: String): kotlinx.coroutines.flow.Flow<Int> = kotlinx.coroutines.flow.callbackFlow {
         val listener = notificationsCollection
             .whereEqualTo("toUserId", userId)

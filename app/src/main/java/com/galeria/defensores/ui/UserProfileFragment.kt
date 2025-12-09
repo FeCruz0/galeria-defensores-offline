@@ -81,38 +81,23 @@ class UserProfileFragment : Fragment() {
             btnEdit.visibility = View.GONE
             btnLogout.visibility = View.GONE
             btnDeleteAccount.visibility = View.GONE
-        } else {
-            btnEdit.visibility = View.VISIBLE
-            btnLogout.visibility = View.VISIBLE
-            btnDeleteAccount.visibility = View.VISIBLE
-            
-            // Edit Button Logic
-            btnEdit.setOnClickListener {
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, UserEditFragment())
-                    .addToBackStack(null)
-                    .commit()
-            }
 
-            // Logout Logic
-            btnLogout.setOnClickListener {
-                FirebaseAuthManager.logout()
-                SessionManager.logout()
-                // Navigate to Login (Clear Stack)
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, LoginFragment())
-                    .run { 
-                        parentFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
-                        commit()
-                    }
             }
             
             // Delete Account Logic
-            val btnDeleteAccount = view.findViewById<Button>(R.id.btn_delete_account)
+
             btnDeleteAccount.setOnClickListener {
                  val dialog = DeleteAccountDialogFragment()
                  dialog.show(parentFragmentManager, "DeleteAccountDialog")
             }
+        btnLogout.setOnClickListener {
+            SessionManager.logout()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, LoginFragment())
+                .run {
+                    parentFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                    commit()
+                }
         }
 
         btnBack.setOnClickListener {
