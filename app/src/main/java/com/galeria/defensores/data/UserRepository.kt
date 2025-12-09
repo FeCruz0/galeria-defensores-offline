@@ -76,4 +76,12 @@ object UserRepository {
             false // Assume not taken on error to avoid blocking, or handle differently
         }
     }
+    suspend fun deleteUser(userId: String) {
+        try {
+            usersCollection.document(userId).delete().await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw e
+        }
+    }
 }

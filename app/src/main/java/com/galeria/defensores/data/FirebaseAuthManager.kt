@@ -7,6 +7,7 @@ import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
+import kotlinx.coroutines.tasks.await
 import java.util.concurrent.TimeUnit
 
 object FirebaseAuthManager {
@@ -123,4 +124,16 @@ object FirebaseAuthManager {
     }
 
 
+
+    suspend fun deleteAccount(password: String) {
+        val user = auth.currentUser ?: throw Exception("Usuário não logado")
+        val credential = com.google.firebase.auth.EmailAuthProvider.getCredential(user.email!!, password)
+        
+        try {
+            user.reauthenticate(credential).await()
+            user.delete().await()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
 }

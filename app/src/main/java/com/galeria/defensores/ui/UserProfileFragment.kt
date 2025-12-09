@@ -74,13 +74,17 @@ class UserProfileFragment : Fragment() {
         updateUI()
 
         // Hide Edit/Logout if viewing another user
+        val btnDeleteAccount = view.findViewById<Button>(R.id.btn_delete_account)
+
         val currentUser = SessionManager.currentUser
         if (userId != null && userId != currentUser?.id) {
             btnEdit.visibility = View.GONE
             btnLogout.visibility = View.GONE
+            btnDeleteAccount.visibility = View.GONE
         } else {
             btnEdit.visibility = View.VISIBLE
             btnLogout.visibility = View.VISIBLE
+            btnDeleteAccount.visibility = View.VISIBLE
             
             // Edit Button Logic
             btnEdit.setOnClickListener {
@@ -101,6 +105,13 @@ class UserProfileFragment : Fragment() {
                         parentFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
                         commit()
                     }
+            }
+            
+            // Delete Account Logic
+            val btnDeleteAccount = view.findViewById<Button>(R.id.btn_delete_account)
+            btnDeleteAccount.setOnClickListener {
+                 val dialog = DeleteAccountDialogFragment()
+                 dialog.show(parentFragmentManager, "DeleteAccountDialog")
             }
         }
 

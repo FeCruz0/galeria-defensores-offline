@@ -19,11 +19,20 @@ import com.galeria.defensores.ui.CharacterSheetFragment
 import androidx.appcompat.app.AlertDialog
 import android.widget.ImageButton
 
+import com.galeria.defensores.data.NotificationRepository
+import com.galeria.defensores.models.Notification
+import com.galeria.defensores.models.NotificationStatus
+
 class CharacterListFragment : Fragment() {
 
     private lateinit var characterRecyclerView: RecyclerView
     private lateinit var adapter: CharacterAdapter
     private var tableId: String? = null
+    
+    // Join Request Views
+    private lateinit var layoutJoinRequest: View
+    private lateinit var textJoinStatus: TextView
+    private lateinit var btnRequestJoin: android.widget.Button
 
     companion object {
         private const val ARG_TABLE_ID = "table_id"
@@ -52,6 +61,11 @@ class CharacterListFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_character_list, container, false)
         characterRecyclerView = view.findViewById(R.id.character_recycler_view)
         characterRecyclerView.layoutManager = LinearLayoutManager(context)
+        
+        // Initialize Join Request Views
+        layoutJoinRequest = view.findViewById(R.id.layout_join_request)
+        textJoinStatus = view.findViewById(R.id.text_join_status)
+        btnRequestJoin = view.findViewById(R.id.btn_request_join)
         
         // FAB Menu Logic
         val fabMenu = view.findViewById<FloatingActionButton>(R.id.fab_menu)
@@ -138,9 +152,61 @@ class CharacterListFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             android.util.Log.d("CharacterListDebug", "Loading characters for tableId=$tableId")
             if (tableId != null) {
-                val currentUserId = com.galeria.defensores.data.SessionManager.currentUser?.id
+                val currentUserId = com.galeria.defensores.data.SessionManager.currentUser?.id ?: return@launch
                 val table = com.galeria.defensores.data.TableRepository.getTable(tableId!!)
                 val isMaster = table?.masterId == currentUserId || table?.masterId == "mock-master-id"
+                val isMember = table?.players?.contains(currentUserId) == true || isMaster
+
+                val fabMenu = view?.findViewById<FloatingActionButton>(R.id.fab_menu)
+                val btnLogs = view?.findViewById<ImageButton>(R.id.btn_logs)
+
+                // Join Request Logic
+                if (!isMember && table != null) {
+                    layoutJoinRequest.visibility = View.VISIBLE
+                    
+                    // Hide Interaction Buttons for Visitors
+                    fabMenu?.visibility = View.GONE
+                    btnLogs?.visibility = View.GONE
+
+                    // Check pending requests
+                    val hasPending = NotificationRepository.hasPendingRequest(currentUserId, table.id)
+                    if (hasPending) {
+                        textJoinStatus.text = "Solicitação enviada. Aguardando aprovação."
+                        btnRequestJoin.isEnabled = false
+                        btnRequestJoin.text = "Aguardando"
+                        btnRequestJoin.alpha = 0.5f
+                    } else {
+                        textJoinStatus.text = "Você está visitando esta mesa."
+                        btnRequestJoin.isEnabled = true
+                        btnRequestJoin.text = "Participar"
+                        btnRequestJoin.alpha = 1.0f
+                        
+                        btnRequestJoin.setOnClickListener {
+                            viewLifecycleOwner.lifecycleScope.launch {
+                                val currentUser = com.galeria.defensores.data.SessionManager.currentUser
+                                if (currentUser != null) {
+                                    val notification = Notification(
+                                        fromUserId = currentUser.id,
+                                        fromUserName = currentUser.name,
+                                        toUserId = table.masterId,
+                                        tableId = table.id,
+                                        tableName = table.name,
+                                        status = NotificationStatus.PENDING
+                                    )
+                                    NotificationRepository.sendNotification(notification)
+                                    Toast.makeText(context, "Solicitação enviada!", Toast.LENGTH_SHORT).show()
+                                    // Refresh UI state
+                                    loadCharacters()
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    layoutJoinRequest.visibility = View.GONE
+                    // Show Interaction Buttons for Members
+                    fabMenu?.visibility = View.VISIBLE
+                    btnLogs?.visibility = View.VISIBLE
+                }
                 
                 val allCharacters = CharacterRepository.getCharacters(tableId)
                 android.util.Log.d("CharacterListDebug", "Fetched ${allCharacters.size} characters. CurrentUser=$currentUserId, isMaster=$isMaster")
