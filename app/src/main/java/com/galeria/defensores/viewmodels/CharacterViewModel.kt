@@ -279,4 +279,16 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         _character.value = currentChar
         saveCharacter()
     }
+    fun deleteCharacter(onSuccess: () -> Unit, onError: (String) -> Unit) {
+        val charId = _character.value?.id ?: return
+        viewModelScope.launch {
+            val success = CharacterRepository.deleteCharacter(charId)
+            if (success) {
+                _character.value = null
+                onSuccess()
+            } else {
+                onError("Erro ao excluir. Verifique sua conexão.")
+            }
+        }
+    }
 }

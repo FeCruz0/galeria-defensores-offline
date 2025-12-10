@@ -42,7 +42,10 @@ class MyCharactersFragment : Fragment() {
         view.findViewById<View>(R.id.btn_back).setOnClickListener {
             parentFragmentManager.popBackStack()
         }
+    }
 
+    override fun onResume() {
+        super.onResume()
         loadCharacters()
     }
 
@@ -72,11 +75,8 @@ class MyCharactersFragment : Fragment() {
 
                     adapter = MyCharactersAdapter(charactersWithTableNames) { character ->
                         // OnClick: Open Character Sheet
-                        val fragment = CharacterSheetFragment()
-                        val args = Bundle()
-                        args.putString("characterId", character.id)
-                        fragment.arguments = args
-
+                        val fragment = CharacterSheetFragment.newInstance(character.id)
+                        
                         parentFragmentManager.beginTransaction()
                             .replace(R.id.fragment_container, fragment)
                             .addToBackStack(null)

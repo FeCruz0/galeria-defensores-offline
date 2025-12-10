@@ -295,5 +295,15 @@
             android:layout_marginBottom="32dp"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
+        <Button
+            android:id="@+id/btn_delete_character"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Excluir Ficha"
+            android:backgroundTint="#EF4444"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="48dp" />
+
     </LinearLayout>
 </ScrollView>

@@ -3,6 +3,8 @@ package com.galeria.defensores.data
 import com.galeria.defensores.models.Character
 import kotlinx.coroutines.tasks.await
 
+import com.google.firebase.firestore.Source
+
 object CharacterRepository {
     private val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
     private val charactersCollection = db.collection("characters")
@@ -21,14 +23,22 @@ object CharacterRepository {
             emptyList()
         }
     }
-    
+
     suspend fun getCharactersForUser(userId: String): List<Character> {
         return try {
-            val snapshot = charactersCollection.whereEqualTo("ownerId", userId).get().await()
+            // FORCE SERVER FETCH to avoid stale cache issues
+            val snapshot = charactersCollection.whereEqualTo("ownerId", userId).get(Source.SERVER).await()
             snapshot.toObjects(Character::class.java)
         } catch (e: Exception) {
             e.printStackTrace()
-            emptyList()
+            // Fallback to cache if server fails? Or just return empty? 
+            // Better empty to indicate error or maybe fallback
+            try {
+                 val snapshot = charactersCollection.whereEqualTo("ownerId", userId).get().await()
+                 snapshot.toObjects(Character::class.java)
+            } catch (ex: Exception) {
+                emptyList()
+            }
         }
     }
 
@@ -50,11 +60,16 @@ object CharacterRepository {
         }
     }
 
-    suspend fun deleteCharacter(id: String) {
-        try {
+    suspend fun deleteCharacter(id: String): Boolean {
+        android.util.Log.d("RepoDebug", "Attempting to delete character ID: $id")
+        return try {
             charactersCollection.document(id).delete().await()
+            android.util.Log.d("RepoDebug", "Delete successful for ID: $id")
+            true
         } catch (e: Exception) {
+            android.util.Log.e("RepoDebug", "Delete FAILED for ID: $id", e)
             e.printStackTrace()
+            false
         }
     }
 

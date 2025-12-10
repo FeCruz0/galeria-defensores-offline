@@ -110,6 +110,8 @@ class CharacterSheetFragment : Fragment() {
         viewModel.loadCharacter(characterId, tableId)
 
         viewModel.character.observe(viewLifecycleOwner) { char ->
+            if (char == null) return@observe
+
             if (!nameEdit.hasFocus()) {
                 nameEdit.setText(char.name)
             }
@@ -161,6 +163,11 @@ class CharacterSheetFragment : Fragment() {
                     container.findViewById<Button>(R.id.btn_minus).isEnabled = canEdit
                     container.findViewById<Button>(R.id.btn_plus).isEnabled = canEdit
                 }
+                
+                // Delete Button Visibility
+                val canDelete = currentUserId != null && (isOwner || isMaster)
+                android.util.Log.d("SheetDebug", "Delete Visibility: User=$currentUserId, Owner=${char.ownerId}, Master=${table?.masterId} -> canDelete=$canDelete")
+                view.findViewById<Button>(R.id.btn_delete_character).visibility = if (canDelete) View.VISIBLE else View.GONE
             }
             
             updateAttributeValue(view.findViewById(R.id.attr_forca), char.forca)
@@ -268,6 +275,34 @@ class CharacterSheetFragment : Fragment() {
         view.findViewById<Button>(R.id.btn_defense).setOnClickListener {
             checkPermissionAndRoll(RollType.DEFENSE)
         }
+        // Delete Button
+        val btnDelete = view.findViewById<Button>(R.id.btn_delete_character)
+        btnDelete.setOnClickListener {
+            val char = viewModel.character.value
+            if (char != null) {
+                 androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Excluir Personagem")
+                    .setMessage("Tem certeza que deseja excluir ${char.name}? Essa ação não pode ser desfeita.")
+                    .setPositiveButton("Excluir") { _, _ ->
+                         viewModel.deleteCharacter(
+                             onSuccess = {
+                                 Toast.makeText(context, "Personagem excluído.", Toast.LENGTH_SHORT).show()
+                                 parentFragmentManager.popBackStack()
+                             },
+                             onError = { errorMsg ->
+                                 Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
+                             }
+                         )
+                    }
+                    .setNegativeButton("Cancelar", null)
+                    .show()
+            }
+        }
+        
+        // Initial visibility check for delete button
+        // We do this in the observer, but let's set it GONE initially to avoid flicker
+        btnDelete.visibility = View.GONE
+
     }
 
     private fun checkPermissionAndRoll(type: RollType) {

@@ -20,3 +20,6 @@ local.properties
 /app/*.apk
 
 build_log*.txt
+build_error*.txt
+build_output*.txt
+
