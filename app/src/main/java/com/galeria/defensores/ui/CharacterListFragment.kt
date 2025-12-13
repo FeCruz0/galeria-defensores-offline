@@ -77,6 +77,8 @@ class CharacterListFragment : Fragment() {
         val fabNewSheet = view.findViewById<FloatingActionButton>(R.id.fab_new_sheet)
         val fabViewPlayers = view.findViewById<FloatingActionButton>(R.id.fab_view_players)
         val fabTransferOwnership = view.findViewById<FloatingActionButton>(R.id.fab_transfer_ownership) // Added
+        val layoutFabClearHistory = view.findViewById<View>(R.id.layout_fab_clear_history)
+        val fabClearHistory = view.findViewById<FloatingActionButton>(R.id.fab_clear_history)
         
         var isMenuOpen = false
 
@@ -87,12 +89,14 @@ class CharacterListFragment : Fragment() {
                 layoutFabViewPlayers.visibility = View.VISIBLE
                 if (isCurrentUserMaster) {
                     layoutFabTransferOwnership.visibility = View.VISIBLE
+                    layoutFabClearHistory.visibility = View.VISIBLE
                 }
                 fabMenu.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
             } else {
                 layoutFabNewSheet.visibility = View.GONE
                 layoutFabViewPlayers.visibility = View.GONE
                 layoutFabTransferOwnership.visibility = View.GONE
+                layoutFabClearHistory.visibility = View.GONE
                 fabMenu.setImageResource(R.drawable.ic_more_vert)
             }
         }
@@ -120,6 +124,7 @@ class CharacterListFragment : Fragment() {
                     layoutFabNewSheet.visibility = View.GONE
                     layoutFabViewPlayers.visibility = View.GONE
                     layoutFabTransferOwnership.visibility = View.GONE
+                    layoutFabClearHistory.visibility = View.GONE
                     fabMenu.setImageResource(R.drawable.ic_more_vert)
                 } else {
                     Toast.makeText(context, "Erro ao criar ficha. Verifique se está logado.", Toast.LENGTH_SHORT).show()
@@ -137,6 +142,7 @@ class CharacterListFragment : Fragment() {
             layoutFabNewSheet.visibility = View.GONE
             layoutFabViewPlayers.visibility = View.GONE
             layoutFabTransferOwnership.visibility = View.GONE
+            layoutFabClearHistory.visibility = View.GONE
             fabMenu.setImageResource(R.drawable.ic_more_vert)
         }
 
@@ -147,6 +153,34 @@ class CharacterListFragment : Fragment() {
             layoutFabNewSheet.visibility = View.GONE
             layoutFabViewPlayers.visibility = View.GONE
             layoutFabTransferOwnership.visibility = View.GONE
+            layoutFabClearHistory.visibility = View.GONE
+            fabMenu.setImageResource(R.drawable.ic_more_vert)
+        }
+
+        fabClearHistory.setOnClickListener {
+             if (tableId != null) {
+                 androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Limpar Histórico")
+                    .setMessage("Tem certeza que deseja apagar todo o histórico de rolagens desta mesa? Essa ação não pode ser desfeita.")
+                    .setPositiveButton("Limpar") { _, _ ->
+                        viewLifecycleOwner.lifecycleScope.launch {
+                             val success = com.galeria.defensores.data.TableRepository.clearRollHistory(tableId!!)
+                             if (success) {
+                                 Toast.makeText(context, "Histórico limpo com sucesso.", Toast.LENGTH_SHORT).show()
+                             } else {
+                                 Toast.makeText(context, "Erro ao limpar histórico.", Toast.LENGTH_SHORT).show()
+                             }
+                        }
+                    }
+                    .setNegativeButton("Cancelar", null)
+                    .show()
+             }
+             // Close menu
+            isMenuOpen = false
+            layoutFabNewSheet.visibility = View.GONE
+            layoutFabViewPlayers.visibility = View.GONE
+            layoutFabTransferOwnership.visibility = View.GONE
+            layoutFabClearHistory.visibility = View.GONE
             fabMenu.setImageResource(R.drawable.ic_more_vert)
         }
 
@@ -243,6 +277,7 @@ class CharacterListFragment : Fragment() {
                 // Hide Transfer Option initially (will be shown if menu opens + isMaster)
                 val layoutFabTransferOwnership = view?.findViewById<View>(R.id.layout_fab_transfer_ownership)
                 layoutFabTransferOwnership?.visibility = View.GONE
+                view?.findViewById<View>(R.id.layout_fab_clear_history)?.visibility = View.GONE
 
                 // Join Request Logic
                 if (!isMember && table != null) {

@@ -120,4 +120,17 @@ object TableRepository {
             e.printStackTrace()
         }
     }
+
+    suspend fun clearRollHistory(tableId: String): Boolean {
+        return try {
+            val emptyList = emptyList<com.galeria.defensores.models.RollResult>()
+            tablesCollection.document(tableId)
+                .update("rollHistory", emptyList)
+                .await()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
 }

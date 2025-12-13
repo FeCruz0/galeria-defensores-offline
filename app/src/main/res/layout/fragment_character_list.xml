@@ -88,6 +88,35 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+        <!-- Clear History FAB (Sub-menu) -->
+        <LinearLayout
+            android:id="@+id/layout_fab_clear_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Limpar Histórico"
+                android:textColor="@color/text_primary"
+                android:background="@color/card_background"
+                android:padding="4dp"
+                android:layout_marginEnd="8dp" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_clear_history"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_delete"
+                app:fabSize="mini"
+                app:backgroundTint="#B91C1C"
+                app:tint="#FFFFFF" />
+        </LinearLayout>
+
         <!-- Transfer Ownership FAB (Sub-menu) -->
         <LinearLayout
             android:id="@+id/layout_fab_transfer_ownership"

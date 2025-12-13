@@ -185,7 +185,9 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                         bonus = bonus,
                         isCritical = fakeDie == 6,
                         timestamp = System.currentTimeMillis(),
-                        name = "Rolando..."
+                        name = "Rolando...",
+                        isHidden = char.isHidden,
+                        characterId = char.id
                     )
                     _lastRoll.value = fakeResult
                     delay(100)
@@ -205,7 +207,9 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                 bonus = bonus,
                 isCritical = isCritical,
                 timestamp = System.currentTimeMillis(),
-                name = if (isSpecial) type.displayName else "${char.name} - ${type.displayName}"
+                name = if (isSpecial) type.displayName else "${char.name} - ${type.displayName}",
+                isHidden = char.isHidden,
+                characterId = char.id
             )
             _lastRoll.value = result
             _isRolling.value = false
@@ -279,6 +283,113 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         _character.value = currentChar
         saveCharacter()
     }
+
+    fun addSkill(skill: com.galeria.defensores.models.AdvantageItem) {
+        val currentChar = _character.value ?: return
+        val newSkills = currentChar.pericias.toMutableList()
+        newSkills.add(skill)
+        currentChar.pericias = newSkills
+        _character.value = currentChar
+        saveCharacter()
+    }
+
+    fun updateSkill(skill: com.galeria.defensores.models.AdvantageItem) {
+        val currentChar = _character.value ?: return
+        val newSkills = currentChar.pericias.toMutableList()
+        val index = newSkills.indexOfFirst { it.id == skill.id }
+        if (index != -1) {
+            newSkills[index] = skill
+            currentChar.pericias = newSkills
+            _character.value = currentChar
+            saveCharacter()
+        }
+    }
+
+    fun removeSkill(skill: com.galeria.defensores.models.AdvantageItem) {
+        val currentChar = _character.value ?: return
+        val newSkills = currentChar.pericias.toMutableList()
+        newSkills.removeAll { it.id == skill.id }
+        currentChar.pericias = newSkills
+        _character.value = currentChar
+        saveCharacter()
+    }
+
+    fun addSpecializations(specializations: List<com.galeria.defensores.models.AdvantageItem>) {
+        val currentChar = _character.value ?: return
+        val newSpecs = currentChar.especializacoes.toMutableList()
+        newSpecs.addAll(specializations)
+        currentChar.especializacoes = newSpecs
+        _character.value = currentChar
+        saveCharacter()
+    }
+
+    fun updateSpecialization(specialization: com.galeria.defensores.models.AdvantageItem) {
+        val currentChar = _character.value ?: return
+        val newSpecs = currentChar.especializacoes.toMutableList()
+        val index = newSpecs.indexOfFirst { it.id == specialization.id }
+        if (index != -1) {
+            newSpecs[index] = specialization
+            currentChar.especializacoes = newSpecs
+            _character.value = currentChar
+            saveCharacter()
+        }
+    }
+
+    fun removeSpecialization(specialization: com.galeria.defensores.models.AdvantageItem) {
+        val currentChar = _character.value ?: return
+        val newSpecs = currentChar.especializacoes.toMutableList()
+        newSpecs.removeAll { it.id == specialization.id }
+        currentChar.especializacoes = newSpecs
+        _character.value = currentChar
+        saveCharacter()
+    }
+
+    fun addInventoryItem(item: com.galeria.defensores.models.InventoryItem) {
+        val currentChar = _character.value ?: return
+        val newList = currentChar.inventario.toMutableList()
+        newList.add(item)
+        currentChar.inventario = newList
+        _character.value = currentChar
+        saveCharacter()
+    }
+
+    fun updateInventoryItem(item: com.galeria.defensores.models.InventoryItem) {
+        val currentChar = _character.value ?: return
+        val newList = currentChar.inventario.toMutableList()
+        val index = newList.indexOfFirst { it.id == item.id }
+        if (index != -1) {
+            newList[index] = item
+            currentChar.inventario = newList
+            _character.value = currentChar
+            saveCharacter()
+        }
+    }
+
+    fun removeInventoryItem(item: com.galeria.defensores.models.InventoryItem) {
+        val currentChar = _character.value ?: return
+        val newList = currentChar.inventario.toMutableList()
+        newList.removeAll { it.id == item.id }
+        currentChar.inventario = newList
+        _character.value = currentChar
+        saveCharacter()
+    }
+
+    fun adjustInventoryQuantity(item: com.galeria.defensores.models.InventoryItem, delta: Int) {
+        val currentQty = item.quantity.toIntOrNull()
+        if (currentQty != null) {
+            val newQty = (currentQty + delta).coerceAtLeast(0)
+            val newItem = item.copy(quantity = newQty.toString())
+            updateInventoryItem(newItem)
+        }
+    }
+
+    fun updateNotes(htmlInfo: String) {
+        val currentChar = _character.value ?: return
+        currentChar.anotacoes = htmlInfo
+        _character.value = currentChar
+        saveCharacter()
+    }
+
     fun deleteCharacter(onSuccess: () -> Unit, onError: (String) -> Unit) {
         val charId = _character.value?.id ?: return
         viewModelScope.launch {

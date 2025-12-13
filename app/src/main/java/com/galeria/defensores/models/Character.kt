@@ -23,10 +23,11 @@ data class Character(
     // Lists
     var vantagens: MutableList<AdvantageItem> = mutableListOf(),
     var desvantagens: MutableList<AdvantageItem> = mutableListOf(),
-    var pericias: MutableList<SimpleItem> = mutableListOf(),
+    var pericias: MutableList<AdvantageItem> = mutableListOf(),
+    var especializacoes: MutableList<AdvantageItem> = mutableListOf(),
     var magias: MutableList<SimpleItem> = mutableListOf(),
-    var itens: MutableList<SimpleItem> = mutableListOf(), // inventario (part 1)
-    var equipamentos: MutableList<SimpleItem> = mutableListOf(), // inventario (part 2)
+    var inventario: MutableList<InventoryItem> = mutableListOf(),
+    val anotacoesRich: String = "", // Para futuro suporte a rich text se precisar persistir html/markdown
     
     var anotacoes: String = "",
     var isHidden: Boolean = false

@@ -9,7 +9,9 @@ data class RollResult(
     val bonus: Int = 0,
     val isCritical: Boolean = false,
     val timestamp: Long = 0L,
-    val name: String = ""
+    val name: String = "",
+    val isHidden: Boolean = false,
+    val characterId: String = ""
 )
 
 enum class RollType(val displayName: String) {
