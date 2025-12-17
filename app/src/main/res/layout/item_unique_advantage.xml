@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    app:cardCornerRadius="8dp"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="4dp"
     app:cardElevation="2dp"
     app:cardBackgroundColor="@color/card_background">
 
@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:padding="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -21,43 +21,41 @@
             android:gravity="center_vertical">
             
             <TextView
-                android:id="@+id/text_advantage_name"
+                android:id="@+id/text_ua_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Advantage Name"
+                android:text="Humano"
                 android:textStyle="bold"
                 android:textSize="16sp"
                 android:textColor="@color/text_primary" />
 
             <TextView
-                android:id="@+id/text_advantage_cost"
+                android:id="@+id/text_ua_cost"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1 pt"
+                android:text="0 pts"
                 android:textColor="#3B82F6"
                 android:textStyle="bold" />
-                
-             <!-- Hidden delete button kept for compatibility if needed, but will likely be unused in favor of LongClick -->
-             <ImageButton
-                android:id="@+id/btn_delete_item"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_menu_delete"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:padding="8dp"
-                android:visibility="gone"
-                app:tint="#EF4444" />
         </LinearLayout>
         
         <TextView
-            android:id="@+id/text_advantage_description"
+            android:id="@+id/text_ua_group"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Description..."
+            android:text="Humanos"
+            android:textSize="12sp"
+            android:textColor="#9CA3AF"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/text_ua_benefits"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Benefícios: ..."
             android:textSize="12sp"
             android:textColor="@color/text_secondary"
-            android:layout_marginTop="4dp" />
+            android:visibility="gone" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

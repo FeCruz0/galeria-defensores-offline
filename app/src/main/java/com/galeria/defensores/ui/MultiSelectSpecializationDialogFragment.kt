@@ -21,9 +21,12 @@ class MultiSelectSpecializationDialogFragment(
     private val selectedItems = mutableListOf<AdvantageItem>()
     private val maxSelection = 3
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
     }
 
     override fun onCreateView(
@@ -62,16 +65,25 @@ class MultiSelectSpecializationDialogFragment(
                         if (selectedItems.size < maxSelection) {
                             selectedItems.add(item)
                         } else {
-                            // Already at max, maybe show toast or just ignore
-                            // For simplistic UX, we'll block the check in the adapter or here
-                            // But usually setChecked logic is in the adapter logic
+                            // Already at max
                         }
                     } else {
                         selectedItems.remove(item)
                     }
                     updateConfirmButton()
                 },
-                canSelectMore = { selectedItems.size < maxSelection }
+                canSelectMore = { selectedItems.size < maxSelection },
+                onLongClick = { itemToDelete ->
+                     androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setTitle("Excluir Especialização")
+                        .setMessage("Deseja excluir '${itemToDelete.name}'?")
+                        .setPositiveButton("Sim") { _, _ ->
+                            SpecializationsRepository.removeSpecialization(itemToDelete)
+                            loadSpecializations()
+                        }
+                        .setNegativeButton("Não", null)
+                        .show()
+                }
             )
             recyclerView.adapter = adapter
         }
@@ -101,19 +113,16 @@ class MultiSelectSpecializationDialogFragment(
         private val items: List<AdvantageItem>,
         private val selectedItems: List<AdvantageItem>,
         private val onSelectionChanged: (AdvantageItem, Boolean) -> Unit,
-        private val canSelectMore: () -> Boolean
+        private val canSelectMore: () -> Boolean,
+        private val onLongClick: (AdvantageItem) -> Unit
     ) : RecyclerView.Adapter<MultiSelectAdapter.ViewHolder>() {
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val checkBox: CheckBox = view.findViewById(R.id.checkbox_select) // Does not exist yet, need item layout
+            val checkBox: CheckBox = view.findViewById(R.id.checkbox_select)
             val name: TextView = view.findViewById(R.id.text_spec_name)
             val skills: TextView = view.findViewById(R.id.text_spec_skills)
             val desc: TextView = view.findViewById(R.id.text_spec_desc)
         }
-        
-        // We need a specific item layout for checkboxes. 
-        // Or we can reuse item_advantage if we modify it or create item_specialization_select.
-        // Let's assume we create 'item_specialization_select'
         
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
@@ -141,6 +150,11 @@ class MultiSelectSpecializationDialogFragment(
             
             holder.itemView.setOnClickListener {
                 holder.checkBox.toggle()
+            }
+            
+            holder.itemView.setOnLongClickListener {
+                onLongClick(item)
+                true
             }
         }
 

@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="@color/page_background">
+    android:minWidth="300dp">
 
     <TextView
         android:id="@+id/dialog_title"
@@ -14,13 +14,15 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@color/text_primary"
+        android:gravity="center"
         android:layout_marginBottom="16dp" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:hint="Nome / Descrição">
+        android:hint="Nome / Descrição"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edit_item_name"
@@ -34,13 +36,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:hint="Quantidade">
+        android:hint="Quantidade"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edit_item_quantity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" 
+            android:inputType="number" 
             android:text="1"
             android:textColor="@color/text_primary" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -56,8 +59,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Remover"
-            android:textColor="#EF4444"
-            style="@style/Widget.MaterialComponents.Button.TextButton" />
+            android:backgroundTint="#EF4444"
+            android:textColor="#FFFFFF" />
 
         <View
             android:layout_width="0dp"
@@ -69,7 +72,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Cancelar"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_marginEnd="8dp" />
 
         <Button

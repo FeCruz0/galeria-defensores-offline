@@ -16,9 +16,12 @@ class SelectAdvantageDialogFragment(
     private val onAdvantageSelected: (AdvantageItem) -> Unit
 ) : DialogFragment() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
     }
 
     override fun onCreateView(
@@ -37,13 +40,21 @@ class SelectAdvantageDialogFragment(
         fun loadAdvantages() {
             val adapter = AdvantagesAdapter(
                 items = AdvantagesRepository.getAllAdvantages(),
-                onDeleteClick = { itemToDelete ->
-                    AdvantagesRepository.removeAdvantage(itemToDelete)
-                    loadAdvantages()
-                },
                 onItemClick = { selectedItem ->
                     onAdvantageSelected(selectedItem)
                     dismiss()
+                },
+                onLongClick = { itemToDelete ->
+                    // Show confirmation dialog or just delete
+                    androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setTitle("Excluir Vantagem")
+                        .setMessage("Deseja excluir '${itemToDelete.name}'?")
+                        .setPositiveButton("Sim") { _, _ ->
+                            AdvantagesRepository.removeAdvantage(itemToDelete)
+                            loadAdvantages()
+                        }
+                        .setNegativeButton("Não", null)
+                        .show()
                 }
             )
             recyclerView.adapter = adapter

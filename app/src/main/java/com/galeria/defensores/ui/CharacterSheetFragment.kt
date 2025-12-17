@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.galeria.defensores.R
 import com.galeria.defensores.models.RollType
+import com.galeria.defensores.models.Spell
 import com.galeria.defensores.viewmodels.CharacterViewModel
 import kotlinx.coroutines.launch
 
@@ -144,6 +145,11 @@ class CharacterSheetFragment : Fragment() {
                 val isOwner = char.ownerId == currentUserId
                 canEdit = isMaster || isOwner
                 
+                // Load Damage Types if not already associated (or just refresh)
+                if (char.tableId.isNotEmpty()) {
+                    viewModel.loadDamageTypes(char.tableId)
+                }
+
                 // Enable/Disable Editing based on permissions
                 nameEdit.isEnabled = canEdit
                 view.findViewById<Button>(R.id.btn_add_advantage).visibility = if (canEdit) View.VISIBLE else View.GONE
@@ -151,6 +157,199 @@ class CharacterSheetFragment : Fragment() {
                 view.findViewById<Button>(R.id.btn_add_skill).visibility = if (canEdit) View.VISIBLE else View.GONE
                 view.findViewById<Button>(R.id.btn_add_specialization).visibility = if (canEdit) View.VISIBLE else View.GONE
                 view.findViewById<Button>(R.id.btn_add_inventory).visibility = if (canEdit) View.VISIBLE else View.GONE
+                view.findViewById<Button>(R.id.btn_add_spell).visibility = if (canEdit) View.VISIBLE else View.GONE
+                
+                // Damage Types UI
+                val spinnerForca = view.findViewById<android.widget.Spinner>(R.id.spinner_damage_forca)
+                val spinnerPdf = view.findViewById<android.widget.Spinner>(R.id.spinner_damage_pdf)
+                val btnManageTypes = view.findViewById<android.view.View>(R.id.btn_manage_damage_types)
+
+                btnManageTypes.visibility = if (isMaster) View.VISIBLE else View.GONE
+                spinnerForca.isEnabled = canEdit
+                spinnerPdf.isEnabled = canEdit
+
+                // Enable/Disable Status Editing
+                updateStatusPermissions(view.findViewById(R.id.status_pv), canEdit)
+                updateStatusPermissions(view.findViewById(R.id.status_pm), canEdit)
+
+                // UNIQUE ADVANTAGE LOGIC
+                viewModel.loadUniqueAdvantages(effectiveTableId)
+                val uaCard = view.findViewById<View>(R.id.card_unique_advantage)
+                val btnSelectUA = view.findViewById<Button>(R.id.btn_select_ua)
+
+                btnSelectUA.visibility = if (canEdit) View.VISIBLE else View.GONE
+                
+                if (char.uniqueAdvantage != null) {
+                    uaCard.visibility = View.VISIBLE
+                    val ua = char.uniqueAdvantage!!
+                    uaCard.findViewById<TextView>(R.id.text_ua_name).text = ua.name
+                    uaCard.findViewById<TextView>(R.id.text_ua_group).text = ua.group
+                    uaCard.findViewById<TextView>(R.id.text_ua_cost).text = "${ua.cost} pts"
+                    val benefitsText = uaCard.findViewById<TextView>(R.id.text_ua_benefits)
+                    benefitsText.visibility = View.VISIBLE
+                    benefitsText.text = "Benefícios: ${ua.benefits}\nFraquezas: ${ua.weaknesses}"
+                    
+                    // Allow clicking current UA to change/view
+                    uaCard.setOnClickListener {
+                        if (canEdit) btnSelectUA.performClick()
+                    }
+                } else {
+                    uaCard.visibility = View.GONE
+                }
+
+                // --- BIND NEW STATS (Score, Saved, XP) ---
+                view.findViewById<TextView>(R.id.text_score_value).text = char.calculateScore().toString()
+                
+                val savedPointsText = view.findViewById<TextView>(R.id.text_saved_points)
+                savedPointsText.text = char.savedPoints.toString()
+                
+                // Saved Points Logic
+                val btnMinusSaved = view.findViewById<Button>(R.id.btn_minus_saved)
+                val btnPlusSaved = view.findViewById<Button>(R.id.btn_plus_saved)
+
+                btnMinusSaved.setOnClickListener {
+                    if (canEdit && char.savedPoints > 0) {
+                        viewModel.updateSavedPoints(char.savedPoints - 1)
+                    }
+                }
+                btnPlusSaved.setOnClickListener {
+                     if (canEdit) {
+                        viewModel.updateSavedPoints(char.savedPoints + 1)
+                     }
+                }
+
+                savedPointsText.setOnClickListener {
+                    if (canEdit) {
+                        val context = view.context
+                        val input = EditText(context)
+                        input.inputType = android.text.InputType.TYPE_CLASS_NUMBER
+                        input.setText(char.savedPoints.toString())
+                        androidx.appcompat.app.AlertDialog.Builder(context)
+                            .setTitle("Pontos Guardados")
+                            .setView(input)
+                            .setPositiveButton("Salvar") { _, _ ->
+                                val newVal = input.text.toString().toIntOrNull()
+                                if (newVal != null) viewModel.updateSavedPoints(newVal)
+                            }
+                            .setNegativeButton("Cancelar", null)
+                            .show()
+                    }
+                }
+
+                // Experience Logic
+                val experienceText = view.findViewById<TextView>(R.id.text_experience)
+                experienceText.text = char.experience.toString()
+                
+                val btnMinusXp = view.findViewById<Button>(R.id.btn_minus_xp)
+                val btnPlusXp = view.findViewById<Button>(R.id.btn_plus_xp)
+
+                btnMinusXp.setOnClickListener {
+                    if (canEdit && char.experience > 0) {
+                         viewModel.updateExperience(char.experience - 1)
+                    }
+                }
+                btnPlusXp.setOnClickListener {
+                    if (canEdit) {
+                        viewModel.updateExperience(char.experience + 1)
+                    }
+                }
+
+                // Removed direct editing click listener for experience as requested
+                
+                // Visibility of buttons based on canEdit
+                val controls = listOf(btnMinusSaved, btnPlusSaved, btnMinusXp, btnPlusXp)
+                controls.forEach { it.visibility = if (canEdit) View.VISIBLE else View.INVISIBLE }
+
+                btnSelectUA.setOnClickListener {
+                    viewModel.availableUniqueAdvantages.observe(viewLifecycleOwner) { uas ->
+                        // Prevent multiple dialogs if called rapidly or multiple updates
+                        // Ideally we check if dialog is added.
+                         if (parentFragmentManager.findFragmentByTag("SelectUADialog") == null) {
+                             val dialog = SelectUniqueAdvantageDialogFragment(
+                                 availableUAs = uas,
+                                 canManage = isMaster, // Only master can manage custom UAs
+                                 onSelect = { selectedUA ->
+                                     viewModel.setUniqueAdvantage(selectedUA)
+                                 },
+                                 onAddCustom = { newUA ->
+                                     viewModel.addCustomUniqueAdvantage(newUA)
+                                 },
+                                 onEditCustom = { oldUA, newUA ->
+                                     viewModel.updateCustomUniqueAdvantage(oldUA, newUA)
+                                 },
+                                 onDeleteCustom = { uaToDelete ->
+                                     viewModel.removeCustomUniqueAdvantage(uaToDelete)
+                                 }
+                             )
+                             dialog.show(parentFragmentManager, "SelectUADialog")
+                         }
+                    }
+                }
+
+                btnManageTypes.setOnClickListener {
+                    val types = viewModel.availableDamageTypes.value ?: emptyList()
+                    // Filter out defaults usually? Or allow removing custom only.
+                    // The dialog logic handles removing custom. We pass the custom ones?
+                    // The ViewModel logic handles Add/Remove.
+                    // Let's pass the current *custom* list? ViewModel knows it. 
+                    // Actually, the dialog adapter shows ALL types? 
+                    // The request said "edit the list to add/remove options".
+                    // Usually you only edit the custom ones.
+                    // Let's assume dialog shows list.
+                    // For simplicity, let's just observe data in dialog or pass current list.
+                    // Ideally we fetch custom types from Table object again or use VM.
+                    // Let's use VM helper.
+                    
+                    val dialog = ManageDamageTypesDialogFragment(
+                         currentTypes = viewModel.availableDamageTypes.value?.filter { 
+                             // Filter out defaults if we want to show only customs?
+                             // User said "add or remove options". 
+                             // "Delete" default options might be bad.
+                             // Let's pass all, but adapter should disable delete for defaults.
+                             // How to know defaults? defined in VM.
+                             // For now pass all.
+                             true
+                         } ?: emptyList(),
+                         onAdd = { viewModel.addCustomDamageType(it) },
+                         onRemove = { viewModel.removeCustomDamageType(it) }
+                    )
+                    dialog.show(parentFragmentManager, "ManageDamageTypes")
+                }
+
+                // Setup Spinners
+                viewModel.availableDamageTypes.observe(viewLifecycleOwner) { types ->
+                    val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, types)
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    spinnerForca.adapter = adapter
+                    spinnerPdf.adapter = adapter
+
+                    // Set current selections
+                    val indexF = types.indexOf(char.damageTypeForca)
+                    if (indexF >= 0) spinnerForca.setSelection(indexF)
+
+                    val indexP = types.indexOf(char.damageTypePdf)
+                    if (indexP >= 0) spinnerPdf.setSelection(indexP)
+                }
+
+                spinnerForca.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                         val selected = parent?.getItemAtPosition(position) as? String
+                         if (selected != null && selected != char.damageTypeForca && canEdit) { // check recursion
+                             viewModel.updateDamageType(selected, false)
+                         }
+                    }
+                    override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+                }
+
+                spinnerPdf.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                         val selected = parent?.getItemAtPosition(position) as? String
+                         if (selected != null && selected != char.damageTypePdf && canEdit) {
+                             viewModel.updateDamageType(selected, true)
+                         }
+                    }
+                    override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+                }
                 
                 // Notes EditText
                 val notesEdit = view.findViewById<EditText>(R.id.edit_notes)
@@ -192,7 +391,7 @@ class CharacterSheetFragment : Fragment() {
                 // Update Advantages List
                 val advantagesRecycler = view.findViewById<RecyclerView>(R.id.recycler_advantages)
                 advantagesRecycler.layoutManager = LinearLayoutManager(context)
-                val adapter = AdvantagesAdapter(char.vantagens) { selectedItem ->
+                val adapter = AdvantagesAdapter(items = char.vantagens, onItemClick = { selectedItem ->
                     // Open Edit Dialog with Remove option
                     val editDialog = EditAdvantageDialogFragment(
                         advantage = selectedItem,
@@ -204,13 +403,13 @@ class CharacterSheetFragment : Fragment() {
                         }
                     )
                     editDialog.show(parentFragmentManager, "EditAdvantageDialog")
-                }
+                })
                 advantagesRecycler.adapter = adapter
     
                 // Update Disadvantages List
                 val disadvantagesRecycler = view.findViewById<RecyclerView>(R.id.recycler_disadvantages)
                 disadvantagesRecycler.layoutManager = LinearLayoutManager(context)
-                val disAdapter = AdvantagesAdapter(char.desvantagens) { selectedItem ->
+                val disAdapter = AdvantagesAdapter(items = char.desvantagens, onItemClick = { selectedItem ->
                     // Open Edit Dialog with Remove option
                     val editDialog = EditAdvantageDialogFragment(
                         advantage = selectedItem,
@@ -222,13 +421,13 @@ class CharacterSheetFragment : Fragment() {
                         }
                     )
                     editDialog.show(parentFragmentManager, "EditDisadvantageDialog")
-                }
+                })
                 disadvantagesRecycler.adapter = disAdapter
     
                 // Update Skills List
                 val skillsRecycler = view.findViewById<RecyclerView>(R.id.recycler_skills)
                 skillsRecycler.layoutManager = LinearLayoutManager(context)
-                val skillsAdapter = AdvantagesAdapter(char.pericias) { selectedItem ->
+                val skillsAdapter = AdvantagesAdapter(items = char.pericias, onItemClick = { selectedItem ->
                     // Open Edit Dialog with Remove option
                     val editDialog = EditSkillDialogFragment(
                         skill = selectedItem,
@@ -240,13 +439,13 @@ class CharacterSheetFragment : Fragment() {
                         }
                     )
                     editDialog.show(parentFragmentManager, "EditSkillDialog")
-                }
+                })
                 skillsRecycler.adapter = skillsAdapter
     
                 // Update Specializations List
                 val specsRecycler = view.findViewById<RecyclerView>(R.id.recycler_specializations)
                 specsRecycler.layoutManager = LinearLayoutManager(context)
-                val specsAdapter = AdvantagesAdapter(char.especializacoes) { selectedItem ->
+                val specsAdapter = AdvantagesAdapter(items = char.especializacoes, onItemClick = { selectedItem ->
                     // Open Edit Dialog
                     val editDialog = EditSpecializationDialogFragment(
                         specialization = selectedItem,
@@ -258,8 +457,27 @@ class CharacterSheetFragment : Fragment() {
                         }
                     )
                     editDialog.show(parentFragmentManager, "EditSpecDialog")
-                }
+                })
                 specsRecycler.adapter = specsAdapter
+    
+                // Update Spells List
+                val spellsRecycler = view.findViewById<RecyclerView>(R.id.recycler_spells)
+                spellsRecycler.layoutManager = LinearLayoutManager(context)
+                val spellsAdapter = SpellsAdapter(spells = char.magias, onSpellClick = { selectedSpell ->
+                     if (canEdit) {
+                         val editDialog = EditSpellDialogFragment(
+                             spell = selectedSpell,
+                             onSave = { updatedSpell ->
+                                 viewModel.updateSpell(updatedSpell)
+                             },
+                             onDelete = { spellToDelete ->
+                                 viewModel.removeSpell(spellToDelete)
+                             }
+                         )
+                         editDialog.show(parentFragmentManager, "EditSpellDialog")
+                     }
+                })
+                spellsRecycler.adapter = spellsAdapter
     
                 // Update Inventory List
                 val invRecycler = view.findViewById<RecyclerView>(R.id.recycler_inventory)
@@ -349,6 +567,13 @@ class CharacterSheetFragment : Fragment() {
                  viewModel.addSpecializations(selectedSpecs)
              }
              dialog.show(parentFragmentManager, "MultiSelectSpecDialog")
+        }
+
+        view.findViewById<Button>(R.id.btn_add_spell).setOnClickListener {
+             val dialog = EditSpellDialogFragment(null, { newSpell ->
+                 viewModel.addSpell(newSpell)
+             })
+             dialog.show(parentFragmentManager, "AddSpellDialog")
         }
 
         view.findViewById<Button>(R.id.btn_add_inventory).setOnClickListener {
@@ -521,6 +746,19 @@ class CharacterSheetFragment : Fragment() {
                 .setNegativeButton("Cancelar", null)
                 .show()
         }
+    }
+
+    private fun updateStatusPermissions(view: View, canEdit: Boolean) {
+        val buttons = listOf<Button>(
+            view.findViewById(R.id.btn_minus_5),
+            view.findViewById(R.id.btn_minus_1),
+            view.findViewById(R.id.btn_plus_1),
+            view.findViewById(R.id.btn_plus_5)
+        )
+        buttons.forEach { it.isEnabled = canEdit }
+        
+        val valueView = view.findViewById<TextView>(R.id.status_value)
+        valueView.isEnabled = canEdit
     }
 
     private fun updateStatusValue(view: View, current: Int, max: Int) {

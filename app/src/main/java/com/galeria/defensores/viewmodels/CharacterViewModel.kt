@@ -13,6 +13,7 @@ import com.galeria.defensores.models.RollType
 import kotlin.random.Random
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.galeria.defensores.data.TableRepository
 
 class CharacterViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -129,6 +130,99 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         currentChar.isHidden = isHidden
         _character.value = currentChar
         saveCharacter()
+    }
+
+    fun updateSavedPoints(points: Int) {
+        val currentChar = _character.value ?: return
+        currentChar.savedPoints = points.coerceAtLeast(0)
+        _character.value = currentChar
+        saveCharacter()
+    }
+
+    fun updateExperience(xp: Int) {
+        val currentChar = _character.value ?: return
+        var newXp = xp.coerceAtLeast(0)
+        var newSaved = currentChar.savedPoints
+
+        if (newXp >= 10) {
+            val pointsToAdd = newXp / 10
+            newXp = newXp % 10
+            newSaved += pointsToAdd
+        }
+
+        if (newXp != currentChar.experience || newSaved != currentChar.savedPoints) {
+            currentChar.experience = newXp
+            currentChar.savedPoints = newSaved
+            _character.value = currentChar
+            saveCharacter()
+        }
+    }
+
+    // --- Damage Types Logic ---
+    private val defaultDamageTypes = listOf(
+        "Corte", "Perfuração", "Esmagamento", 
+        "Fogo", "Frio", "Elétrico", "Químico", "Sônico"
+    )
+
+    private val _availableDamageTypes = MutableLiveData<List<String>>()
+    val availableDamageTypes: LiveData<List<String>> = _availableDamageTypes
+
+    private var currentTableId: String? = null
+
+    // Call this when loading character or table
+    fun loadDamageTypes(tableId: String?) {
+        this.currentTableId = tableId
+        viewModelScope.launch {
+            val customTypes = if (!tableId.isNullOrEmpty()) {
+                val table = TableRepository.getTable(tableId)
+                table?.customDamageTypes ?: emptyList()
+            } else {
+                emptyList()
+            }
+            val allTypes = (defaultDamageTypes + customTypes).distinct().sorted()
+            _availableDamageTypes.value = allTypes
+        }
+    }
+
+    fun updateDamageType(type: String, isPdf: Boolean) {
+        val currentChar = _character.value ?: return
+        if (isPdf) {
+            currentChar.damageTypePdf = type
+        } else {
+            currentChar.damageTypeForca = type
+        }
+        _character.value = currentChar
+        saveCharacter()
+    }
+
+    fun addCustomDamageType(type: String) {
+        val tableId = currentTableId ?: return
+        if (type.isBlank()) return
+        
+        viewModelScope.launch {
+            val table = TableRepository.getTable(tableId)
+            if (table != null) {
+                if (!table.customDamageTypes.contains(type)) {
+                    table.customDamageTypes.add(type)
+                    TableRepository.updateTable(table) // Assuming updateTable exists or creating helper
+                }
+                loadDamageTypes(tableId) // Reload
+            }
+        }
+    }
+
+    fun removeCustomDamageType(type: String) {
+        val tableId = currentTableId ?: return
+        
+        viewModelScope.launch {
+            val table = TableRepository.getTable(tableId)
+            if (table != null) {
+                if (table.customDamageTypes.remove(type)) {
+                    TableRepository.updateTable(table)
+                }
+                loadDamageTypes(tableId) // Reload
+            }
+        }
     }
 
     fun rollDice(type: RollType) {
@@ -399,6 +493,123 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                 onSuccess()
             } else {
                 onError("Erro ao excluir. Verifique sua conexão.")
+            }
+        }
+    }
+    fun addSpell(spell: com.galeria.defensores.models.Spell) {
+        val currentChar = _character.value ?: return
+        val newSpells = currentChar.magias.toMutableList()
+        newSpells.add(spell)
+        currentChar.magias = newSpells
+        _character.value = currentChar
+        saveCharacter()
+    }
+
+    fun updateSpell(spell: com.galeria.defensores.models.Spell) {
+        val currentChar = _character.value ?: return
+        val newSpells = currentChar.magias.toMutableList()
+        val index = newSpells.indexOfFirst { it.id == spell.id }
+        if (index != -1) {
+            newSpells[index] = spell
+            currentChar.magias = newSpells
+            _character.value = currentChar
+            saveCharacter()
+        }
+    }
+
+    fun removeSpell(spell: com.galeria.defensores.models.Spell) {
+        val currentChar = _character.value ?: return
+        val newSpells = currentChar.magias.toMutableList()
+        newSpells.removeAll { it.id == spell.id }
+        currentChar.magias = newSpells
+        _character.value = currentChar
+        saveCharacter()
+    }
+
+    // --- Unique Advantage Logic ---
+    
+    private val _availableUniqueAdvantages = MutableLiveData<List<com.galeria.defensores.models.UniqueAdvantage>>()
+    val availableUniqueAdvantages: LiveData<List<com.galeria.defensores.models.UniqueAdvantage>> = _availableUniqueAdvantages
+
+    fun loadUniqueAdvantages(tableId: String?) {
+        this.currentTableId = tableId
+        viewModelScope.launch {
+            val defaults = com.galeria.defensores.data.UniqueAdvantagesData.defaults
+            val customUAs = if (!tableId.isNullOrEmpty()) {
+                val table = TableRepository.getTable(tableId)
+                table?.customUniqueAdvantages ?: emptyList()
+            } else {
+                emptyList()
+            }
+            // Merge defaults and customs. We can sort them if we want.
+            // Sorting by name seems reasonable.
+            val allTypes = (defaults + customUAs).sortedBy { it.name }
+            _availableUniqueAdvantages.value = allTypes
+        }
+    }
+
+    fun setUniqueAdvantage(ua: com.galeria.defensores.models.UniqueAdvantage?) {
+        val currentChar = _character.value ?: return
+        currentChar.uniqueAdvantage = ua
+        _character.value = currentChar
+        saveCharacter()
+    }
+
+    fun addCustomUniqueAdvantage(ua: com.galeria.defensores.models.UniqueAdvantage) {
+        val tableId = currentTableId ?: return
+        viewModelScope.launch {
+            val table = TableRepository.getTable(tableId)
+            if (table != null) {
+                // Remove if exists (update) or just add
+               val existingIndex = table.customUniqueAdvantages.indexOfFirst { it.name == ua.name } // Check by name uniqueness for simplicity or just allow duplicates? 
+               // Better to not allow duplicates with same name to avoid confusion.
+               if (existingIndex == -1) {
+                   table.customUniqueAdvantages.add(ua)
+               } else {
+                   // Update if exists?
+                   table.customUniqueAdvantages[existingIndex] = ua
+               }
+                if (TableRepository.updateTable(table)) {
+                    loadUniqueAdvantages(tableId)
+                }
+            }
+        }
+    }
+    
+    fun removeCustomUniqueAdvantage(ua: com.galeria.defensores.models.UniqueAdvantage) {
+        val tableId = currentTableId ?: return
+        viewModelScope.launch {
+            val table = TableRepository.getTable(tableId)
+            if (table != null) {
+                // Logic to remove. Since Custom UAs are saved in the list, we remove by object equality or name.
+                // Assuming UA is from the list.
+                val removed = table.customUniqueAdvantages.removeIf { it.name == ua.name && it.group == ua.group }
+                if (removed) {
+                    if (TableRepository.updateTable(table)) {
+                        loadUniqueAdvantages(tableId)
+                    }
+                }
+            }
+        }
+    }
+    
+     fun updateCustomUniqueAdvantage(oldUA: com.galeria.defensores.models.UniqueAdvantage, newUA: com.galeria.defensores.models.UniqueAdvantage) {
+        val tableId = currentTableId ?: return
+        viewModelScope.launch {
+            val table = TableRepository.getTable(tableId)
+            if (table != null) {
+                 val index = table.customUniqueAdvantages.indexOfFirst { it.name == oldUA.name && it.group == oldUA.group }
+                 if (index != -1) {
+                     table.customUniqueAdvantages[index] = newUA
+                     if (TableRepository.updateTable(table)) {
+                         loadUniqueAdvantages(tableId)
+                     }
+                 } else {
+                     // Maybe it was a default one being "edited" into a custom one?
+                     // Requirements say "edit... custom ones".
+                     // If user tries to edit a default one, it should probably create a custom one copy?
+                     // For now, let's assume we only edit custom ones via this method.
+                 }
             }
         }
     }

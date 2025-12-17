@@ -17,10 +17,7 @@ class EditAdvantageDialogFragment(
     private val onDelete: ((AdvantageItem) -> Unit)? = null
 ) : DialogFragment() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
-    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,23 +62,38 @@ class EditAdvantageDialogFragment(
 
         view.findViewById<View>(R.id.btn_save).setOnClickListener {
             val name = editName.text.toString()
-            val cost = editCost.text.toString()
+            val costStr = editCost.text.toString()
             val desc = editDesc.text.toString()
+
+            val costInt = costStr.toIntOrNull()
+            if (costInt == null) {
+                editCost.error = "Insira um número válido"
+                return@setOnClickListener
+            }
 
             if (name.isNotBlank()) {
                 val newItem = advantage?.copy(
                     name = name,
-                    cost = cost,
+                    cost = costStr, // Keeping as string as per model, but validated as int
                     description = desc
                 ) ?: AdvantageItem(
                     id = java.util.UUID.randomUUID().toString(),
                     name = name,
-                    cost = cost,
+                    cost = costStr,
                     description = desc
                 )
                 onSave(newItem)
                 dismiss()
+            } else {
+                 editName.error = "Nome é obrigatório"
             }
         }
+    }
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
     }
 }

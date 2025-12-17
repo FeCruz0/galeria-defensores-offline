@@ -8,41 +8,32 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Selecionar Especialização"
+        android:text="Selecionar Vantagem Única"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@color/text_primary"
+        android:layout_marginBottom="16dp"
         android:gravity="center"
-        android:layout_marginBottom="16dp" />
+        android:textColor="@color/text_primary" />
 
     <Button
-        android:id="@+id/btn_new_specialization"
+        android:id="@+id/btn_add_custom_ua"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Criar Nova Especialização"
+        android:text="Criar Nova (Mestre)"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="8dp"
+        android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_specializations"
+        android:id="@+id/recycler_uas"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
-
-    <Button
-        android:id="@+id/btn_confirm_selection"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Adicionar (0)"
-        android:enabled="false"
-        android:layout_marginTop="8dp" />
 
     <Button
         android:id="@+id/btn_cancel_selection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Cancelar"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_marginTop="4dp" />
-
+        android:layout_marginTop="8dp" />
 </LinearLayout>

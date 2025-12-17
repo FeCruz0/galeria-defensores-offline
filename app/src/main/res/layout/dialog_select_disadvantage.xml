@@ -3,17 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/page_background"
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/dialog_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Selecionar Desvantagem"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@color/text_primary"
+        android:gravity="center"
+        android:id="@+id/dialog_title"
         android:layout_marginBottom="16dp" />
 
     <Button
@@ -35,7 +35,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Cancelar"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_marginTop="8dp" />
 
 </LinearLayout>

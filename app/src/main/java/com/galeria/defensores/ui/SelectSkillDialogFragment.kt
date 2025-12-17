@@ -15,9 +15,12 @@ class SelectSkillDialogFragment(
     private val onSkillSelected: (AdvantageItem) -> Unit
 ) : DialogFragment() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
     }
 
     override fun onCreateView(
@@ -36,13 +39,20 @@ class SelectSkillDialogFragment(
         fun loadSkills() {
             val adapter = AdvantagesAdapter(
                 items = SkillsRepository.getAllSkills(),
-                onDeleteClick = { itemToDelete ->
-                    SkillsRepository.removeSkill(itemToDelete)
-                    loadSkills()
-                },
                 onItemClick = { selectedItem ->
                     onSkillSelected(selectedItem)
                     dismiss()
+                },
+                onLongClick = { itemToDelete ->
+                     androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setTitle("Excluir Perícia")
+                        .setMessage("Deseja excluir '${itemToDelete.name}'?")
+                        .setPositiveButton("Sim") { _, _ ->
+                            SkillsRepository.removeSkill(itemToDelete)
+                            loadSkills()
+                        }
+                        .setNegativeButton("Não", null)
+                        .show()
                 }
             )
             recyclerView.adapter = adapter

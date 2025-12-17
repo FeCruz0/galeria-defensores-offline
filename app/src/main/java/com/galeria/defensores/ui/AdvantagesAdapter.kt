@@ -10,15 +10,14 @@ import com.galeria.defensores.models.AdvantageItem
 
 class AdvantagesAdapter(
     private val items: List<AdvantageItem>,
-    private val onDeleteClick: ((AdvantageItem) -> Unit)? = null,
-    private val onItemClick: (AdvantageItem) -> Unit
+    private val onItemClick: (AdvantageItem) -> Unit,
+    private val onLongClick: ((AdvantageItem) -> Unit)? = null
 ) : RecyclerView.Adapter<AdvantagesAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val name: TextView = view.findViewById(R.id.text_advantage_name)
         val cost: TextView = view.findViewById(R.id.text_advantage_cost)
         val description: TextView = view.findViewById(R.id.text_advantage_description)
-        val deleteButton: View = view.findViewById(R.id.btn_delete_item)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -33,14 +32,17 @@ class AdvantagesAdapter(
         holder.cost.text = item.cost
         holder.description.text = item.description
         
-        if (onDeleteClick != null) {
-            holder.deleteButton.visibility = View.VISIBLE
-            holder.deleteButton.setOnClickListener { onDeleteClick.invoke(item) }
-        } else {
-            holder.deleteButton.visibility = View.GONE
-        }
+        // Hide delete button if it exists in XML but we don't use it anymore
+        holder.itemView.findViewById<View>(R.id.btn_delete_item)?.visibility = View.GONE
 
         holder.itemView.setOnClickListener { onItemClick(item) }
+        
+        if (onLongClick != null) {
+            holder.itemView.setOnLongClickListener {
+                onLongClick.invoke(item)
+                true
+            }
+        }
     }
 
     override fun getItemCount() = items.size

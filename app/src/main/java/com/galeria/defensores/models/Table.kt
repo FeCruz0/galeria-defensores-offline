@@ -13,5 +13,7 @@ data class Table(
     @get:PropertyName("isPrivate") @set:PropertyName("isPrivate") var isPrivate: Boolean = false, // privativa
     val password: String? = null,
     val rulesMod: Map<String, Any> = emptyMap(), // regras_mod
-    val rollHistory: MutableList<RollResult> = mutableListOf() // historico_rolagens
+    val rollHistory: MutableList<RollResult> = mutableListOf(), // historico_rolagens
+    var customDamageTypes: MutableList<String> = mutableListOf(), // tipos_dano_customizados
+    var customUniqueAdvantages: MutableList<UniqueAdvantage> = mutableListOf()
 )
