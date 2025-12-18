@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 class CharacterSheetFragment : Fragment() {
 
     private lateinit var viewModel: CharacterViewModel
+    private lateinit var chatViewModel: com.galeria.defensores.viewmodels.ChatViewModel
     private var characterId: String? = null
     private var tableId: String? = null
 
@@ -60,6 +61,7 @@ class CharacterSheetFragment : Fragment() {
             tableId = it.getString(ARG_TABLE_ID)
         }
         viewModel = ViewModelProvider(this).get(CharacterViewModel::class.java)
+        chatViewModel = ViewModelProvider(this).get(com.galeria.defensores.viewmodels.ChatViewModel::class.java)
     }
 
     override fun onCreateView(
@@ -109,6 +111,10 @@ class CharacterSheetFragment : Fragment() {
 
         // Observe Data
         viewModel.loadCharacter(characterId, tableId)
+        
+        if (tableId != null) {
+            chatViewModel.setTableId(tableId!!)
+        }
 
         viewModel.character.observe(viewLifecycleOwner) { char ->
             if (char == null) return@observe
@@ -521,6 +527,11 @@ class CharacterSheetFragment : Fragment() {
                     rollTotalText.setTextColor(Color.parseColor("#D97706")) // Yellow/Gold
                 } else {
                     rollTotalText.setTextColor(Color.WHITE)
+                }
+                
+                // Send to Chat if in a table
+                if (tableId != null) {
+                     chatViewModel.sendRollResult(result)
                 }
             } else {
                 rollResultCard.visibility = View.GONE

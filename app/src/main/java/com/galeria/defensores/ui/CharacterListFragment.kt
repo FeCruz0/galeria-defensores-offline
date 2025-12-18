@@ -29,10 +29,7 @@ class CharacterListFragment : Fragment() {
     private lateinit var adapter: CharacterAdapter
     private var tableId: String? = null
     
-    // Join Request Views
-    private lateinit var layoutJoinRequest: View
-    private lateinit var textJoinStatus: TextView
-    private lateinit var btnRequestJoin: android.widget.Button
+
 
     companion object {
         private const val ARG_TABLE_ID = "table_id"
@@ -64,10 +61,7 @@ class CharacterListFragment : Fragment() {
         characterRecyclerView = view.findViewById(R.id.character_recycler_view)
         characterRecyclerView.layoutManager = LinearLayoutManager(context)
         
-        // Initialize Join Request Views
-        layoutJoinRequest = view.findViewById(R.id.layout_join_request)
-        textJoinStatus = view.findViewById(R.id.text_join_status)
-        btnRequestJoin = view.findViewById(R.id.btn_request_join)
+
         
         // FAB Menu Logic
         val fabMenu = view.findViewById<FloatingActionButton>(R.id.fab_menu)
@@ -194,6 +188,8 @@ class CharacterListFragment : Fragment() {
             }
         }
 
+
+
         return view
     }
 
@@ -274,58 +270,20 @@ class CharacterListFragment : Fragment() {
                 val fabMenu = view?.findViewById<FloatingActionButton>(R.id.fab_menu)
                 val btnLogs = view?.findViewById<ImageButton>(R.id.btn_logs)
                 
-                // Hide Transfer Option initially (will be shown if menu opens + isMaster)
-                val layoutFabTransferOwnership = view?.findViewById<View>(R.id.layout_fab_transfer_ownership)
-                layoutFabTransferOwnership?.visibility = View.GONE
-                view?.findViewById<View>(R.id.layout_fab_clear_history)?.visibility = View.GONE
-
-                // Join Request Logic
-                if (!isMember && table != null) {
-                    layoutJoinRequest.visibility = View.VISIBLE
-                    
-                    // Hide Interaction Buttons for Visitors
-                    fabMenu?.visibility = View.GONE
-                    btnLogs?.visibility = View.GONE
-
-                    // Check pending requests
-                    val hasPending = NotificationRepository.hasPendingRequest(currentUserId, table.id)
-                    if (hasPending) {
-                        textJoinStatus.text = "Solicitação enviada. Aguardando aprovação."
-                        btnRequestJoin.isEnabled = false
-                        btnRequestJoin.text = "Aguardando"
-                        btnRequestJoin.alpha = 0.5f
-                    } else {
-                        textJoinStatus.text = "Você está visitando esta mesa."
-                        btnRequestJoin.isEnabled = true
-                        btnRequestJoin.text = "Participar"
-                        btnRequestJoin.alpha = 1.0f
-                        
-                        btnRequestJoin.setOnClickListener {
-                            viewLifecycleOwner.lifecycleScope.launch {
-                                val currentUser = com.galeria.defensores.data.SessionManager.currentUser
-                                if (currentUser != null) {
-                                    val notification = Notification(
-                                        fromUserId = currentUser.id,
-                                        fromUserName = currentUser.name,
-                                        toUserId = table.masterId,
-                                        tableId = table.id,
-                                        tableName = table.name,
-                                        status = NotificationStatus.PENDING
-                                    )
-                                    NotificationRepository.sendNotification(notification)
-                                    Toast.makeText(context, "Solicitação enviada!", Toast.LENGTH_SHORT).show()
-                                    // Refresh UI state
-                                    loadCharacters()
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    layoutJoinRequest.visibility = View.GONE
-                    // Show Interaction Buttons for Members
-                    fabMenu?.visibility = View.VISIBLE
-                    btnLogs?.visibility = View.VISIBLE
-                }
+            // Hide Transfer Option initially (will be shown if menu opens + isMaster)
+            val layoutFabTransferOwnership = view?.findViewById<View>(R.id.layout_fab_transfer_ownership)
+            layoutFabTransferOwnership?.visibility = View.GONE
+            view?.findViewById<View>(R.id.layout_fab_clear_history)?.visibility = View.GONE
+            
+            if (!isMember && table != null) {
+                // Visitor - Hide Interaction Buttons
+                fabMenu?.visibility = View.GONE
+                btnLogs?.visibility = View.GONE
+            } else {
+                // Member - Show Interaction Buttons
+                fabMenu?.visibility = View.VISIBLE
+                btnLogs?.visibility = View.VISIBLE
+            }
                 
                 val allCharacters = CharacterRepository.getCharacters(tableId)
                 android.util.Log.d("CharacterListDebug", "Fetched ${allCharacters.size} characters. CurrentUser=$currentUserId, isMaster=$isMaster")
@@ -360,7 +318,9 @@ class CharacterListFragment : Fragment() {
 
     private fun openCharacterSheet(characterId: String?) {
         val fragment = CharacterSheetFragment.newInstance(characterId, tableId)
-        parentFragmentManager.beginTransaction()
+        // Use requireActivity().supportFragmentManager to ensure we replace the whole screen content (R.id.fragment_container)
+        // This is necessary because this fragment might be nested in a Drawer (ChildFragment)
+        requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .addToBackStack(null)
             .commit()

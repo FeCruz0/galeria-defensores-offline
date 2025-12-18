@@ -62,7 +62,7 @@ class TableListFragment : Fragment() {
 
                             if (!table.isPrivate || isMaster || isPlayer) {
                                 // Access Granted
-                                val fragment = CharacterListFragment.newInstance(table.id)
+                                val fragment = TableContainerFragment.newInstance(table.id)
                                 parentFragmentManager.beginTransaction()
                                     .replace(R.id.fragment_container, fragment)
                                     .addToBackStack(null)
@@ -85,7 +85,7 @@ class TableListFragment : Fragment() {
                                                 if (currentUser != null) {
                                                     TableRepository.addPlayerToTable(table.id, currentUser.id)
                                                     
-                                                    val fragment = CharacterListFragment.newInstance(table.id)
+                                                    val fragment = TableContainerFragment.newInstance(table.id)
                                                     parentFragmentManager.beginTransaction()
                                                         .replace(R.id.fragment_container, fragment)
                                                         .addToBackStack(null)
