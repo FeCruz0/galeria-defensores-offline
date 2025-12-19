@@ -5,9 +5,10 @@ import java.util.UUID
 data class Character(
     val id: String = UUID.randomUUID().toString(),
     var name: String = "Defensor", // nome_personagem
-    var tableId: String = "", // mesa_id
     var ownerId: String = "", // proprietario_id
     var ownerName: String = "", // nome_do_proprietario
+    var tableId: String = "", // id_da_mesa
+    var imageUrl: String = "", // avatar_url
     
     // Attributes
     var forca: Int = 0,

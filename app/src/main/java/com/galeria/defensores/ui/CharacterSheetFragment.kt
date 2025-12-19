@@ -24,11 +24,64 @@ import com.galeria.defensores.R
 import com.galeria.defensores.models.RollType
 import com.galeria.defensores.models.Spell
 import com.galeria.defensores.viewmodels.CharacterViewModel
+import androidx.activity.result.contract.ActivityResultContracts
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import kotlinx.coroutines.launch
 
 class CharacterSheetFragment : Fragment() {
 
     private lateinit var viewModel: CharacterViewModel
+    private val cropImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val resultUri = com.yalantis.ucrop.UCrop.getOutput(result.data!!)
+            resultUri?.let { uri ->
+                val context = requireContext()
+                Toast.makeText(context, "Processando imagem...", Toast.LENGTH_SHORT).show()
+                viewModel.uploadCharacterAvatar(context, uri, 
+                    onSuccess = {
+                        Toast.makeText(context, "Avatar atualizado!", Toast.LENGTH_SHORT).show()
+                        // Clean up temp file
+                        try {
+                            // Deleting file via content resolver or file path if possible, 
+                            // but uCrop output is usually file:// so standard File delete works.
+                            // We can rely on cache clearing or delete explicitly.
+                            // file cleanup is optional for cache files but good practice.
+                        } catch (e: Exception) {}
+                    },
+                    onError = { error ->
+                        Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+        } else if (result.resultCode == com.yalantis.ucrop.UCrop.RESULT_ERROR) {
+            val cropError = com.yalantis.ucrop.UCrop.getError(result.data!!)
+            Toast.makeText(requireContext(), "Erro ao cortar: ${cropError?.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: android.net.Uri? ->
+        uri?.let {
+            startCrop(it)
+        }
+    }
+
+    private fun startCrop(uri: android.net.Uri) {
+        val destinationFileName = "cropped_avatar_${System.currentTimeMillis()}.jpg"
+        val destinationUri = android.net.Uri.fromFile(java.io.File(requireContext().cacheDir, destinationFileName))
+        
+        val uCrop = com.yalantis.ucrop.UCrop.of(uri, destinationUri)
+        uCrop.withAspectRatio(1f, 1f)
+        uCrop.withMaxResultSize(500, 500) // Slightly larger than our final 300px to allow good downscaling
+        
+        val options = com.yalantis.ucrop.UCrop.Options()
+        options.setCircleDimmedLayer(true) // Helper for circle avatars
+        options.setShowCropGrid(false)
+        options.setCompressionQuality(90) // High quality for the crop step, we compress in ViewModel
+        uCrop.withOptions(options)
+        
+        cropImage.launch(uCrop.getIntent(requireContext()))
+    }
     private lateinit var chatViewModel: com.galeria.defensores.viewmodels.ChatViewModel
     private var characterId: String? = null
     private var tableId: String? = null
@@ -82,6 +135,10 @@ class CharacterSheetFragment : Fragment() {
         rollNameText = view.findViewById(R.id.text_roll_name)
         
         val hiddenCheck = view.findViewById<android.widget.CheckBox>(R.id.check_hidden)
+        
+        val avatarImage = view.findViewById<ImageView>(R.id.img_character_avatar)
+        val editAvatarIcon = view.findViewById<ImageView>(R.id.img_edit_avatar_icon)
+
         val btnBack = view.findViewById<android.widget.ImageButton>(R.id.btn_reset)
 
         btnBack.setOnClickListener {
@@ -164,6 +221,29 @@ class CharacterSheetFragment : Fragment() {
                 view.findViewById<Button>(R.id.btn_add_specialization).visibility = if (canEdit) View.VISIBLE else View.GONE
                 view.findViewById<Button>(R.id.btn_add_inventory).visibility = if (canEdit) View.VISIBLE else View.GONE
                 view.findViewById<Button>(R.id.btn_add_spell).visibility = if (canEdit) View.VISIBLE else View.GONE
+                
+                // Avatar Logic
+                if (char.imageUrl.isNotEmpty()) {
+                    Glide.with(this@CharacterSheetFragment)
+                        .load(char.imageUrl)
+                        .apply(RequestOptions.circleCropTransform())
+                        .placeholder(android.R.drawable.sym_def_app_icon) // Fallback
+                        .into(avatarImage)
+                } else {
+                     // Reset to default if empty (handling updates)
+                     avatarImage.setImageResource(android.R.drawable.sym_def_app_icon)
+                     avatarImage.setBackgroundResource(R.drawable.bg_circle_button)
+                }
+
+                if (canEdit) {
+                    editAvatarIcon.visibility = View.VISIBLE
+                    avatarImage.setOnClickListener { pickImage.launch("image/*") }
+                    editAvatarIcon.setOnClickListener { pickImage.launch("image/*") }
+                } else {
+                    editAvatarIcon.visibility = View.GONE
+                    avatarImage.setOnClickListener(null)
+                    editAvatarIcon.setOnClickListener(null)
+                }
                 
                 // Damage Types UI
                 val spinnerForca = view.findViewById<android.widget.Spinner>(R.id.spinner_damage_forca)
@@ -528,13 +608,17 @@ class CharacterSheetFragment : Fragment() {
                 } else {
                     rollTotalText.setTextColor(Color.WHITE)
                 }
-                
+            } else {
+                rollResultCard.visibility = View.GONE
+            }
+        }
+
+        viewModel.rollEvent.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { result ->
                 // Send to Chat if in a table
                 if (tableId != null) {
                      chatViewModel.sendRollResult(result)
                 }
-            } else {
-                rollResultCard.visibility = View.GONE
             }
         }
 

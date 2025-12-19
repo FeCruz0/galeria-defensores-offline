@@ -26,6 +26,9 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
     private val _lastRoll = MutableLiveData<RollResult>()
     val lastRoll: LiveData<RollResult> = _lastRoll
 
+    private val _rollEvent = MutableLiveData<com.galeria.defensores.utils.Event<RollResult>>()
+    val rollEvent: LiveData<com.galeria.defensores.utils.Event<RollResult>> = _rollEvent
+
     // Settings
     var isAnimationEnabled = true
 
@@ -306,6 +309,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                 characterId = char.id
             )
             _lastRoll.value = result
+            _rollEvent.value = com.galeria.defensores.utils.Event(result)
             _isRolling.value = false
 
             // Save to Table History
@@ -612,5 +616,49 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                  }
             }
         }
+    }
+
+    // --- Avatar Logic ---
+    fun uploadCharacterAvatar(context: Context, uri: android.net.Uri, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        val charId = _character.value?.id ?: return
+        android.util.Log.d("AvatarUpdate", "Starting Base64 update for charId: $charId")
+        
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                // 1. Compress Image (Max 300px, 70% Quality)
+                val compressedBytes = com.galeria.defensores.utils.ImageUtils.compressImage(context, uri)
+                
+                if (compressedBytes != null) {
+                    // 2. Encode to Base64
+                    val base64String = android.util.Base64.encodeToString(compressedBytes, android.util.Base64.DEFAULT)
+                    // Prefix for Glide/Web usage
+                    val dataUri = "data:image/jpeg;base64,$base64String"
+                    
+                    android.util.Log.d("AvatarUpdate", "Image encoded. Length: ${dataUri.length} chars")
+
+                    // 3. Update Character Object Directly
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        updateAvatarUrl(dataUri)
+                        onSuccess()
+                    }
+                } else {
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        onError("Falha ao processar imagem (compressão falhou).")
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("AvatarUpdate", "Error during avatar Base64 conversion", e)
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    onError("Erro ao salvar imagem: ${e.message}")
+                }
+            }
+        }
+    }
+
+    private fun updateAvatarUrl(url: String) {
+        val currentChar = _character.value ?: return
+        currentChar.imageUrl = url
+        _character.postValue(currentChar) // Update UI immediately
+        saveCharacter() // Save big string to Firestore
     }
 }
