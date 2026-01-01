@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_rounded_border"
+    android:backgroundTint="#F3F4F6"
+    android:padding="8dp"
+    android:layout_marginBottom="4dp">
+
+    <TextView
+        android:id="@+id/text_reply_sender_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimary"
+        android:textSize="11sp"
+        tools:text="Respondendo a Fulano" />
+
+    <TextView
+        android:id="@+id/text_reply_preview_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#4B5563"
+        android:textSize="12sp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        tools:text="Prévia da mensagem original..." />
+</LinearLayout>

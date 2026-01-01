@@ -16,6 +16,14 @@
         android:textSize="12sp"
         tools:text="Nome do Personagem" />
 
+    <include
+        android:id="@+id/layout_reply_preview"
+        layout="@layout/layout_reply_preview"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp" />
+
     <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -26,45 +34,71 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="8dp"
-            android:minWidth="150dp">
+            android:orientation="horizontal"
+            android:padding="8dp">
 
-            <TextView
-                android:id="@+id/text_roll_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ATAQUE (F)"
-                android:textColor="#9CA3AF"
-                android:textSize="10sp"
-                android:textStyle="bold" />
+            <ImageView
+                android:id="@+id/image_message_avatar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:visibility="gone"
+                android:scaleType="centerCrop"
+                android:layout_marginEnd="8dp"
+                tools:src="@tools:sample/avatars"
+                tools:visibility="visible"/>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="4dp">
+                android:orientation="vertical"
+                android:minWidth="100dp">
 
                 <TextView
-                    android:id="@+id/text_roll_total"
+                    android:id="@+id/text_roll_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="15"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:textColor="#FFFFFF" />
+                    android:text="ATAQUE (F)"
+                    android:textColor="#9CA3AF"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/text_roll_detail"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="F(3) + H(2) + 1d6(5)"
-                    android:textColor="#D1D5DB"
-                    android:textSize="12sp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="4dp">
+
+                    <TextView
+                        android:id="@+id/text_roll_total"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="15"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF" />
+
+                    <TextView
+                        android:id="@+id/text_roll_detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="F(3) + H(2) + 1d6(5)"
+                        android:textColor="#D1D5DB"
+                        android:textSize="12sp" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/text_message_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#9CA3AF"
+        android:textSize="10sp"
+        android:layout_gravity="end"
+        android:layout_marginTop="2dp"
+        tools:text="14:30" />
 
 </LinearLayout>

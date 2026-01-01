@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check auth
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Users: Each user can read/write their own document
+    // For MVP/Dev, we might allow authenticated read of others (e.g. to see names)
+    match /users/{userId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Characters: Authenticated users can read/write characters
+    // Ideally: allow read if table member, write if owner. 
+    // For Dev: allow all authenticated.
+    match /characters/{characterId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Tables: Authenticated users can read/write tables
+    match /tables/{tableId} {
+      allow read, write: if isAuthenticated();
+
+      // Messages subcollection
+      match /messages/{messageId} {
+        allow read, write: if isAuthenticated();
+      }
+      
+      // Typing Status subcollection
+      match /typing_status/{userId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+
+    // Notifications: Authenticated users can read/write notifications
+    match /notifications/{notificationId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Catch-all (Optional, safe to remove if strict rules above work)
+    // match /{document=**} {
+    //   allow read, write: if request.auth != null;
+    // }
+  }
+}

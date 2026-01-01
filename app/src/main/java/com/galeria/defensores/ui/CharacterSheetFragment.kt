@@ -617,7 +617,8 @@ class CharacterSheetFragment : Fragment() {
             event.getContentIfNotHandled()?.let { result ->
                 // Send to Chat if in a table
                 if (tableId != null) {
-                     chatViewModel.sendRollResult(result)
+                     val avatarUrl = viewModel.character.value?.imageUrl
+                     chatViewModel.sendRollResult(result, avatarUrl)
                 }
             }
         }

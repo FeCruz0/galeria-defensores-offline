@@ -12,7 +12,7 @@ object ImageUtils {
     private const val MAX_DIMENSION = 300 // Max width/height in pixels
     private const val COMPRESSION_QUALITY = 70 // 0-100
 
-    fun compressImage(context: Context, imageUri: Uri): ByteArray? {
+    fun compressImage(context: Context, imageUri: Uri, maxDimension: Int = 300): ByteArray? {
         var inputStream: InputStream? = null
         try {
             inputStream = context.contentResolver.openInputStream(imageUri)
@@ -25,17 +25,17 @@ object ImageUtils {
             val newHeight: Int
 
             if (width > height) {
-                if (width > MAX_DIMENSION) {
-                    newWidth = MAX_DIMENSION
-                    newHeight = (height * (MAX_DIMENSION.toFloat() / width)).toInt()
+                if (width > maxDimension) {
+                    newWidth = maxDimension
+                    newHeight = (height * (maxDimension.toFloat() / width)).toInt()
                 } else {
                     newWidth = width
                     newHeight = height
                 }
             } else {
-                if (height > MAX_DIMENSION) {
-                    newHeight = MAX_DIMENSION
-                    newWidth = (width * (MAX_DIMENSION.toFloat() / height)).toInt()
+                if (height > maxDimension) {
+                    newHeight = maxDimension
+                    newWidth = (width * (maxDimension.toFloat() / height)).toInt()
                 } else {
                     newWidth = width
                     newHeight = height

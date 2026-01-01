@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="#B0BEC5" android:state_enabled="false"/> <!-- Blue Gray 200 for disabled -->
+    <item android:color="#607D8B"/> <!-- Blue Gray 500 for normal -->
+</selector>

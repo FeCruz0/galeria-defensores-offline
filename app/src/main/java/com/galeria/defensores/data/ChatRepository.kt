@@ -47,4 +47,136 @@ class ChatRepository @Inject constructor() {
             .add(message)
             .await()
     }
+
+    suspend fun getOlderMessages(tableId: String, beforeTimestamp: Long, limit: Int = 20): List<ChatMessage> {
+        val snapshot = db.collection("tables")
+            .document(tableId)
+            .collection("messages")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .whereLessThan("timestamp", beforeTimestamp)
+            .limit(limit.toLong())
+            .get()
+            .await()
+
+        // Result needs to be reversed because we query DESCENDING to get immediate previous ones, 
+        // but our list usually expects ASCENDING order or we handle it in VM.
+        // Let's return them as is and handle in VM.
+        return snapshot.documents.mapNotNull { doc ->
+            doc.toObject(ChatMessage::class.java)?.copy(id = doc.id)
+        }
+    }
+
+    suspend fun editMessage(tableId: String, messageId: String, newContent: String) {
+        db.collection("tables")
+            .document(tableId)
+            .collection("messages")
+            .document(messageId)
+            .update(mapOf(
+                "content" to newContent,
+                "isEdited" to true
+            ))
+            .await()
+    }
+
+    suspend fun deleteMessage(tableId: String, messageId: String) {
+        db.collection("tables")
+            .document(tableId)
+            .collection("messages")
+            .document(messageId)
+            .delete()
+            .await()
+    }
+    suspend fun setTypingStatus(tableId: String, userId: String, userName: String, isTyping: Boolean) {
+        val docRef = db.collection("tables")
+            .document(tableId)
+            .collection("typing_status")
+            .document(userId)
+
+        if (isTyping) {
+            val data = mapOf(
+                "timestamp" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
+                "userName" to userName
+            )
+            docRef.set(data).await()
+        } else {
+            docRef.delete().await()
+        }
+    }
+
+    fun getTypingUsersFlow(tableId: String): Flow<Map<String, String>> = callbackFlow {
+        val listener = db.collection("tables")
+            .document(tableId)
+            .collection("typing_status")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    val now = System.currentTimeMillis()
+                    val typingMap = mutableMapOf<String, String>()
+                    
+                    snapshot.documents.forEach { doc ->
+                        val timestamp = doc.getTimestamp("timestamp")?.toDate()?.time ?: 0L
+                        val name = doc.getString("userName")
+                        val userId = doc.id
+                        
+                        // Client-side filter: only show if updated in last 10 seconds
+                        if (name != null && (now - timestamp < 10000)) {
+                           typingMap[userId] = name
+                        }
+                    }
+                    trySend(typingMap)
+                }
+            }
+        awaitClose { listener.remove() }
+    }
+    suspend fun cleanupMessages(tableId: String) {
+        val messagesRef = db.collection("tables").document(tableId).collection("messages")
+        
+        try {
+            // 1. Time-based cleanup (older than 60 days)
+            val sixtyDaysAgo = System.currentTimeMillis() - (60L * 24 * 60 * 60 * 1000)
+            val oldMessages = messagesRef
+                .whereLessThan("timestamp", sixtyDaysAgo)
+                .get()
+                .await()
+
+            if (!oldMessages.isEmpty) {
+                val batch = db.batch()
+                for (doc in oldMessages) {
+                    batch.delete(doc.reference)
+                }
+                batch.commit().await()
+            }
+
+            // 2. Count-based cleanup (Keep max 500)
+            val countQuery = messagesRef.count()
+            val aggregateSnapshot = countQuery.get(com.google.firebase.firestore.AggregateSource.SERVER).await()
+            val count = aggregateSnapshot.count
+            
+            val maxMessages = 500
+            if (count > maxMessages) {
+                val toDelete = count - maxMessages
+                // Get the oldest 'toDelete' messages
+                val oldestMessages = messagesRef
+                    .orderBy("timestamp", Query.Direction.ASCENDING)
+                    .limit(toDelete)
+                    .get()
+                    .await()
+                
+                if (!oldestMessages.isEmpty) {
+                    val batch = db.batch()
+                    for (doc in oldestMessages) {
+                        batch.delete(doc.reference)
+                    }
+                    batch.commit().await()
+                }
+            }
+        } catch (e: Exception) {
+            // Log error silently or separate logging mechanism
+            e.printStackTrace()
+        }
+    }
 }
