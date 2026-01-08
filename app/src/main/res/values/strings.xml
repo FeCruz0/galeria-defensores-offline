@@ -1,12 +1,21 @@
 <resources>
     <string name="app_name">Galeria de Defensores</string>
-    <string name="welcome_message">Bem-vindo à Galeria de Defensores!</string>
-    <string name="character_list_title">Lista de Defensores</string>
-    <string name="character_detail_title">Detalhes do Defensor</string>
-    <string name="add_character">Adicionar Defensor</string>
-    <string name="edit_character">Editar Defensor</string>
-    <string name="delete_character">Deletar Defensor</string>
-    <string name="confirm_delete">Tem certeza que deseja deletar esse defensor?</string>
-    <string name="yes">Sim</string>
-    <string name="no">Não</string>
+    <string-array name="dice_faces_array">
+        <item>4</item>
+        <item>6</item>
+        <item>8</item>
+        <item>10</item>
+        <item>12</item>
+        <item>20</item>
+        <item>100</item>
+    </string-array>
+    <string name="character_list_title">Meus Personagens</string>
+    <string-array name="charsheet_attributes_array">
+        <item>Nenhum</item>
+        <item>Força</item>
+        <item>Habilidade</item>
+        <item>Resistência</item>
+        <item>Armadura</item>
+        <item>Poder de Fogo</item>
+    </string-array>
 </resources>

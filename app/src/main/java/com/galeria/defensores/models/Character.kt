@@ -40,7 +40,10 @@ data class Character(
     val anotacoesRich: String = "", // Para futuro suporte a rich text se precisar persistir html/markdown
     
     var anotacoes: String = "",
-    var isHidden: Boolean = false
+    var isHidden: Boolean = false,
+    
+    // Custom Rolls
+    var customRolls: MutableList<CustomRoll> = mutableListOf()
 ) {
     fun getMaxPv(): Int = (resistencia * 5).coerceAtLeast(1)
     fun getMaxPm(): Int = (resistencia * 5).coerceAtLeast(1)
@@ -77,4 +80,26 @@ data class Spell(
     var range: String = "",
     var duration: String = "",
     var description: String = ""
+)
+
+data class CustomRoll(
+    val id: String = UUID.randomUUID().toString(),
+    var name: String = "Nova Rolagem",
+    var description: String = "",
+    var components: MutableList<RollComponent> = mutableListOf(RollComponent()),
+    var globalModifier: Int = 0,
+    var primaryAttribute: String = "none",
+    var secondaryAttribute: String = "none",
+    var accumulateCrit: Boolean = false // false: Single Crit (x2), true: +1 Mult per Crit
+)
+
+data class RollComponent(
+    val id: String = UUID.randomUUID().toString(),
+    var count: Int = 1,
+    var faces: Int = 6,
+    var bonus: Int = 0,
+    var isNegative: Boolean = false,
+    var canCrit: Boolean = true,
+    var critRangeStart: Int? = null, // null means ONLY max value
+    var critMultiplier: Int = 2
 )

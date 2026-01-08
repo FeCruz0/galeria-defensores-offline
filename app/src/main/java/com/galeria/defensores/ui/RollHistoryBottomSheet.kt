@@ -165,7 +165,11 @@ class RollHistoryBottomSheet(private val tableId: String) : BottomSheetDialogFra
 
                 val critText = if (roll.isCritical) " (CRÍTICO!)" else ""
                 val bonusText = if (roll.bonus > 0) " + ${roll.bonus}" else ""
-                descText.text = "H(${roll.skillValue}) + ${roll.attributeUsed}(${roll.attributeValue}${if(roll.isCritical) "x2" else ""}) + 1d6(${roll.die})$bonusText$critText"
+                if (roll.die == 0 && roll.attributeValue == 0) {
+                     descText.text = roll.attributeUsed
+                } else {
+                     descText.text = "H(${roll.skillValue}) + ${roll.attributeUsed}(${roll.attributeValue}${if(roll.isCritical) "x2" else ""}) + 1d6(${roll.die})$bonusText$critText"
+                }
                 
                 resultText.text = roll.total.toString()
                 

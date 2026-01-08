@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Configurar Rolagem"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nome da Rolagem"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_roll_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapSentences" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="Descrição (Opcional)"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_roll_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapSentences" />
+        </com.google.android.material.textfield.TextInputLayout>
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DADOS E MODIFICADORES"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:textColor="@color/colorAccent"
+            android:letterSpacing="0.1"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_roll_components"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:nestedScrollingEnabled="false"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_add_component"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Adicionar Dado"
+            android:layout_marginTop="8dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:icon="@android:drawable/ic_input_add"
+            app:iconGravity="textStart"/>
+            
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Modificador Extra (Global)"
+            helperText="Valor fixo somado ao final de tudo (ex: +2, -5)"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_global_modifier"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:text="0"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="REGRAS E ATRIBUTOS"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:textColor="@color/colorAccent"
+            android:letterSpacing="0.1"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Atributo Principal"
+            android:textColor="#AAAAAA"
+            android:layout_marginTop="12dp"
+            android:textSize="12sp"/>
+            
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Este atributo será somado ao total e DOBRADO se houver crítico."
+            android:textColor="#666666"
+            android:textSize="10sp"
+            android:layout_marginBottom="4dp"/>
+
+        <Spinner
+            android:id="@+id/spinner_primary_attr"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:entries="@array/charsheet_attributes_array" 
+            android:background="@drawable/bg_rounded_border"
+            android:paddingStart="8dp"/>
+
+         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Atributo Secundário"
+            android:textColor="#AAAAAA"
+            android:layout_marginTop="12dp"
+            android:textSize="12sp"/>
+            
+         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Este atributo será apenas somado ao total (não dobra no crítico)."
+            android:textColor="#666666"
+            android:textSize="10sp"
+            android:layout_marginBottom="4dp"/>
+
+        <Spinner
+            android:id="@+id/spinner_secondary_attr"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:entries="@array/charsheet_attributes_array"
+            android:background="@drawable/bg_rounded_border"
+            android:paddingStart="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical">
+            
+            <CheckBox
+                android:id="@+id/check_accumulate_crit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Acumular Críticos?"
+                android:textColor="@color/white"/>
+        </LinearLayout>
+            
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Se marcado: Cada dado que obtiver um crítico aumentará o multiplicador (x2, x3, x4...).\nSe desmarcado: Qualquer quantidade de dados críticos apenas ativará o multiplicador padrão (x2)."
+            android:textSize="12sp"
+            android:textColor="#888888"
+            android:layout_marginStart="32dp"
+            android:layout_marginBottom="16dp"/>
+            
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_delete_roll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Excluir Rolagem"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:textColor="#EF4444"
+            android:layout_marginTop="24dp"/>
+
+    </LinearLayout>
+</ScrollView>

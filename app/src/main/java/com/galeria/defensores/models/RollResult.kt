@@ -19,5 +19,6 @@ enum class RollType(val displayName: String) {
     ATTACK_PDF("Poder de Fogo"),
     DEFENSE("Armadura"),
     SPECIAL_F("Especial (F)"),
-    SPECIAL_PDF("Especial (PdF)")
+    SPECIAL_PDF("Especial (PdF)"),
+    INITIATIVE("Iniciativa")
 }

@@ -254,8 +254,13 @@ class ChatAdapter(
             if (roll != null) {
                 titleText.text = "ROLOGEM: ${roll.name}"
                 totalText.text = roll.total.toString()
-                val detail = if (roll.bonus != 0) "${roll.attributeUsed}(${roll.attributeValue}) + ${roll.die} + ${roll.bonus}" else "${roll.attributeUsed}(${roll.attributeValue}) + ${roll.die}"
-                detailText.text = detail
+                // For custom rolls (die=0), attributeUsed contains the full breakdown.
+                // For standard rolls, we construct the string.
+                val detail = if (roll.die == 0 && roll.attributeValue == 0) {
+                     roll.attributeUsed
+                } else {
+                     if (roll.bonus != 0) "${roll.attributeUsed}(${roll.attributeValue}) + ${roll.die} + ${roll.bonus}" else "${roll.attributeUsed}(${roll.attributeValue}) + ${roll.die}"
+                }
                 detailText.text = detail
             } else { titleText.text = "ROLOGEM INVÁLIDA" }
             

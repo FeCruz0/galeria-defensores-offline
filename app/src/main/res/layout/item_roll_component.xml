@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardBackgroundColor="#1F2937"
+    app:cardCornerRadius="8dp"
+    android:layout_marginBottom="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <EditText
+                android:id="@+id/edit_dice_count"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="1"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/white"
+                android:gravity="center"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="d"
+                android:textColor="@color/white"
+                android:textSize="18sp"/>
+
+            <Spinner
+                android:id="@+id/spinner_dice_faces"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:entries="@array/dice_faces_array"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark"
+                android:backgroundTint="@color/white"
+                android:minWidth="80dp"/>
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+"
+                android:textColor="@color/white"
+                android:layout_marginStart="4dp"/>
+
+            <EditText
+                android:id="@+id/edit_dice_bonus"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:text="0"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/white"
+                android:gravity="center"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+            <ImageButton
+                android:id="@+id/btn_remove_component"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="#EF4444"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            
+            <CheckBox
+                android:id="@+id/check_negative"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Negativo (Subtrair)"
+                android:textColor="@color/white"/>
+            
+             <CheckBox
+                android:id="@+id/check_can_crit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pode Critar"
+                android:checked="true"
+                android:textColor="@color/white"/>
+
+        </LinearLayout>
+        
+        <LinearLayout
+            android:id="@+id/layout_crit_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Critico: "
+                android:textColor="@color/white"/>
+            
+             <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=">= "
+                android:textColor="@color/white"/>
+
+            <EditText
+                android:id="@+id/edit_crit_range"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:hint="Valor"
+                android:textColor="@color/white"
+                android:textColorHint="#AAAAAA"
+                android:backgroundTint="@color/white"
+                android:gravity="center"/>
+            
+             <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mult: x"
+                android:textColor="@color/white"
+                android:layout_marginStart="8dp"/>
+
+            <EditText
+                android:id="@+id/edit_crit_mult"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="2"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/white"
+                android:gravity="center"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

@@ -262,6 +262,15 @@ class ChatFragment : Fragment() {
             pickImageLauncher.launch("image/*")
         }
 
+        view.findViewById<ImageButton>(R.id.btn_quick_roll).setOnClickListener {
+             tableId?.let { tid ->
+                 val bottomSheet = QuickRollBottomSheet(tid) { result, avatarUrl ->
+                     viewModel.sendRollResult(result, avatarUrl)
+                 }
+                 bottomSheet.show(parentFragmentManager, "QuickRoll")
+             } ?: android.widget.Toast.makeText(context, "Mesa não identificada", android.widget.Toast.LENGTH_SHORT).show()
+        }
+
         val textTypingIndicator = view.findViewById<android.widget.TextView>(R.id.text_typing_indicator)
 
         viewModel.typingStatusText.observe(viewLifecycleOwner) { text ->

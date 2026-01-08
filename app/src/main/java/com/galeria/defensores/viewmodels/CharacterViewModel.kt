@@ -262,6 +262,10 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                     attrVal = char.armadura
                     displayAttr = "Armadura"
                 }
+                RollType.INITIATIVE -> {
+                    attrVal = 0
+                    displayAttr = "Iniciativa"
+                }
             }
 
             val prefs = getApplication<Application>().getSharedPreferences("app_settings", Context.MODE_PRIVATE)
@@ -618,7 +622,164 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    // --- Avatar Logic ---
+    // --- Custom Rolls Logic ---
+    fun addCustomRoll(roll: com.galeria.defensores.models.CustomRoll) {
+        val currentChar = _character.value ?: return
+        val newRolls = currentChar.customRolls.toMutableList()
+        newRolls.add(roll)
+        currentChar.customRolls = newRolls
+        _character.value = currentChar
+        saveCharacter()
+    }
+
+    fun updateCustomRoll(roll: com.galeria.defensores.models.CustomRoll) {
+        val currentChar = _character.value ?: return
+        val newRolls = currentChar.customRolls.toMutableList()
+        val index = newRolls.indexOfFirst { it.id == roll.id }
+        if (index != -1) {
+            newRolls[index] = roll
+            currentChar.customRolls = newRolls
+            _character.value = currentChar
+            saveCharacter()
+        }
+    }
+
+    fun removeCustomRoll(roll: com.galeria.defensores.models.CustomRoll) {
+        val currentChar = _character.value ?: return
+        val newRolls = currentChar.customRolls.toMutableList()
+        newRolls.removeAll { it.id == roll.id }
+        currentChar.customRolls = newRolls
+        _character.value = currentChar
+        saveCharacter()
+    }
+
+    fun rollCustom(roll: com.galeria.defensores.models.CustomRoll) {
+        val char = _character.value ?: return
+        viewModelScope.launch {
+            _isRolling.value = true
+            
+            // Animation logic (optional re-use or simplified)
+            val prefs = getApplication<Application>().getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+            val animationEnabled = prefs.getBoolean("animation_enabled", true)
+            
+            if (animationEnabled) {
+                 delay(1500)
+            }
+
+            var totalSum = 0
+
+            val parts = mutableListOf<String>()
+            var isCriticalSummary = false
+            var totalCrits = 0
+            
+            // 1. Process Dice Components
+            roll.components.forEach { comp ->
+                var compTotal = 0
+                val rolls = mutableListOf<Int>()
+                
+                repeat(comp.count) {
+                    val die = Random.nextInt(comp.faces) + 1
+                    
+                    val isCrit = comp.canCrit && (
+                        (comp.critRangeStart != null && die >= comp.critRangeStart!!) || 
+                        (comp.critRangeStart == null && die == comp.faces)
+                    )
+                    
+                    if (isCrit) {
+                        totalCrits++
+                        isCriticalSummary = true
+                    }
+                    
+                    rolls.add(die)
+                    compTotal += die
+                }
+                
+                val finalCompTotal = if (comp.isNegative) -compTotal else compTotal
+                totalSum += finalCompTotal + comp.bonus
+                
+                // Format: "2d6[3,5]+2" or "-1d6[4]"
+                val signPrefix = if (comp.isNegative) "- " else (if (parts.isNotEmpty()) "+ " else "")
+                val diceStr = "${comp.count}d${comp.faces}[${rolls.joinToString(",")}]"
+                val bonusStr = if (comp.bonus != 0) {
+                     if (comp.bonus > 0) "+${comp.bonus}" else "${comp.bonus}"
+                } else ""
+                
+                parts.add("$signPrefix$diceStr$bonusStr")
+            }
+
+            // 2. Resolve Attributes & Crits
+            fun getAttrValue(attrName: String): Int {
+                return when(attrName) {
+                    "forca" -> char.forca
+                    "habilidade" -> char.habilidade
+                    "resistencia" -> char.resistencia
+                    "armadura" -> char.armadura
+                    "poderFogo" -> char.poderFogo
+                    else -> 0
+                }
+            }
+            
+            val primaryVal = getAttrValue(roll.primaryAttribute)
+            val secondaryVal = getAttrValue(roll.secondaryAttribute)
+            
+            // Calculate Multiplier
+            var critMultiplier = 1
+            if (isCriticalSummary) {
+                 critMultiplier = if (roll.accumulateCrit) 1 + totalCrits else 2
+            }
+            
+            val finalPrimary = primaryVal * critMultiplier
+            totalSum += finalPrimary + secondaryVal + roll.globalModifier
+
+            // 3. Append Attributes formatted
+            if (roll.primaryAttribute != "none" && primaryVal != 0) {
+                // Formatting: + For(3x2 Crit)
+                val pName = roll.primaryAttribute.take(3).replaceFirstChar { it.uppercase() }
+                val critInfo = if (critMultiplier > 1) " x$critMultiplier Crit" else ""
+                val prefix = if (parts.isNotEmpty()) "+ " else ""
+                parts.add("$prefix$pName($primaryVal$critInfo)")
+            }
+            
+            if (roll.secondaryAttribute != "none" && secondaryVal != 0) {
+                val sName = roll.secondaryAttribute.take(3).replaceFirstChar { it.uppercase() }
+                val prefix = if (parts.isNotEmpty()) "+ " else ""
+                parts.add("$prefix$sName($secondaryVal)")
+            }
+            
+            // 4. Global Modifier
+            if (roll.globalModifier != 0) {
+                 val prefix = if (roll.globalModifier > 0) (if (parts.isNotEmpty()) "+ " else "") else "- "
+                 parts.add("$prefix${kotlin.math.abs(roll.globalModifier)}")
+            }
+            
+            // 5. Build Final String
+            val finalString = parts.joinToString(" ").replace("  ", " ").trim()
+
+            val result = RollResult(
+                total = totalSum,
+                die = 0, // Not single die
+                attributeUsed = "Custom",
+                attributeValue = 0,
+                skillValue = 0,
+                bonus = roll.globalModifier,
+                isCritical = isCriticalSummary,
+                timestamp = System.currentTimeMillis(),
+                name = "${char.name} - ${roll.name}",
+                isHidden = char.isHidden,
+                characterId = char.id
+            )
+
+            val resultWithBreakdown = result.copy(attributeUsed = finalString)
+
+            _lastRoll.value = resultWithBreakdown
+            _rollEvent.value = com.galeria.defensores.utils.Event(resultWithBreakdown)
+            _isRolling.value = false
+            
+             if (char.tableId.isNotEmpty()) {
+                com.galeria.defensores.data.TableRepository.addRollToHistory(char.tableId, resultWithBreakdown)
+            }
+        }
+    }
     fun uploadCharacterAvatar(context: Context, uri: android.net.Uri, onSuccess: () -> Unit, onError: (String) -> Unit) {
         val charId = _character.value?.id ?: return
         android.util.Log.d("AvatarUpdate", "Starting Base64 update for charId: $charId")

@@ -601,7 +601,12 @@ class CharacterSheetFragment : Fragment() {
                 val critText = if (result.isCritical) " (CRÍTICO!)" else ""
                 val bonusText = if (result.bonus > 0) " + ${result.bonus}" else ""
                 
-                rollDetailText.text = "H(${result.skillValue}) + ${result.attributeUsed}(${result.attributeValue}${if(result.isCritical) "x2" else ""}) + 1d6(${result.die})$bonusText$critText"
+                if (result.die == 0 && result.attributeValue == 0) {
+                     // Custom Roll: String is already formatted in attributeUsed
+                     rollDetailText.text = result.attributeUsed
+                } else {
+                     rollDetailText.text = "H(${result.skillValue}) + ${result.attributeUsed}(${result.attributeValue}${if(result.isCritical) "x2" else ""}) + 1d6(${result.die})$bonusText$critText"
+                }
                 
                 if (result.isCritical) {
                     rollTotalText.setTextColor(Color.parseColor("#D97706")) // Yellow/Gold
@@ -700,6 +705,9 @@ class CharacterSheetFragment : Fragment() {
         view.findViewById<Button>(R.id.btn_defense).setOnClickListener {
             checkPermissionAndRoll(RollType.DEFENSE)
         }
+        view.findViewById<Button>(R.id.btn_initiative).setOnClickListener {
+            checkPermissionAndRoll(RollType.INITIATIVE)
+        }
         // Delete Button
         val btnDelete = view.findViewById<Button>(R.id.btn_delete_character)
         btnDelete.setOnClickListener {
@@ -728,6 +736,82 @@ class CharacterSheetFragment : Fragment() {
         // We do this in the observer, but let's set it GONE initially to avoid flicker
         btnDelete.visibility = View.GONE
 
+        // Custom Rolls Setup
+        val customRollsRecycler = view.findViewById<RecyclerView>(R.id.recycler_custom_rolls)
+        val btnAddCustomRoll = view.findViewById<Button>(R.id.btn_add_custom_roll)
+        
+        // Use Flexbox or GridLayout? For now LinearLayout vertical or horizontal?
+        // Layout manager was not set in XML. Let's use GridLayoutManager for buttons grid
+        customRollsRecycler.layoutManager = androidx.recyclerview.widget.GridLayoutManager(context, 2)
+        
+        val customRollsAdapter = CustomRollsAdapter(
+            items = mutableListOf(),
+            onRollClick = { roll -> viewModel.rollCustom(roll) },
+            onEditClick = { roll ->
+                // Show Edit Dialog
+                 val dialog = EditCustomRollDialogFragment(
+                     existingRoll = roll,
+                     onSave = { updatedRoll ->
+                         viewModel.updateCustomRoll(updatedRoll)
+                     },
+                     onDelete = { rollToDelete ->
+                         viewModel.removeCustomRoll(rollToDelete)
+                     }
+                 )
+                 dialog.show(parentFragmentManager, "EditCustomRoll")
+            },
+            canEdit = false // Initial state, update in observer
+        )
+        customRollsRecycler.adapter = customRollsAdapter
+
+        btnAddCustomRoll.setOnClickListener {
+             val dialog = EditCustomRollDialogFragment(
+                 existingRoll = null, 
+                 onSave = { newRoll ->
+                     viewModel.addCustomRoll(newRoll)
+                 },
+                 onDelete = null
+             )
+             dialog.show(parentFragmentManager, "NewCustomRoll")
+        }
+
+        viewModel.character.observe(viewLifecycleOwner) { char ->
+            if (char == null) return@observe
+             val currentUserId = com.galeria.defensores.data.SessionManager.currentUser?.id
+             val effectiveTableId = tableId ?: char.tableId
+             
+             viewLifecycleOwner.lifecycleScope.launch {
+                 val table = if (effectiveTableId.isNotEmpty()) com.galeria.defensores.data.TableRepository.getTable(effectiveTableId) else null
+                 val isMaster = table?.masterId == currentUserId || table?.masterId == "mock-master-id"
+                 
+                 val canManageRolls = isMaster
+                 
+                 btnAddCustomRoll.visibility = if (canManageRolls) View.VISIBLE else View.GONE
+                 
+                 // update adapter permissions
+                 val newAdapter = CustomRollsAdapter(
+                    items = char.customRolls,
+                    onRollClick = { roll -> viewModel.rollCustom(roll) },
+                    onEditClick = { roll ->
+                         if (canManageRolls) {
+                             val dialog = EditCustomRollDialogFragment(
+                                 existingRoll = roll,
+                                 onSave = { updatedRoll ->
+                                     viewModel.updateCustomRoll(updatedRoll)
+                                 },
+                                 onDelete = { rollToDelete ->
+                                     viewModel.removeCustomRoll(rollToDelete)
+                                 }
+                             )
+                             dialog.show(parentFragmentManager, "EditCustomRoll")
+                         }
+                    },
+                    canEdit = canManageRolls
+                 )
+                 customRollsRecycler.adapter = newAdapter
+             }
+        }
+        
     }
 
     private fun checkPermissionAndRoll(type: RollType) {

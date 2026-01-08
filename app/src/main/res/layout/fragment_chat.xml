@@ -152,6 +152,16 @@
             android:padding="12dp"
             app:tint="#9CA3AF" />
 
+        <ImageButton
+            android:id="@+id/btn_quick_roll"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_dice_d20"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Rolagem Rápida"
+            android:padding="12dp"
+            app:tint="#9CA3AF" />
+
         <EditText
             android:id="@+id/edit_chat_message"
             android:layout_width="0dp"
