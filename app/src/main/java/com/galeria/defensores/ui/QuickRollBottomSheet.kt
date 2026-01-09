@@ -139,6 +139,30 @@ class QuickRollBottomSheet(
                 dismiss()
             }
         }
+
+        // Virtual Roll Observer
+        viewModel.virtualRollRequest.observe(viewLifecycleOwner) { event ->
+             event.getContentIfNotHandled()?.let { request ->
+                 val frag = com.galeria.defensores.ui.VirtualDiceFragment.newInstance(
+                     diceCount = request.diceCount,
+                     bonus = request.bonus,
+                     attrVal = request.attributeValue,
+                     skillVal = request.skillValue,
+                     attrName = request.attributeName,
+                     charId = viewModel.character.value?.id ?: ""
+                 )
+                 frag.show(parentFragmentManager, "virtual_dice")
+             }
+        }
+        
+        // Virtual Roll Result Listener
+        parentFragmentManager.setFragmentResultListener(
+            com.galeria.defensores.ui.VirtualDiceFragment.REQUEST_KEY,
+            viewLifecycleOwner
+        ) { _, bundle ->
+            val diceValues = bundle.getIntegerArrayList("diceValues")?.toList() ?: emptyList()
+            viewModel.finalizeVirtualRoll(diceValues)
+        }
     }
     
     private fun disableButtons(view: View) {

@@ -11,7 +11,9 @@ data class RollResult(
     val timestamp: Long = 0L,
     val name: String = "",
     val isHidden: Boolean = false,
-    val characterId: String = ""
+    val characterId: String = "",
+    val details: String = "",       // Pre-formatted breakdown: "F(3) + 1d6(5) + Bonus(1)"
+    val diceResults: List<Int> = emptyList() // Individual dice outcomes
 )
 
 enum class RollType(val displayName: String) {
@@ -20,5 +22,6 @@ enum class RollType(val displayName: String) {
     DEFENSE("Armadura"),
     SPECIAL_F("Especial (F)"),
     SPECIAL_PDF("Especial (PdF)"),
-    INITIATIVE("Iniciativa")
+    INITIATIVE("Iniciativa"),
+    ATTRIBUTE("Atributo")
 }

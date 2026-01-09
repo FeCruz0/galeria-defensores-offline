@@ -37,20 +37,17 @@ class CharacterSheetFragment : Fragment() {
             val resultUri = com.yalantis.ucrop.UCrop.getOutput(result.data!!)
             resultUri?.let { uri ->
                 val context = requireContext()
-                Toast.makeText(context, "Processando imagem...", Toast.LENGTH_SHORT).show()
-                viewModel.uploadCharacterAvatar(context, uri, 
+                Toast.makeText(requireContext(), "Processando imagem...", Toast.LENGTH_SHORT).show()
+                viewModel.uploadCharacterAvatar(requireContext(), uri, 
                     onSuccess = {
-                        Toast.makeText(context, "Avatar atualizado!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Avatar atualizado!", Toast.LENGTH_SHORT).show()
                         // Clean up temp file
                         try {
-                            // Deleting file via content resolver or file path if possible, 
-                            // but uCrop output is usually file:// so standard File delete works.
-                            // We can rely on cache clearing or delete explicitly.
-                            // file cleanup is optional for cache files but good practice.
+                             // Cleanup logic (empty catch for now is fine per existing code)
                         } catch (e: Exception) {}
                     },
                     onError = { error ->
-                        Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
                     }
                 )
             }
@@ -171,6 +168,30 @@ class CharacterSheetFragment : Fragment() {
         
         if (tableId != null) {
             chatViewModel.setTableId(tableId!!)
+        }
+
+        // Virtual Roll Observer
+        viewModel.virtualRollRequest.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { request ->
+                val frag = com.galeria.defensores.ui.VirtualDiceFragment.newInstance(
+                    diceCount = request.diceCount,
+                    bonus = request.bonus,
+                    attrVal = request.attributeValue,
+                    skillVal = request.skillValue,
+                    attrName = request.attributeName,
+                    charId = viewModel.character.value?.id ?: ""
+                )
+                frag.show(parentFragmentManager, "virtual_dice")
+            }
+        }
+
+        // Virtual Roll Result Listener
+        parentFragmentManager.setFragmentResultListener(
+            com.galeria.defensores.ui.VirtualDiceFragment.REQUEST_KEY,
+            viewLifecycleOwner
+        ) { _, bundle ->
+            val diceValues = bundle.getIntegerArrayList("diceValues")?.toList() ?: emptyList()
+            viewModel.finalizeVirtualRoll(diceValues)
         }
 
         viewModel.character.observe(viewLifecycleOwner) { char ->

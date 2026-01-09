@@ -304,7 +304,7 @@ class ChatViewModel : ViewModel() {
             senderId = user.uid,
             senderName = rollResult.name, // Use character name for rolls usually
             senderAvatar = avatarUrl,
-            content = "Rolou ${rollResult.total}",
+            content = if (rollResult.details.isNotEmpty()) rollResult.details else "Rolou ${rollResult.total}",
             type = MessageType.ROLL,
             rollResult = rollResult
         )
