@@ -149,7 +149,12 @@ class QuickRollBottomSheet(
                      attrVal = request.attributeValue,
                      skillVal = request.skillValue,
                      attrName = request.attributeName,
-                     charId = viewModel.character.value?.id ?: ""
+                     charId = viewModel.character.value?.id ?: "",
+                     expectedResults = request.diceOverride,
+                     canCrit = request.canCrit,
+                     isNegative = request.isNegative,
+                     critRangeStart = request.critRangeStart,
+                     diceProperties = request.diceProperties
                  )
                  frag.show(parentFragmentManager, "virtual_dice")
              }

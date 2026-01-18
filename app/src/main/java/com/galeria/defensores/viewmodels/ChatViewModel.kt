@@ -73,8 +73,11 @@ class ChatViewModel : ViewModel() {
     private val _replyingToMessage = MutableLiveData<ChatMessage?>(null)
     val replyingToMessage: LiveData<ChatMessage?> = _replyingToMessage
 
+    private val _visualRollBroadcast = MutableLiveData<com.galeria.defensores.utils.Event<com.galeria.defensores.models.VisualRoll>>()
+    val visualRollBroadcast: LiveData<com.galeria.defensores.utils.Event<com.galeria.defensores.models.VisualRoll>> = _visualRollBroadcast
+
     private val _currentUser = FirebaseAuth.getInstance().currentUser
-    val currentUser get() = _currentUser
+    val currentUser get() = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
     private var currentTable: com.galeria.defensores.models.Table? = null
 
     fun setTableId(tableId: String) {
@@ -82,10 +85,48 @@ class ChatViewModel : ViewModel() {
         loadMessages(tableId)
         checkMembership(tableId)
         listenToTyping(tableId)
+        listenToTableChanges(tableId)
         
         // Trigger auto-deletion (Fire and forget)
         viewModelScope.launch {
             repository.cleanupMessages(tableId)
+        }
+    }
+
+    private var tableJob: kotlinx.coroutines.Job? = null
+    private var lastProcessedRollId: String? = null
+    private fun listenToTableChanges(tableId: String) {
+        tableJob?.cancel()
+        tableJob = viewModelScope.launch {
+            com.galeria.defensores.data.TableRepository.getTableFlow(tableId).collect { table ->
+                if (table != null) {
+                    currentTable = table
+                    val lastRoll = table.lastVisualRoll
+                    if (lastRoll != null) {
+                        val now = System.currentTimeMillis()
+                        val diff = now - lastRoll.timestamp
+                        val isNew = lastRoll.id != lastProcessedRollId
+                        val currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                        val isOther = lastRoll.senderId != currentUid
+                        val isRecent = Math.abs(diff) < 60000 // Increased to 60s for more stability
+                        
+                        android.util.Log.d("VisualRollDebug", "[TABLE $tableId] Received Roll update: " +
+                            "RollID=${lastRoll.id}, " +
+                            "Sender=${lastRoll.senderName} (${lastRoll.senderId}), " +
+                            "isNew=$isNew (lastProcessed=$lastProcessedRollId), " +
+                            "isOther=$isOther (myUid=$currentUid), " +
+                            "isRecent=$isRecent (diff=${diff}ms)")
+                        
+                        if (isNew && isOther && isRecent) {
+                            lastProcessedRollId = lastRoll.id
+                            _visualRollBroadcast.value = com.galeria.defensores.utils.Event(lastRoll)
+                            android.util.Log.d("VisualRollDebug", "!!! TRIGGERING BROADCAST UI !!!")
+                        } else if (!isRecent) {
+                            android.util.Log.w("VisualRollDebug", "Roll ignored because it's too old (or clock drift). Diff: ${diff}ms")
+                        }
+                    }
+                }
+            }
         }
     }
 

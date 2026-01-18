@@ -248,9 +248,24 @@ class ChatFragment : Fragment() {
             } else {
                 btnLoadMore.visibility = View.GONE
             }
-            
-            // Logic to keep scroll position when loading older messages would go here ideally.
-            // But ListAdapter handles diffs, so it shouldn't jump wildly if we prepend.
+        }
+
+        // Observer for broadcast rolls from other players
+        viewModel.visualRollBroadcast.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { visualRoll ->
+                // Only show if not already showing (optional but good)
+                if (parentFragmentManager.findFragmentByTag("virtual_dice_broadcast") == null) {
+                    val frag = com.galeria.defensores.ui.VirtualDiceFragment.newPassiveInstance(
+                        diceCount = visualRoll.diceCount,
+                        expectedResults = visualRoll.diceValues,
+                        canCrit = visualRoll.canCrit,
+                        isNegative = visualRoll.isNegative,
+                        critRangeStart = visualRoll.critRangeStart,
+                        diceProperties = visualRoll.diceProperties
+                    )
+                    frag.show(parentFragmentManager, "virtual_dice_broadcast")
+                }
+            }
         }
 
         // Setup Inputs

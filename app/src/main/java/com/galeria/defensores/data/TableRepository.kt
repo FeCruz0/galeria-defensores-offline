@@ -2,6 +2,9 @@ package com.galeria.defensores.data
 
 import com.galeria.defensores.models.Table
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 
 object TableRepository {
     private val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
@@ -134,5 +137,33 @@ object TableRepository {
             e.printStackTrace()
             false
         }
+    }
+
+    suspend fun broadcastVisualRoll(tableId: String, visualRoll: com.galeria.defensores.models.VisualRoll) {
+        try {
+            android.util.Log.d("VisualRollDebug", "Updating Firestore table $tableId with roll ${visualRoll.id}")
+            tablesCollection.document(tableId)
+                .update("lastVisualRoll", visualRoll)
+                .await()
+            android.util.Log.d("VisualRollDebug", "Firestore update successful")
+        } catch (e: Exception) {
+            android.util.Log.e("VisualRollDebug", "Firestore update failed: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+
+    fun getTableFlow(id: String): Flow<Table?> = callbackFlow {
+        val listener = tablesCollection.document(id).addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                close(e)
+                return@addSnapshotListener
+            }
+            if (snapshot != null && snapshot.exists()) {
+                trySend(snapshot.toObject(Table::class.java))
+            } else {
+                trySend(null)
+            }
+        }
+        awaitClose { listener.remove() }
     }
 }

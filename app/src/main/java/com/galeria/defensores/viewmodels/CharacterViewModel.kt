@@ -245,17 +245,17 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         }
 
         val result = if (request.type == com.galeria.defensores.models.RollRequestType.CUSTOM && request.customRoll != null) {
-            calculateCustomRollResult(char, request.customRoll, diceValues)
+            calculateCustomRollResult(char, request.customRoll, request.diceOverride ?: diceValues)
         } else {
-            // Standard Roll: Expects 1 die usually, but if diceValues has more, we take first or sum?
-            // Standard Virtual Roll spawns 1 die based on our logic.
-            val dieVal = if (diceValues.isNotEmpty()) diceValues[0] else 1
+            // Standard Roll
+            val dieVal = (request.diceOverride ?: diceValues).firstOrNull() ?: 1
             
             val rollType = when(request.type) {
                 com.galeria.defensores.models.RollRequestType.ATTACK_F -> com.galeria.defensores.models.RollType.ATTACK_F
                 com.galeria.defensores.models.RollRequestType.ATTACK_PDF -> com.galeria.defensores.models.RollType.ATTACK_PDF
                 com.galeria.defensores.models.RollRequestType.DEFENSE -> com.galeria.defensores.models.RollType.DEFENSE
                 com.galeria.defensores.models.RollRequestType.INITIATIVE -> com.galeria.defensores.models.RollType.INITIATIVE
+                com.galeria.defensores.models.RollRequestType.ATTRIBUTE -> com.galeria.defensores.models.RollType.ATTRIBUTE
                 else -> com.galeria.defensores.models.RollType.ATTRIBUTE
             }
 
@@ -340,11 +340,34 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                 RollType.ATTRIBUTE -> {
                      attrVal = 0
                      displayAttr = "Atributo"
-                     reqType = com.galeria.defensores.models.RollRequestType.ATTACK_F // Fallback
+                     reqType = com.galeria.defensores.models.RollRequestType.ATTRIBUTE
                 }
             }
 
             if (isVirtualRollEnabled) {
+                // Pre-roll die for visual synchronization
+                val diceValues = listOf(Random.nextInt(6) + 1)
+                val canCrit = (type == RollType.ATTACK_F || type == RollType.ATTACK_PDF || type == RollType.SPECIAL_F || type == RollType.SPECIAL_PDF || type == RollType.DEFENSE)
+                val isNegativeRoll = bonus < 0
+                val diceProps = listOf(com.galeria.defensores.models.DieProperty(canCrit, isNegativeRoll, 6))
+
+                // Broadcast to table
+                if (char.tableId.isNotEmpty()) {
+                    val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: char.ownerId
+                    val visualRoll = com.galeria.defensores.models.VisualRoll(
+                        senderId = currentUserId,
+                        senderName = char.name,
+                        diceCount = 1,
+                        diceValues = diceValues,
+                        diceProperties = diceProps,
+                        canCrit = canCrit,
+                        isNegative = isNegativeRoll,
+                        critRangeStart = 6
+                    )
+                    android.util.Log.d("VisualRollDebug", "Broadcasting standard roll: sender=$currentUserId, table=${char.tableId}")
+                    TableRepository.broadcastVisualRoll(char.tableId, visualRoll)
+                }
+
                 // Intercept and send request
                 val request = com.galeria.defensores.models.RollRequest(
                     type = reqType,
@@ -352,7 +375,12 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                     bonus = bonus,
                     attributeValue = attrVal,
                     skillValue = char.habilidade,
-                    attributeName = displayAttr
+                    attributeName = displayAttr,
+                    diceOverride = diceValues,
+                    diceProperties = diceProps,
+                    isNegative = isNegativeRoll,
+                    canCrit = canCrit,
+                    critRangeStart = 6
                 )
                 _virtualRollRequest.value = com.galeria.defensores.utils.Event(request)
                 // We do NOT update _lastRoll yet.
@@ -743,35 +771,64 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                 var diceCount = 0
                 roll.components.forEach { diceCount += it.count }
                 
+                // Pre-calculate dice values and determine crit range
+                val diceValues = mutableListOf<Int>()
+                val diceProps = mutableListOf<com.galeria.defensores.models.DieProperty>()
+                val combatNameCheck = roll.name.contains("Ataque", ignoreCase = true) || 
+                                     roll.name.contains("Defesa", ignoreCase = true) || 
+                                     roll.name.contains("PdF", ignoreCase = true) ||
+                                     roll.name.contains(" F ", ignoreCase = true)
+
+                var minCritRange = 6
+                roll.components.forEach { comp ->
+                    if (comp.canCrit && (comp.critRangeStart ?: comp.faces) < minCritRange) {
+                        minCritRange = comp.critRangeStart ?: comp.faces
+                    }
+                    repeat(comp.count) {
+                        diceValues.add(Random.nextInt(comp.faces) + 1)
+                        diceProps.add(com.galeria.defensores.models.DieProperty(
+                            canCrit = comp.canCrit || combatNameCheck,
+                            isNegative = comp.isNegative,
+                            critRangeStart = comp.critRangeStart ?: comp.faces
+                        ))
+                    }
+                }
+
+                val isNegativeRoll = roll.globalModifier < 0
+                val canCrit = roll.components.any { it.canCrit } || combatNameCheck
+
+                // Broadcast
+                if (char.tableId.isNotEmpty()) {
+                    val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: char.ownerId
+                    val visualRoll = com.galeria.defensores.models.VisualRoll(
+                        senderId = currentUserId,
+                        senderName = char.name,
+                        diceCount = diceValues.size,
+                        diceValues = diceValues,
+                        diceProperties = diceProps,
+                        canCrit = canCrit,
+                        isNegative = isNegativeRoll,
+                        critRangeStart = minCritRange
+                    )
+                    android.util.Log.d("VisualRollDebug", "Broadcasting custom roll: sender=$currentUserId, table=${char.tableId}")
+                    TableRepository.broadcastVisualRoll(char.tableId, visualRoll)
+                }
+
+                // Intercept and send request
+                val totalDice = roll.components.sumOf { it.count }
                 val request = com.galeria.defensores.models.RollRequest(
                     type = com.galeria.defensores.models.RollRequestType.CUSTOM,
-                    diceCount = diceCount,
-                    bonus = 0, // Calculated in final result or UI? 
-                    // For custom rolls, bonus is built-in to components/logic. 
-                    // We pass 0 here and let finalize logic handle the full calc?
-                    // actually, the UI might just return "dice results" and we re-run the calculation logic with those fixed results?
-                    // OR we just trigger the animation phase and then run the standard logic?
-                    // Let's stick to "Post Request -> UI does visual thing -> calls finalize -> finalized uses standard logic but maybe mocked dice?"
-                    // Actually, `finalizeVirtualRoll` takes a `RollResult`.
-                    // So the UI needs to CALCULATE the result for custom rolls?
-                    // That implies duplicating the complex custom roll logic in the UI or Helper.
-                    // BETTER APPROACH: 
-                    // 1. VM calculates the result (RNG) *first*.
-                    // 2. VM sends "Here is the result (e.g. 3, 5, 6), please animate this virtual roll".
-                    // 3. UI animates.
-                    // 4. UI callback "Done".
-                    // 5. VM posts the result to chat.
-                    // This "Deterministic" approach is easier for logic reuse.
-                    // BUT the user wants to "interact" with the dice (physics).
-                    // If physics determine the result, the VM cannot pre-calculate.
-                    // So `DiceBoardView` MUST generate the random numbers based on physics/position.
-                    // Challenge: How to feed those numbers back into the complex `rollCustom` logic?
-                    // The `rollCustom` logic has `Random.nextInt`.
-                    // Refactor `rollCustom` to accept *optional* pre-determined dice values?
+                    diceCount = totalDice,
+                    bonus = roll.globalModifier,
                     attributeValue = 0,
                     skillValue = char.habilidade,
                     attributeName = roll.name,
-                    customRoll = roll
+                    customRoll = roll,
+                    diceOverride = diceValues,
+                    diceProperties = diceProps,
+                    isNegative = isNegativeRoll,
+                    canCrit = canCrit,
+                    critRangeStart = minCritRange
                 )
                 _virtualRollRequest.value = com.galeria.defensores.utils.Event(request)
                 _isRolling.value = false
@@ -816,14 +873,15 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
              RollType.ATTACK_F -> "Força"
              RollType.ATTACK_PDF -> "PdF"
              RollType.DEFENSE -> "Armadura"
-             RollType.INITIATIVE -> "Agilidade"
+             RollType.INITIATIVE -> "Iniciativa"
              else -> "Atributo"
         }
 
-        val attrDetail = if (isCritical) "$displayAttr ($attrVal x2 CRÍTICO!)" else "$displayAttr ($attrVal)"
-        val bonusDetail = if (bonus != 0) " + Bonus ($bonus)" else ""
+        val attrDetail = if (isCritical) "$displayAttr [$attrVal x2!]" else "$displayAttr [$attrVal]"
+        val bonusDetail = if (bonus != 0) " + Bônus [$bonus]" else ""
+        val dieDetail = if (isCritical) "1d6 [6!]" else "1d6 [$die]"
         
-        val details = "$attrDetail + Hab ($skillVal) + 1d6 ($die)$bonusDetail = $total"
+        val details = "$attrDetail + Hab [$skillVal] + $dieDetail$bonusDetail = $total"
 
         return RollResult(
             total = total,
@@ -853,6 +911,11 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         var totalCrits = 0
         val allDice = mutableListOf<Int>()
         
+        val combatNameCheck = roll.name.contains("Ataque", ignoreCase = true) || 
+                             roll.name.contains("Defesa", ignoreCase = true) || 
+                             roll.name.contains("PdF", ignoreCase = true) ||
+                             roll.name.contains(" F ", ignoreCase = true)
+
         var overrideIndex = 0
 
         // 1. Process Dice Components
@@ -867,7 +930,8 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                     Random.nextInt(comp.faces) + 1
                 }
                 
-                val isCrit = comp.canCrit && (
+                val currentCanCrit = comp.canCrit || combatNameCheck
+                val isCrit = currentCanCrit && (
                     (comp.critRangeStart != null && die >= comp.critRangeStart!!) || 
                     (comp.critRangeStart == null && die == comp.faces)
                 )
@@ -885,11 +949,17 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
             val finalCompTotal = if (comp.isNegative) -compTotal else compTotal
             totalSum += finalCompTotal + comp.bonus
             
-            // Format: "2d6[3,5]+2" or "-1d6[4]"
+            // Format: "2d6 [3,5] + 2"
             val signPrefix = if (comp.isNegative) "- " else (if (parts.isNotEmpty()) "+ " else "")
-            val diceStr = "${comp.count}d${comp.faces}[${rolls.joinToString(",")}]"
+            
+            val formattedRolls = rolls.map { d ->
+                val isMax = (d == comp.faces && comp.canCrit)
+                if (isMax) "$d!" else "$d"
+            }.joinToString(",")
+            
+            val diceStr = "${comp.count}d${comp.faces} [$formattedRolls]"
             val bonusStr = if (comp.bonus != 0) {
-                 if (comp.bonus > 0) "+${comp.bonus}" else "${comp.bonus}"
+                 " + ${comp.bonus}"
             } else ""
             
             parts.add("$signPrefix$diceStr$bonusStr")
@@ -921,26 +991,26 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
 
         // 3. Append Attributes formatted
         if (roll.primaryAttribute != "none" && primaryVal != 0) {
-            val pName = roll.primaryAttribute.take(3).replaceFirstChar { it.uppercase() }
-            val critInfo = if (critMultiplier > 1) " x$critMultiplier Crit" else ""
+            val pName = roll.primaryAttribute.replaceFirstChar { it.uppercase() }.take(3)
+            val critInfo = if (critMultiplier > 1) " x$critMultiplier!" else ""
             val prefix = if (parts.isNotEmpty()) "+ " else ""
-            parts.add("$prefix$pName($primaryVal$critInfo)")
+            parts.add("$prefix$pName [$primaryVal$critInfo]")
         }
         
         if (roll.secondaryAttribute != "none" && secondaryVal != 0) {
-            val sName = roll.secondaryAttribute.take(3).replaceFirstChar { it.uppercase() }
+            val sName = roll.secondaryAttribute.replaceFirstChar { it.uppercase() }.take(3)
             val prefix = if (parts.isNotEmpty()) "+ " else ""
-            parts.add("$prefix$sName($secondaryVal)")
+            parts.add("$prefix$sName [$secondaryVal]")
         }
         
         // 4. Global Modifier
         if (roll.globalModifier != 0) {
              val prefix = if (roll.globalModifier > 0) (if (parts.isNotEmpty()) "+ " else "") else "- "
-             parts.add("$prefix${kotlin.math.abs(roll.globalModifier)}")
+             parts.add("$prefix[${kotlin.math.abs(roll.globalModifier)}]")
         }
         
         // 5. Build Final String
-        val finalString = parts.joinToString(" ").replace("  ", " ").trim()
+        val finalString = "${parts.joinToString(" ").replace("  ", " ").trim()} = $totalSum"
 
         return RollResult(
             total = totalSum,

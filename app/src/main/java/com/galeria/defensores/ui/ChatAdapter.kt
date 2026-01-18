@@ -2,7 +2,9 @@ package com.galeria.defensores.ui
 
 import android.view.LayoutInflater
 import android.view.View
+import android.view.Gravity
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -148,13 +150,34 @@ class ChatAdapter(
         private val onSenderClick: (ChatMessage) -> Unit,
         private val onReplyClick: (String) -> Unit
     ) : RecyclerView.ViewHolder(itemView) {
+        private val container: LinearLayout = itemView.findViewById<LinearLayout>(R.id.layout_message_bubble_container)
+        private val bubbleLayout: LinearLayout = itemView.findViewById<LinearLayout>(R.id.layout_bubble)
         private val nameText: TextView = itemView.findViewById(R.id.text_sender_name)
         private val contentText: TextView = itemView.findViewById(R.id.text_message_content)
         private val timeText: TextView = itemView.findViewById(R.id.text_message_time)
 
         fun bind(message: ChatMessage) {
-            nameText.text = message.senderName
-            nameText.setOnClickListener { onSenderClick(message) }
+            val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+            val isMe = message.senderId == currentUserId
+
+            // Alignment and Background
+            val params = container.layoutParams as LinearLayout.LayoutParams
+            if (isMe) {
+                params.gravity = Gravity.END
+                bubbleLayout.setBackgroundResource(R.drawable.bg_bubble_sent)
+                nameText.visibility = View.GONE
+                contentText.setTextColor(android.graphics.Color.WHITE)
+                timeText.setTextColor(android.graphics.Color.parseColor("#E0E7FF"))
+            } else {
+                params.gravity = Gravity.START
+                bubbleLayout.setBackgroundResource(R.drawable.bg_bubble_received)
+                nameText.visibility = View.VISIBLE
+                nameText.text = message.senderName
+                nameText.setOnClickListener { onSenderClick(message) }
+                contentText.setTextColor(android.graphics.Color.parseColor("#111827"))
+                timeText.setTextColor(android.graphics.Color.parseColor("#9CA3AF"))
+            }
+            container.layoutParams = params
             
             val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
             timeText.text = timeFormat.format(Date(message.timestamp))
@@ -169,7 +192,8 @@ class ChatAdapter(
                 
                 spannable.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.ITALIC), start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                 spannable.setSpan(android.text.style.RelativeSizeSpan(0.8f), start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                spannable.setSpan(android.text.style.ForegroundColorSpan(android.graphics.Color.GRAY), start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                val editedColor = if (isMe) android.graphics.Color.parseColor("#C7D2FE") else android.graphics.Color.GRAY
+                spannable.setSpan(android.text.style.ForegroundColorSpan(editedColor), start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                 contentText.text = spannable
             } else {
                 contentText.text = formattedContent
@@ -191,13 +215,32 @@ class ChatAdapter(
         private val onSenderClick: (ChatMessage) -> Unit,
         private val onReplyClick: (String) -> Unit
     ) : RecyclerView.ViewHolder(itemView) {
+        private val container: LinearLayout = itemView.findViewById<LinearLayout>(R.id.layout_message_bubble_container)
+        private val bubbleLayout: LinearLayout = itemView.findViewById<LinearLayout>(R.id.layout_bubble)
         private val nameText: TextView = itemView.findViewById(R.id.text_sender_name)
         private val imageView: android.widget.ImageView = itemView.findViewById(R.id.image_message_content)
         private val timeText: TextView = itemView.findViewById(R.id.text_message_time)
 
         fun bind(message: ChatMessage) {
-            nameText.text = message.senderName
-            nameText.setOnClickListener { onSenderClick(message) }
+            val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+            val isMe = message.senderId == currentUserId
+
+            // Alignment and Background
+            val params = container.layoutParams as LinearLayout.LayoutParams
+            if (isMe) {
+                params.gravity = Gravity.END
+                bubbleLayout.setBackgroundResource(R.drawable.bg_bubble_sent)
+                nameText.visibility = View.GONE
+                timeText.setTextColor(android.graphics.Color.parseColor("#E0E7FF"))
+            } else {
+                params.gravity = Gravity.START
+                bubbleLayout.setBackgroundResource(R.drawable.bg_bubble_received)
+                nameText.visibility = View.VISIBLE
+                nameText.text = message.senderName
+                nameText.setOnClickListener { onSenderClick(message) }
+                timeText.setTextColor(android.graphics.Color.parseColor("#9CA3AF"))
+            }
+            container.layoutParams = params
 
             val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
             timeText.text = timeFormat.format(Date(message.timestamp))
@@ -254,14 +297,10 @@ class ChatAdapter(
             if (roll != null) {
                 titleText.text = "ROLOGEM: ${roll.name}"
                 totalText.text = roll.total.toString()
-                // For custom rolls (die=0), attributeUsed contains the full breakdown.
-                // For standard rolls, we construct the string.
-                val detail = if (roll.die == 0 && roll.attributeValue == 0) {
-                     roll.attributeUsed
-                } else {
-                     if (roll.bonus != 0) "${roll.attributeUsed}(${roll.attributeValue}) + ${roll.die} + ${roll.bonus}" else "${roll.attributeUsed}(${roll.attributeValue}) + ${roll.die}"
+                detailText.text = if (roll.details.isNotEmpty()) roll.details else {
+                    if (roll.bonus != 0) "${roll.attributeUsed}(${roll.attributeValue}) + ${roll.die} + ${roll.bonus}" 
+                    else "${roll.attributeUsed}(${roll.attributeValue}) + ${roll.die}"
                 }
-                detailText.text = detail
             } else { titleText.text = "ROLOGEM INVÁLIDA" }
             
             bindReplyView(itemView, message, onReplyClick)

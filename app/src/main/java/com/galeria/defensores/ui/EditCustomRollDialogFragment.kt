@@ -54,6 +54,10 @@ class EditCustomRollDialogFragment(
             editDesc.setText(existingRoll.description)
             editGlobalMod.setText(existingRoll.globalModifier.toString())
             
+            // Populate components
+            components.clear()
+            components.addAll(existingRoll.components.map { it.copy() }) // Use copies to avoid direct mutation until save
+            
             // Set Spinners
             val pIndex = attrKeys.indexOf(existingRoll.primaryAttribute).coerceAtLeast(0)
             spinnerPrimary.setSelection(pIndex)
@@ -82,6 +86,9 @@ class EditCustomRollDialogFragment(
         } else {
             // New Roll - No Delete Option
             btnDelete.visibility = View.GONE
+            if (components.isEmpty()) {
+                components.add(RollComponent())
+            }
         }
 
         // ... (Recycler Setup) ...

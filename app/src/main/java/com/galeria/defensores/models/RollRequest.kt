@@ -5,7 +5,8 @@ enum class RollRequestType {
     ATTACK_PDF,
     DEFENSE,
     INITIATIVE,
-    CUSTOM
+    CUSTOM,
+    ATTRIBUTE
 }
 
 data class RollRequest(
@@ -16,5 +17,10 @@ data class RollRequest(
     val skillValue: Int,
     val attributeName: String,
     // For Custom Rolls
-    val customRoll: CustomRoll? = null
+    val customRoll: CustomRoll? = null,
+    val diceOverride: List<Int>? = null,
+    val diceProperties: List<DieProperty>? = null,
+    val isNegative: Boolean = false,
+    val canCrit: Boolean = false,
+    val critRangeStart: Int = 6
 )

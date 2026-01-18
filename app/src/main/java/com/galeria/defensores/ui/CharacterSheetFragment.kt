@@ -28,6 +28,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 class CharacterSheetFragment : Fragment() {
 
@@ -179,9 +180,29 @@ class CharacterSheetFragment : Fragment() {
                     attrVal = request.attributeValue,
                     skillVal = request.skillValue,
                     attrName = request.attributeName,
-                    charId = viewModel.character.value?.id ?: ""
+                    charId = viewModel.character.value?.id ?: "",
+                    expectedResults = request.diceOverride,
+                    canCrit = request.canCrit,
+                    isNegative = request.isNegative,
+                    critRangeStart = request.critRangeStart,
+                    diceProperties = request.diceProperties
                 )
                 frag.show(parentFragmentManager, "virtual_dice")
+            }
+        }
+
+        // Observer for broadcast rolls from other players
+        chatViewModel.visualRollBroadcast.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { visualRoll ->
+                val frag = com.galeria.defensores.ui.VirtualDiceFragment.newPassiveInstance(
+                    diceCount = visualRoll.diceCount,
+                    expectedResults = visualRoll.diceValues,
+                    canCrit = visualRoll.canCrit,
+                    isNegative = visualRoll.isNegative,
+                    critRangeStart = visualRoll.critRangeStart,
+                    diceProperties = visualRoll.diceProperties
+                )
+                frag.show(parentFragmentManager, "virtual_dice_broadcast")
             }
         }
 
@@ -618,15 +639,9 @@ class CharacterSheetFragment : Fragment() {
                 rollResultCard.visibility = View.VISIBLE
                 rollNameText.text = result.name
                 rollTotalText.text = result.total.toString()
-                
-                val critText = if (result.isCritical) " (CRÍTICO!)" else ""
-                val bonusText = if (result.bonus > 0) " + ${result.bonus}" else ""
-                
-                if (result.die == 0 && result.attributeValue == 0) {
-                     // Custom Roll: String is already formatted in attributeUsed
-                     rollDetailText.text = result.attributeUsed
-                } else {
-                     rollDetailText.text = "H(${result.skillValue}) + ${result.attributeUsed}(${result.attributeValue}${if(result.isCritical) "x2" else ""}) + 1d6(${result.die})$bonusText$critText"
+                rollDetailText.text = if (result.details.isNotEmpty()) result.details else {
+                    val bonusText = if (result.bonus > 0) " + ${result.bonus}" else ""
+                    "${result.attributeUsed}(${result.attributeValue}) + ${result.die}$bonusText"
                 }
                 
                 if (result.isCritical) {

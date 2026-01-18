@@ -7,50 +7,68 @@
     android:orientation="vertical"
     android:padding="8dp">
 
-    <TextView
-        android:id="@+id/text_sender_name"
+    <LinearLayout
+        android:id="@+id/layout_message_bubble_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textColor="@color/colorPrimary"
-        android:textSize="12sp"
-        tools:text="Nome do Jogador" />
+        android:orientation="vertical">
 
-    <include
-        android:id="@+id/layout_reply_preview"
-        layout="@layout/layout_reply_preview"
-        android:visibility="gone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp" />
-
-    <androidx.cardview.widget.CardView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="2dp"
-        android:layout_marginTop="4dp">
-
-        <ImageView
-            android:id="@+id/image_message_content"
+        <TextView
+            android:id="@+id/text_sender_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:maxWidth="250dp"
-            android:maxHeight="300dp"
-            android:scaleType="centerInside"
-            tools:src="@tools:sample/backgrounds/scenic"/>
-            
-    </androidx.cardview.widget.CardView>
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:textSize="12sp"
+            android:layout_marginBottom="2dp"
+            tools:text="Nome do Jogador" />
 
-    <TextView
-        android:id="@+id/text_message_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#9CA3AF"
-        android:textSize="10sp"
-        android:layout_gravity="end"
-        android:layout_marginTop="2dp"
-        tools:text="14:30" />
+        <LinearLayout
+            android:id="@+id/layout_bubble"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="4dp"
+            android:elevation="1dp"
+            android:background="@drawable/bg_bubble_received">
+
+            <include
+                android:id="@+id/layout_reply_preview"
+                layout="@layout/layout_reply_preview"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:id="@+id/image_message_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:maxWidth="250dp"
+                    android:maxHeight="300dp"
+                    android:scaleType="centerInside"
+                    tools:src="@tools:sample/backgrounds/scenic"/>
+                    
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/text_message_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#9CA3AF"
+                android:textSize="10sp"
+                android:layout_gravity="end"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="4dp"
+                tools:text="14:30" />
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

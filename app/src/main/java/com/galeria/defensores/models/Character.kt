@@ -99,7 +99,7 @@ data class RollComponent(
     var faces: Int = 6,
     var bonus: Int = 0,
     var isNegative: Boolean = false,
-    var canCrit: Boolean = true,
+    var canCrit: Boolean = false,
     var critRangeStart: Int? = null, // null means ONLY max value
     var critMultiplier: Int = 2
 )
