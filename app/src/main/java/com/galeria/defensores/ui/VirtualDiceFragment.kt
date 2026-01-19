@@ -149,6 +149,14 @@ class VirtualDiceFragment : DialogFragment(), SensorEventListener {
                 }, displayDelay)
             }
         }
+
+        diceBoard.onRollStarted = {
+            activity?.runOnUiThread {
+                btnCancel.isEnabled = false
+                btnCancel.alpha = 0.5f
+                btnCancel.text = "Rolando..."
+            }
+        }
         
         btnCancel.setOnClickListener {
             dismiss()

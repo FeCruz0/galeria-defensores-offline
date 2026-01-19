@@ -48,6 +48,49 @@ class SettingsFragment : Fragment() {
             AppCompatDelegate.setDefaultNightMode(mode)
         }
 
+        val switchCollision = view.findViewById<Switch>(R.id.switch_collision)
+        switchCollision.isChecked = prefs.getBoolean("collision_enabled", true)
+        
+        switchCollision.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("collision_enabled", isChecked).apply()
+        }
+
+        view.findViewById<View>(R.id.btn_color_global).setOnClickListener {
+            ColorPickerDialogFragment.newInstance("Escolher Cor Global").apply {
+                setOnColorSelectedListener { color ->
+                    prefs.edit()
+                        .putInt("color_normal", color)
+                        .putInt("color_non_crit", color)
+                        .putInt("color_negative", color)
+                        .apply()
+                }
+            }.show(parentFragmentManager, "color_picker")
+        }
+
+        view.findViewById<View>(R.id.btn_color_normal).setOnClickListener {
+            ColorPickerDialogFragment.newInstance("Cor: Dados Normais").apply {
+                setOnColorSelectedListener { color ->
+                    prefs.edit().putInt("color_normal", color).apply()
+                }
+            }.show(parentFragmentManager, "color_picker")
+        }
+
+        view.findViewById<View>(R.id.btn_color_non_crit).setOnClickListener {
+            ColorPickerDialogFragment.newInstance("Cor: Dados Difíceis/Sem Crit").apply {
+                setOnColorSelectedListener { color ->
+                    prefs.edit().putInt("color_non_crit", color).apply()
+                }
+            }.show(parentFragmentManager, "color_picker")
+        }
+
+        view.findViewById<View>(R.id.btn_color_negative).setOnClickListener {
+            ColorPickerDialogFragment.newInstance("Cor: Dados Negativos").apply {
+                setOnColorSelectedListener { color ->
+                    prefs.edit().putInt("color_negative", color).apply()
+                }
+            }.show(parentFragmentManager, "color_picker")
+        }
+
         view.findViewById<View>(R.id.btn_logout).setOnClickListener {
             com.galeria.defensores.data.FirebaseAuthManager.logout()
             parentFragmentManager.beginTransaction()

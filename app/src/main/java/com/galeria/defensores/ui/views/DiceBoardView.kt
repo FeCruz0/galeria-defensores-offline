@@ -12,13 +12,18 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.os.VibrationAttributes
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import com.galeria.defensores.R
 import kotlin.math.abs
 import kotlin.random.Random
 
 class DiceBoardView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : View(context, attrs, defStyleAttr) {
+) : View(context, attrs, defStyleAttr), SensorEventListener {
 
     data class Die(
         var x: Float,
@@ -33,7 +38,8 @@ class DiceBoardView @JvmOverloads constructor(
         val size: Float = 150f,
         var canCrit: Boolean = false,
         var isNegative: Boolean = false,
-        var critRangeStart: Int = 6
+        var critRangeStart: Int = 6,
+        val trail: MutableList<PointF> = mutableListOf()
     )
 
     enum class DieState {
@@ -45,9 +51,11 @@ class DiceBoardView @JvmOverloads constructor(
     private val pipPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val trailPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     
     private var velocityTracker: VelocityTracker? = null
     var onRollFinished: ((List<Int>) -> Unit)? = null
+    var onRollStarted: (() -> Unit)? = null
     
     private var activeDieIndex: Int = -1
     private var lastTouchX: Float = 0f
@@ -55,6 +63,7 @@ class DiceBoardView @JvmOverloads constructor(
     
     // For synchronization: if set, dice will land on these values
     var expectedResults: List<Int>? = null
+    private var collisionEnabled: Boolean = true
 
     // Sounds
     private var soundPool: SoundPool? = null
@@ -67,6 +76,14 @@ class DiceBoardView @JvmOverloads constructor(
     // Vibration
     private var vibrator: Vibrator? = null
 
+    // Shake Detection
+    private var sensorManager: SensorManager? = null
+    private var accelerometer: Sensor? = null
+    private var lastAccelTime: Long = 0
+    private var lastAcceleration: Float = 0f
+    private val SHAKE_THRESHOLD = 12f // Sensitivity
+    private val SHAKE_TIMEOUT = 1000L // Prevent accidental double shakes
+
     init {
         pipPaint.color = Color.BLACK
         pipPaint.style = Paint.Style.FILL
@@ -78,9 +95,20 @@ class DiceBoardView @JvmOverloads constructor(
         glowPaint.color = Color.parseColor("#FFD700") // Golden
         glowPaint.style = Paint.Style.FILL
         glowPaint.maskFilter = BlurMaskFilter(40f, BlurMaskFilter.Blur.NORMAL)
+
+        trailPaint.style = Paint.Style.STROKE
+        trailPaint.strokeWidth = 20f
+        trailPaint.strokeCap = Paint.Cap.ROUND
+        trailPaint.strokeJoin = Paint.Join.ROUND
         
         initSoundPool()
         initVibrator()
+        initSensors()
+    }
+
+    private fun initSensors() {
+        sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
     }
 
     private fun initVibrator() {
@@ -94,8 +122,17 @@ class DiceBoardView @JvmOverloads constructor(
     }
 
     private fun vibrate(duration: Long) {
+        if (vibrator?.hasVibrator() != true) return
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator?.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE))
+            val effect = VibrationEffect.createOneShot(duration, 255) // Max amplitude
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val attrs = VibrationAttributes.createForUsage(VibrationAttributes.USAGE_MEDIA)
+                vibrator?.vibrate(effect, attrs)
+            } else {
+                vibrator?.vibrate(effect)
+            }
         } else {
             @Suppress("DEPRECATION")
             vibrator?.vibrate(duration)
@@ -127,14 +164,15 @@ class DiceBoardView @JvmOverloads constructor(
         android.util.Log.d("DiceBoardSound", "Loading sounds: shake=$shakeSoundId, throw=$throwSoundId")
     }
 
-    private fun playShakeSound() {
+    private fun playShakeSound(intensity: Float = 1.0f) {
         if (!loadedSounds.contains(shakeSoundId)) {
             android.util.Log.w("DiceBoardSound", "Shake sound not loaded yet")
             return
         }
         val now = System.currentTimeMillis()
         if (now - lastShakeTime > SHAKE_COOLDOWN) {
-            soundPool?.play(shakeSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
+            val volume = intensity.coerceIn(0.1f, 1.0f)
+            soundPool?.play(shakeSoundId, volume, volume, 1, 0, 1.0f)
             lastShakeTime = now
         }
     }
@@ -153,6 +191,18 @@ class DiceBoardView @JvmOverloads constructor(
         val startX = width / 2f
         val startY = height - 400f
         
+        val prefs = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        
+        val defaultColorNormal = Color.WHITE
+        val defaultColorNonCrit = Color.RED
+        val defaultColorNegative = Color.BLACK
+        
+        collisionEnabled = prefs.getBoolean("collision_enabled", true)
+        
+        val colorNormal = prefs.getInt("color_normal", defaultColorNormal)
+        val colorNonCrit = prefs.getInt("color_non_crit", defaultColorNonCrit)
+        val colorNegative = prefs.getInt("color_negative", defaultColorNegative)
+        
         for (i in 0 until count) {
             val prop = diceProperties?.getOrNull(i)
             
@@ -161,9 +211,9 @@ class DiceBoardView @JvmOverloads constructor(
             val dieCritRange = prop?.critRangeStart ?: critRangeStart
             
             val dieColor = when {
-                dieIsNegative -> Color.BLACK
-                !dieCanCrit -> Color.RED
-                else -> Color.WHITE
+                dieIsNegative -> colorNegative
+                !dieCanCrit -> colorNonCrit
+                else -> colorNormal
             }
 
             dice.add(Die(
@@ -219,15 +269,12 @@ class DiceBoardView @JvmOverloads constructor(
                 die.dhRotation *= 0.97f
                 
                 // Spin/Value change while rolling fast
-                if (abs(die.dx) + abs(die.dy) > 10) {
+                if (Math.abs(die.dx) + Math.abs(die.dy) > 10) {
                    if (Random.nextInt(5) == 0) die.value = Random.nextInt(6) + 1
-                } else {
-                    // Snap rotation when slowing down to look neat-ish? 
-                    // Or usually dice just stop.
                 }
 
                 // Stop condition
-                if (abs(die.dx) < 1.5f && abs(die.dy) < 1.5f && abs(die.dhRotation) < 1.5f) {
+                if (Math.abs(die.dx) < 1.5f && Math.abs(die.dy) < 1.5f && Math.abs(die.dhRotation) < 1.5f) {
                     die.state = DieState.SETTLED
                     // Use expected result if available
                     val idx = dice.indexOf(die)
@@ -236,6 +283,15 @@ class DiceBoardView @JvmOverloads constructor(
                     } else {
                         Random.nextInt(6) + 1
                     }
+                    die.trail.clear()
+                }
+
+                // Update Trail
+                if (moving && (Math.abs(die.dx) > 5 || Math.abs(die.dy) > 5)) {
+                    die.trail.add(PointF(die.x + die.size / 2, die.y + die.size / 2))
+                    if (die.trail.size > 8) die.trail.removeAt(0)
+                } else if (die.trail.isNotEmpty()) {
+                    die.trail.removeAt(0)
                 }
             } else if (die.state == DieState.DRAGGING) {
                 allSettled = false
@@ -246,7 +302,8 @@ class DiceBoardView @JvmOverloads constructor(
             }
 
             // Dice-to-Dice Collision Detection
-            for (j in (dice.indexOf(die) + 1) until dice.size) {
+            val limit = if (collisionEnabled) dice.size else 0
+            for (j in (dice.indexOf(die) + 1) until limit) {
                 val other = dice[j]
                 if (die.state != DieState.ROLLING && other.state != DieState.ROLLING) continue
 
@@ -306,9 +363,11 @@ class DiceBoardView @JvmOverloads constructor(
                         }
                         
                         // Play sound if impact is hard enough
-                        if (Math.abs(velAlongNormal) > 5) {
-                            playShakeSound() // Using shake sound as collision placeholder
-                            vibrate(15)
+                        if (Math.abs(velAlongNormal) > 2) {
+                            // Scale volume based on impact (2.0 -> 0.2, 40.0 -> 1.0)
+                            val intensity = (Math.abs(velAlongNormal) / 40f).coerceIn(0.2f, 1.0f)
+                            playShakeSound(intensity)
+                            vibrate((intensity * 20).toLong().coerceAtLeast(5))
                         }
                     }
                 }
@@ -321,6 +380,19 @@ class DiceBoardView @JvmOverloads constructor(
             // Draw Glow for Crits
             if (die.canCrit && !die.isNegative && die.value >= die.critRangeStart && die.state == DieState.SETTLED) {
                 canvas.drawCircle(die.x + die.size/2, die.y + die.size/2, die.size * 0.8f, glowPaint)
+            }
+
+            // Draw Trail
+            if (die.trail.size > 1) {
+                val trailPath = Path()
+                trailPath.moveTo(die.trail[0].x, die.trail[0].y)
+                for (i in 1 until die.trail.size) {
+                    trailPath.lineTo(die.trail[i].x, die.trail[i].y)
+                }
+                trailPaint.color = die.color
+                trailPaint.alpha = 100
+                // Fade out effect could be better with separate segments but this is a good start
+                canvas.drawPath(trailPath, trailPaint)
             }
             
             // Draw Die
@@ -429,7 +501,7 @@ class DiceBoardView @JvmOverloads constructor(
                     die.y += dy
                     lastTouchX = x
                     lastTouchY = y
-                    playShakeSound()
+                    playShakeSound(0.3f)
                     invalidate()
                     return true
                 }
@@ -443,6 +515,7 @@ class DiceBoardView @JvmOverloads constructor(
                     
                     // ALWAYS ROLL
                     die.state = DieState.ROLLING
+                    onRollStarted?.invoke() // Notify roll start on manual flick
                     die.dx = vx * 0.015f 
                     die.dy = vy * 0.015f
                     // Add slight rotation if none exists to ensure motion check passes
@@ -469,22 +542,67 @@ class DiceBoardView @JvmOverloads constructor(
      * Programmatically triggers a roll animation for observers.
      */
     fun autoFlick() {
+        if (dice.isEmpty()) return
+        
+        onRollStarted?.invoke()
+        
         dice.forEach { die ->
-                die.state = DieState.ROLLING
-                // Randomized flick - Increased for stronger shake/flick feel
-                die.dx = (Random.nextFloat() * 120f - 60f)
-                die.dy = (Random.nextFloat() * 120f - 60f)
-                die.dhRotation = (Random.nextFloat() * 100f - 50f)
+            die.state = DieState.ROLLING
+            die.dx = (Random.nextFloat() * 100 - 50)
+            die.dy = (Random.nextFloat() * 100 - 50)
+            die.dhRotation = (Random.nextFloat() * 60 - 30)
         }
         playThrowSound()
-        vibrate(30)
+        vibrate(50)
         invalidate()
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        accelerometer?.let {
+            sensorManager?.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
+        }
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         soundPool?.release()
         soundPool = null
+        sensorManager?.unregisterListener(this)
+    }
+
+    override fun onWindowVisibilityChanged(visibility: Int) {
+        super.onWindowVisibilityChanged(visibility)
+        if (visibility == View.VISIBLE) {
+            accelerometer?.let {
+                sensorManager?.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
+            }
+        } else {
+            sensorManager?.unregisterListener(this)
+        }
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        event ?: return
+        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+            val x = event.values[0]
+            val y = event.values[1]
+            val z = event.values[2]
+
+            val acceleration = Math.sqrt((x * x + y * y + z * z).toDouble()).toFloat() - SensorManager.GRAVITY_EARTH
+            val now = System.currentTimeMillis()
+
+            if (acceleration > SHAKE_THRESHOLD) {
+                if (now - lastAccelTime > SHAKE_TIMEOUT) {
+                    lastAccelTime = now
+                    autoFlick()
+                }
+            }
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        // Not used
     }
 
     private fun manipulateColor(color: Int, factor: Float): Int {
