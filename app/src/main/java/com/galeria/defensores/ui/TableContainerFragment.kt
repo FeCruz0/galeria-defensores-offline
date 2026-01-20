@@ -65,6 +65,21 @@ class TableContainerFragment : Fragment() {
                     }
                     true
                 }
+                R.id.action_combat -> {
+                    // Open Combat Tracker
+                    val args = Bundle().apply { putString("table_id", tableId) }
+                    val frag = com.galeria.defensores.ui.CombatTrackerFragment().apply { arguments = args }
+                    // Show in a dialog or replace a container?
+                    // Let's use a BottomSheet for now or just replace main view?
+                    // Given the complexity, maybe a DialogFragment is better or a full screen fragment.
+                    // Let's use Full Screen Dialog logic using setTransition.
+                    parentFragmentManager.beginTransaction()
+                        .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                        .add(R.id.fragment_container, frag) // Assuming main activity has this container
+                        .addToBackStack("CombatTracker")
+                        .commit()
+                    true
+                }
                 else -> false
             }
         }

@@ -128,6 +128,13 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         saveCharacter()
     }
 
+    fun updateScale(scale: Int) {
+        val currentChar = _character.value ?: return
+        currentChar.scale = scale
+        _character.value = currentChar
+        saveCharacter()
+    }
+
     fun updateHidden(isHidden: Boolean) {
         val currentChar = _character.value ?: return
         currentChar.isHidden = isHidden

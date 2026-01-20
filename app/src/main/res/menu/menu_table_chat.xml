@@ -6,4 +6,9 @@
         android:icon="@android:drawable/ic_menu_my_calendar"
         android:title="Personagens"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_combat"
+        android:icon="@android:drawable/ic_menu_agenda" 
+        android:title="Combate"
+        app:showAsAction="ifRoom" />
 </menu>

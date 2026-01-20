@@ -9,6 +9,7 @@ data class Character(
     var ownerName: String = "", // nome_do_proprietario
     var tableId: String = "", // id_da_mesa
     var imageUrl: String = "", // avatar_url
+    var scale: Int = 0, // escala: 0=Ningen, 1=Sugoi, 2=Kiodai, 3=Kami
     
     // Attributes
     var forca: Int = 0,

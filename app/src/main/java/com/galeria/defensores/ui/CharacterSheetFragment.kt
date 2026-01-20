@@ -249,6 +249,9 @@ class CharacterSheetFragment : Fragment() {
                 val isMaster = table?.masterId == currentUserId || table?.masterId == "mock-master-id"
                 val isOwner = char.ownerId == currentUserId
                 canEdit = isMaster || isOwner
+                val canEditScale = isMaster // Strictly Master unless not in table? Requirement: "apenas o mestre".
+                // If not in a table, isOwner could edit? Let's assume yes if tableId is empty.
+                val effectivelyCanEditScale = if (char.tableId.isEmpty()) isOwner else isMaster
                 
                 // Load Damage Types if not already associated (or just refresh)
                 if (char.tableId.isNotEmpty()) {
@@ -299,6 +302,32 @@ class CharacterSheetFragment : Fragment() {
                 // Enable/Disable Status Editing
                 updateStatusPermissions(view.findViewById(R.id.status_pv), canEdit)
                 updateStatusPermissions(view.findViewById(R.id.status_pm), canEdit)
+
+                // Scale Logic
+                val scaleText = view.findViewById<TextView>(R.id.text_scale)
+                val scaleName = when(char.scale) {
+                    0 -> "Ningen (x1)"
+                    1 -> "Sugoi (x10)"
+                    2 -> "Kiodai (x100)"
+                    3 -> "Kami (x1000)"
+                    else -> "Ningen (x1)"
+                }
+                scaleText.text = "Escala: $scaleName"
+
+                scaleText.setOnClickListener {
+                    if (effectivelyCanEditScale) {
+                         val scales = arrayOf("Ningen (x1)", "Sugoi (x10)", "Kiodai (x100)", "Kami (x1000)")
+                         androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                             .setTitle("Alterar Escala de Poder")
+                             .setSingleChoiceItems(scales, char.scale) { dialog, which ->
+                                 viewModel.updateScale(which)
+                                 dialog.dismiss()
+                             }
+                             .show()
+                    } else if (canEdit) {
+                        Toast.makeText(context, "Apenas o Mestre pode alterar a Escala.", Toast.LENGTH_SHORT).show()
+                    }
+                }
 
                 // UNIQUE ADVANTAGE LOGIC
                 viewModel.loadUniqueAdvantages(effectiveTableId)

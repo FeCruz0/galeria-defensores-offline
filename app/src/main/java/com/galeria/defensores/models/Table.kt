@@ -16,5 +16,6 @@ data class Table(
     val rollHistory: MutableList<RollResult> = mutableListOf(), // historico_rolagens
     var customDamageTypes: MutableList<String> = mutableListOf(), // tipos_dano_customizados
     @get:PropertyName("customUniqueAdvantages") var customUniqueAdvantages: MutableList<UniqueAdvantage> = mutableListOf(),
-    @get:PropertyName("lastVisualRoll") var lastVisualRoll: VisualRoll? = null
+    @get:PropertyName("lastVisualRoll") var lastVisualRoll: VisualRoll? = null,
+    @get:PropertyName("combatState") var combatState: CombatState? = null
 )

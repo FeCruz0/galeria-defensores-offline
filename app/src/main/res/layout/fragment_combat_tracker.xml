@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#111827"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/text_combat_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="COMBATE: Round 1"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_combatants"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Action Area -->
+    <LinearLayout
+        android:id="@+id/layout_combat_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@drawable/bg_rounded_border"
+        android:backgroundTint="#1F2937">
+
+        <TextView
+            android:id="@+id/text_action_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Aguardando..."
+            android:textColor="#D1D5DB"
+            android:gravity="center"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btn_combat_action"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="AÇÃO"
+            android:backgroundTint="#3B82F6"
+            android:textColor="#FFFFFF" />
+            
+        <Button
+            android:id="@+id/btn_next_turn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Próximo Turno"
+            android:backgroundTint="#10B981"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp" 
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+</LinearLayout>
