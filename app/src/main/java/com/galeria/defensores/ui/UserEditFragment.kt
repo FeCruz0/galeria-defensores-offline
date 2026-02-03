@@ -10,7 +10,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.galeria.defensores.R
-import com.galeria.defensores.data.FirebaseAuthManager
 import com.galeria.defensores.data.SessionManager
 import com.galeria.defensores.data.UserRepository
 import com.galeria.defensores.models.User
@@ -61,7 +60,7 @@ class UserEditFragment : Fragment() {
         etCity = view.findViewById(R.id.input_city)
         etState = view.findViewById(R.id.input_state)
         etCountry = view.findViewById(R.id.input_country)
-        etPasswordConfirm = view.findViewById(R.id.input_password_confirm)
+        // etPasswordConfirm = view.findViewById(R.id.input_password_confirm) // Not needed
         btnSearchCep = view.findViewById(R.id.btn_search_cep)
         btnSave = view.findViewById(R.id.btn_save_changes)
         btnCancel = view.findViewById(R.id.btn_back)
@@ -163,17 +162,11 @@ class UserEditFragment : Fragment() {
     }
 
     private fun handleSave() {
-        val password = etPasswordConfirm.text.toString()
-        if (password.isEmpty()) {
-            Toast.makeText(context, "Digite sua senha para confirmar", Toast.LENGTH_SHORT).show()
-            return
-        }
-
+        // Validation simplified for offline
         val currentUser = SessionManager.currentUser ?: return
         val newUsername = etUsername.text.toString().trim()
-        val currentUsername = currentUser.name
-
-        // Reading UI fields here guarantees Main Thread execution
+        
+        // Reading UI fields
         val newAbout = etAbout.text.toString().trim()
         val newCep = etCep.text.toString().trim()
         val newCity = etCity.text.toString().trim()
@@ -187,73 +180,11 @@ class UserEditFragment : Fragment() {
             Toast.makeText(context, formatError, Toast.LENGTH_SHORT).show()
             return
         }
-
-        // Username Change Rules
-        if (newUsername != currentUsername) {
-            // Check monthly limit
-            val thirtyDaysMs = 30L * 24 * 60 * 60 * 1000
-            val timeSinceLastChange = System.currentTimeMillis() - currentUser.lastUsernameChangeAt
-            
-            if (currentUser.lastUsernameChangeAt > 0 && timeSinceLastChange < thirtyDaysMs) {
-                val daysRemaining = 30 - (timeSinceLastChange / (24 * 60 * 60 * 1000))
-                Toast.makeText(context, "Aguarde $daysRemaining dias para mudar o nome novamente.", Toast.LENGTH_LONG).show()
-                return
-            }
-            
-            // Check uniqueness
-            lifecycleScope.launch {
-                try {
-                    val isTaken = UserRepository.isUsernameTaken(newUsername)
-                    if (isTaken) {
-                        layoutUsername.error = "Nome de usuário já existe"
-                        context?.let { Toast.makeText(it, "Nome de usuário já existe", Toast.LENGTH_SHORT).show() }
-                    } else {
-                        reauthenticateAndSave(password, true, newUsername, newAbout, newCep, newCity, newState, newCountry)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    context?.let { Toast.makeText(it, "Erro ao verificar nome de usuário: ${e.message}", Toast.LENGTH_SHORT).show() }
-                }
-            }
-        } else {
-            // Not changing username, just other info
-            reauthenticateAndSave(password, false, newUsername, newAbout, newCep, newCity, newState, newCountry)
-        }
-    }
-
-    private fun reauthenticateAndSave(
-        password: String, 
-        usernameChanged: Boolean,
-        newUsername: String,
-        newAbout: String,
-        newCep: String,
-        newCity: String,
-        newState: String,
-        newCountry: String
-    ) {
-        val currentUser = SessionManager.currentUser ?: return
-        val email = currentUser.email
-
-        if (email.isEmpty()) {
-            Toast.makeText(context, "Erro: E-mail não encontrado. Faça login novamente.", Toast.LENGTH_LONG).show()
-            return
-        }
-
-        try {
-            FirebaseAuthManager.login(email, password, {
-                // Auth success, callback might be on background thread. switch to lifecycleScope (Main)
-                lifecycleScope.launch {
-                    saveProfile(usernameChanged, newUsername, newAbout, newCep, newCity, newState, newCountry)
-                }
-            }, {
-                // Error callback also needs UI thread handling
-                 lifecycleScope.launch {
-                     context?.let { Toast.makeText(it, "Senha incorreta.", Toast.LENGTH_SHORT).show() }
-                 }
-            })
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(context, "Erro no login: ${e.message}", Toast.LENGTH_SHORT).show()
+        
+        // Directly save
+        val usernameChanged = newUsername != currentUser.name
+        lifecycleScope.launch {
+            saveProfile(usernameChanged, newUsername, newAbout, newCep, newCity, newState, newCountry)
         }
     }
 

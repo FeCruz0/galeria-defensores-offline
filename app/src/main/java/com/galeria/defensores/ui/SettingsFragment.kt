@@ -91,11 +91,6 @@ class SettingsFragment : Fragment() {
             }.show(parentFragmentManager, "color_picker")
         }
 
-        view.findViewById<View>(R.id.btn_logout).setOnClickListener {
-            com.galeria.defensores.data.FirebaseAuthManager.logout()
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, LoginFragment())
-                .commit()
-        }
+        view.findViewById<View>(R.id.btn_logout).visibility = View.GONE
     }
 }

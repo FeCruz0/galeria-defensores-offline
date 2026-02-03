@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.galeria.defensores.R
 import com.galeria.defensores.models.RollType
 import com.galeria.defensores.models.Spell
+import com.galeria.defensores.models.Buff
 import com.galeria.defensores.viewmodels.CharacterViewModel
 import androidx.activity.result.contract.ActivityResultContracts
 import com.bumptech.glide.Glide
@@ -80,7 +81,7 @@ class CharacterSheetFragment : Fragment() {
         
         cropImage.launch(uCrop.getIntent(requireContext()))
     }
-    private lateinit var chatViewModel: com.galeria.defensores.viewmodels.ChatViewModel
+
     private var characterId: String? = null
     private var tableId: String? = null
 
@@ -112,7 +113,7 @@ class CharacterSheetFragment : Fragment() {
             tableId = it.getString(ARG_TABLE_ID)
         }
         viewModel = ViewModelProvider(this).get(CharacterViewModel::class.java)
-        chatViewModel = ViewModelProvider(this).get(com.galeria.defensores.viewmodels.ChatViewModel::class.java)
+
     }
 
     override fun onCreateView(
@@ -167,9 +168,7 @@ class CharacterSheetFragment : Fragment() {
         // Observe Data
         viewModel.loadCharacter(characterId, tableId)
         
-        if (tableId != null) {
-            chatViewModel.setTableId(tableId!!)
-        }
+
 
         // Virtual Roll Observer
         viewModel.virtualRollRequest.observe(viewLifecycleOwner) { event ->
@@ -191,20 +190,7 @@ class CharacterSheetFragment : Fragment() {
             }
         }
 
-        // Observer for broadcast rolls from other players
-        chatViewModel.visualRollBroadcast.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.let { visualRoll ->
-                val frag = com.galeria.defensores.ui.VirtualDiceFragment.newPassiveInstance(
-                    diceCount = visualRoll.diceCount,
-                    expectedResults = visualRoll.diceValues,
-                    canCrit = visualRoll.canCrit,
-                    isNegative = visualRoll.isNegative,
-                    critRangeStart = visualRoll.critRangeStart,
-                    diceProperties = visualRoll.diceProperties
-                )
-                frag.show(parentFragmentManager, "virtual_dice_broadcast")
-            }
-        }
+
 
         // Virtual Roll Result Listener
         parentFragmentManager.setFragmentResultListener(
@@ -655,6 +641,22 @@ class CharacterSheetFragment : Fragment() {
                 )
                 invRecycler.adapter = invAdapter
     
+                // Update Buffs List
+                val buffsRecycler = view.findViewById<RecyclerView>(R.id.recycler_buffs)
+                buffsRecycler.layoutManager = LinearLayoutManager(context)
+                val buffsAdapter = BuffsAdapter(char.buffs, isMaster) { buffToDelete ->
+                     viewModel.removeBuff(buffToDelete)
+                }
+                buffsRecycler.adapter = buffsAdapter
+                
+                view.findViewById<Button>(R.id.btn_add_buff).visibility = if (isMaster) View.VISIBLE else View.GONE
+                view.findViewById<Button>(R.id.btn_add_buff).setOnClickListener {
+                     val dialog = EditBuffDialogFragment(null) { newBuff ->
+                         viewModel.addBuff(newBuff)
+                     }
+                     dialog.show(parentFragmentManager, "AddBuffDialog")
+                }
+    
                 // Update Notes (Prevent overwriting if user is typing)
                 if (!view.findViewById<EditText>(R.id.edit_notes).hasFocus()) {
                      view.findViewById<EditText>(R.id.edit_notes).setText(androidx.core.text.HtmlCompat.fromHtml(char.anotacoes, androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY))
@@ -686,10 +688,10 @@ class CharacterSheetFragment : Fragment() {
         viewModel.rollEvent.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let { result ->
                 // Send to Chat if in a table
-                if (tableId != null) {
-                     val avatarUrl = viewModel.character.value?.imageUrl
-                     chatViewModel.sendRollResult(result, avatarUrl)
-                }
+                // if (tableId != null) {
+                //      val avatarUrl = viewModel.character.value?.imageUrl
+                //      chatViewModel.sendRollResult(result, avatarUrl)
+                // }
             }
         }
 
@@ -1013,5 +1015,37 @@ class CharacterSheetFragment : Fragment() {
         valueView.text = "$current / $max"
         barView.max = max
         barView.progress = current
+    }
+    private inner class BuffsAdapter(
+        private val items: List<Buff>,
+        private val canEdit: Boolean,
+        private val onDelete: (Buff) -> Unit
+    ) : RecyclerView.Adapter<BuffsAdapter.ViewHolder>() {
+
+        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            val nameText: TextView = view.findViewById(R.id.text_advantage_name)
+            val descText: TextView = view.findViewById(R.id.text_advantage_description)
+            val deleteBtn: View = view.findViewById(R.id.btn_delete_item)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_advantage, parent, false)
+            return ViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val item = items[position]
+            holder.nameText.text = "${item.name} (${if(item.value >= 0) "+"+item.value else item.value})"
+            holder.descText.text = "Alvo: ${item.targetType}"
+            
+            if (canEdit) {
+                holder.deleteBtn.visibility = View.VISIBLE
+                holder.deleteBtn.setOnClickListener { onDelete(item) }
+            } else {
+                holder.deleteBtn.visibility = View.GONE
+            }
+        }
+
+        override fun getItemCount() = items.size
     }
 }

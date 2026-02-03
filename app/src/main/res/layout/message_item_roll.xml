@@ -16,13 +16,7 @@
         android:textSize="12sp"
         tools:text="Nome do Personagem" />
 
-    <include
-        android:id="@+id/layout_reply_preview"
-        layout="@layout/layout_reply_preview"
-        android:visibility="gone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp" />
+
 
     <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"

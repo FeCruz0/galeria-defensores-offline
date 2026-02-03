@@ -6,83 +6,83 @@ import kotlinx.coroutines.tasks.await
 import com.google.firebase.firestore.Source
 
 object CharacterRepository {
-    private val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
-    private val charactersCollection = db.collection("characters")
+    private const val PREFIX = "char_"
+
+    // Needs Context to access filesDir. 
+    // Ideally we inject Context, but for this refactor we can use the Application Context 
+    // if we had access to it, or pass it in. 
+    // Since this is an Object, passing Context to every method is the cleanest way without Dagger/Hilt.
+    // However, existing calls don't pass Context.
+    // We can hold a reference to applicationContext via a simplified init method call from MainActivity 
+    // or just assume we modify calls (which is a lot).
+    // Let's use a "lateinit var context" initialized in MainActivity/SessionManager.
+    
+    private lateinit var appContext: android.content.Context
+
+    fun init(context: android.content.Context) {
+        appContext = context.applicationContext
+    }
+    
+    // Safety check helper
+    private fun getContext(): android.content.Context? {
+        return if (::appContext.isInitialized) appContext else null
+    }
 
     suspend fun getCharacters(tableId: String? = null): List<Character> {
-        return try {
-            val query = if (tableId != null) {
-                charactersCollection.whereEqualTo("tableId", tableId)
-            } else {
-                charactersCollection
+        val context = getContext() ?: return emptyList()
+        val allFiles = LocalFileManager.listFiles(context, PREFIX)
+        val characters = mutableListOf<Character>()
+        
+        for (file in allFiles) {
+            val char = LocalFileManager.readJson(context, file.name, Character::class.java)
+            if (char != null) {
+                if (tableId == null || char.tableId == tableId) {
+                    characters.add(char)
+                }
             }
-            val snapshot = query.get().await()
-            snapshot.toObjects(Character::class.java)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emptyList()
         }
+        return characters
     }
 
     suspend fun getCharactersForUser(userId: String): List<Character> {
-        return try {
-            // FORCE SERVER FETCH to avoid stale cache issues
-            val snapshot = charactersCollection.whereEqualTo("ownerId", userId).get(Source.SERVER).await()
-            snapshot.toObjects(Character::class.java)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // Fallback to cache if server fails? Or just return empty? 
-            // Better empty to indicate error or maybe fallback
-            try {
-                 val snapshot = charactersCollection.whereEqualTo("ownerId", userId).get().await()
-                 snapshot.toObjects(Character::class.java)
-            } catch (ex: Exception) {
-                emptyList()
+        // In offline mode, current user owns everything basically, 
+        // or we filter by the mock ID "offline_user_id". 
+        // Let's just return all characters matching the ownerId 
+        // (which should be "offline_user_id" for new ones).
+        
+        val context = getContext() ?: return emptyList()
+        val allFiles = LocalFileManager.listFiles(context, PREFIX)
+        val characters = mutableListOf<Character>()
+        
+        for (file in allFiles) {
+            val char = LocalFileManager.readJson(context, file.name, Character::class.java)
+            if (char != null && char.ownerId == userId) {
+                characters.add(char)
             }
         }
+        return characters
     }
 
     suspend fun getCharacter(id: String): Character? {
-        return try {
-            val doc = charactersCollection.document(id).get().await()
-            doc.toObject(Character::class.java)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+        val context = getContext() ?: return null
+        return LocalFileManager.readJson(context, "$PREFIX$id.json", Character::class.java)
     }
 
     suspend fun saveCharacter(character: Character) {
-        try {
-            charactersCollection.document(character.id).set(character).await()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        val context = getContext() ?: return
+        LocalFileManager.saveJson(context, "$PREFIX${character.id}.json", character)
     }
 
     suspend fun deleteCharacter(id: String): Boolean {
-        android.util.Log.d("RepoDebug", "Attempting to delete character ID: $id")
-        return try {
-            charactersCollection.document(id).delete().await()
-            android.util.Log.d("RepoDebug", "Delete successful for ID: $id")
-            true
-        } catch (e: Exception) {
-            android.util.Log.e("RepoDebug", "Delete FAILED for ID: $id", e)
-            e.printStackTrace()
-            false
-        }
+        val context = getContext() ?: return false
+        return LocalFileManager.deleteFile(context, "$PREFIX$id.json")
     }
 
     suspend fun unlinkCharactersFromTable(tableId: String) {
-        try {
-            val snapshot = charactersCollection.whereEqualTo("tableId", tableId).get().await()
-            val batch = db.batch()
-            for (document in snapshot.documents) {
-                batch.update(document.reference, "tableId", "")
-            }
-            batch.commit().await()
-        } catch (e: Exception) {
-            e.printStackTrace()
+        val characters = getCharacters(tableId)
+        for (char in characters) {
+            val updatedChar = char.copy(tableId = "")
+            saveCharacter(updatedChar)
         }
     }
 }

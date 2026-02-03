@@ -647,6 +647,30 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         saveCharacter()
     }
 
+    fun addBuff(buff: com.galeria.defensores.models.Buff) {
+        val currentChar = _character.value ?: return
+        val newBuffs = currentChar.buffs.toMutableList()
+        newBuffs.add(buff)
+        currentChar.buffs = newBuffs
+        _character.value = currentChar
+        saveCharacter()
+    }
+    
+    fun removeBuff(buff: com.galeria.defensores.models.Buff) {
+        val currentChar = _character.value ?: return
+        val newBuffs = currentChar.buffs.toMutableList()
+        newBuffs.removeIf { it.name == buff.name && it.targetType == buff.targetType && it.value == buff.value } // Buff has no ID?
+        // Ideally Buff should have ID or use equals.
+        // Assuming data class equality works if no ID.
+        // Or remove by object reference which won't work across recreations easily.
+        // Let's rely on data class equals unless it doesn't have ID.
+        // Step 216 says Buff has name, valule, targetType. No ID.
+        // So removal by equality is correct.
+        currentChar.buffs = newBuffs
+        _character.value = currentChar
+        saveCharacter()
+    }
+
     // --- Unique Advantage Logic ---
     
     private val _availableUniqueAdvantages = MutableLiveData<List<com.galeria.defensores.models.UniqueAdvantage>>()

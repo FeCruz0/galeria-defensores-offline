@@ -779,6 +779,32 @@
             android:text="Adicionar Item"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
+        <!-- Buffs / Debuffs -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="BUFFS / DEBUFFS"
+            android:textColor="@color/text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_buffs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btn_add_buff"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Adicionar Buff/Debuff"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
         <!-- Anotações -->
         <TextView
             android:layout_width="match_parent"

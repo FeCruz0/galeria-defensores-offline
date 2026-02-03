@@ -8,86 +8,29 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 object NotificationRepository {
-    private val db = FirebaseFirestore.getInstance()
-    private val notificationsCollection = db.collection("notifications")
-
+    // Offline: No notifications
+    
     suspend fun sendNotification(notification: Notification) {
-        try {
-            notificationsCollection.document(notification.id).set(notification).await()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        // No-op
     }
 
     suspend fun getNotificationsForUser(userId: String): List<Notification> {
-        return try {
-            val snapshot = notificationsCollection
-                .whereEqualTo("toUserId", userId)
-                .whereEqualTo("status", "PENDING")
-                .get()
-                .await()
-            val list = snapshot.toObjects(Notification::class.java).sortedByDescending { it.timestamp }
-            android.util.Log.d("NotificationDebug", "Fetched ${list.size} pending notifications for user $userId")
-            list
-        } catch (e: Exception) {
-            e.printStackTrace()
-            android.util.Log.e("NotificationDebug", "Error fetching notifications: ${e.message}")
-            emptyList()
-        }
+        return emptyList()
     }
     
-    // Check if there is already a pending request for this user and table
     suspend fun hasPendingRequest(userId: String, tableId: String): Boolean {
-        return try {
-            val snapshot = notificationsCollection
-                .whereEqualTo("fromUserId", userId)
-                .whereEqualTo("tableId", tableId)
-                .whereEqualTo("status", "PENDING")
-                .get()
-                .await()
-            !snapshot.isEmpty
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
+        return false
     }
 
     suspend fun updateStatus(notificationId: String, status: NotificationStatus) {
-        try {
-            notificationsCollection.document(notificationId).update("status", status).await()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        // No-op
     }
 
     suspend fun deleteNotificationsForTable(tableId: String) {
-        try {
-            val snapshot = notificationsCollection.whereEqualTo("tableId", tableId).get().await()
-            val batch = db.batch()
-            for (document in snapshot.documents) {
-                batch.delete(document.reference)
-            }
-            batch.commit().await()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        // No-op
     }
 
-    fun observeNotificationsCount(userId: String): kotlinx.coroutines.flow.Flow<Int> = kotlinx.coroutines.flow.callbackFlow {
-        val listener = notificationsCollection
-            .whereEqualTo("toUserId", userId)
-            .whereEqualTo("status", "PENDING")
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    close(error) // Cancel the flow on error
-                    return@addSnapshotListener
-                }
-                
-                if (snapshot != null) {
-                    trySend(snapshot.size())
-                }
-            }
-        
-        awaitClose { listener.remove() }
+    fun observeNotificationsCount(userId: String): kotlinx.coroutines.flow.Flow<Int> = kotlinx.coroutines.flow.flow {
+        emit(0)
     }
 }

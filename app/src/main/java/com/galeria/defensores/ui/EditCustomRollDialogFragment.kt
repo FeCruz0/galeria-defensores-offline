@@ -37,6 +37,9 @@ class EditCustomRollDialogFragment(
         val recycler = view.findViewById<RecyclerView>(R.id.recycler_roll_components)
         val btnAdd = view.findViewById<Button>(R.id.btn_add_component)
         val btnDelete = view.findViewById<Button>(R.id.btn_delete_roll)
+        
+        val spinnerType = view.findViewById<Spinner>(R.id.spinner_roll_type)
+        val editPmCost = view.findViewById<EditText>(R.id.edit_pm_cost)
 
         // Map UI String -> Internal Key
         val attrMap = mapOf(
@@ -48,6 +51,23 @@ class EditCustomRollDialogFragment(
             "Poder de Fogo" to "poderFogo"
         )
         val attrKeys = attrMap.values.toList()
+        
+        // Define Roll Types
+        val typeMap = mapOf(
+            "Ataque" to "ATTACK",
+            "Defesa" to "DEFENSE",
+            "Magia" to "MAGIC",
+            "Teste" to "TEST",
+            "Iniciativa" to "INITIATIVE",
+            "Outro" to "OTHER"
+        )
+        val typeKeys = typeMap.values.toList()
+        val typeDisplay = typeMap.keys.toList()
+        
+        // Setup Type Spinner
+        val typeAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, typeDisplay)
+        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerType.adapter = typeAdapter
         
         if (existingRoll != null) {
             editName.setText(existingRoll.name)
@@ -64,6 +84,11 @@ class EditCustomRollDialogFragment(
             
             val sIndex = attrKeys.indexOf(existingRoll.secondaryAttribute).coerceAtLeast(0)
             spinnerSecondary.setSelection(sIndex)
+            
+            // Set Type and PM
+            val typeIndex = typeKeys.indexOf(existingRoll.type).coerceAtLeast(typeKeys.indexOf("OTHER"))
+            spinnerType.setSelection(typeIndex)
+            editPmCost.setText(existingRoll.pmCost.toString())
             
             checkAccumulate.isChecked = existingRoll.accumulateCrit
             
@@ -114,6 +139,9 @@ class EditCustomRollDialogFragment(
                 val pAttr = attrKeys[spinnerPrimary.selectedItemPosition]
                 val sAttr = attrKeys[spinnerSecondary.selectedItemPosition]
                 val accumulate = checkAccumulate.isChecked
+                
+                val typeKey = typeKeys[spinnerType.selectedItemPosition]
+                val pmCost = editPmCost.text.toString().toIntOrNull() ?: 0
 
                 val newRoll = existingRoll?.copy(
                     name = name,
@@ -122,7 +150,9 @@ class EditCustomRollDialogFragment(
                     globalModifier = globalMod,
                     primaryAttribute = pAttr,
                     secondaryAttribute = sAttr,
-                    accumulateCrit = accumulate
+                    accumulateCrit = accumulate,
+                    type = typeKey,
+                    pmCost = pmCost
                 ) ?: CustomRoll(
                     name = name,
                     description = desc,
@@ -130,7 +160,9 @@ class EditCustomRollDialogFragment(
                     globalModifier = globalMod,
                     primaryAttribute = pAttr,
                     secondaryAttribute = sAttr,
-                    accumulateCrit = accumulate
+                    accumulateCrit = accumulate,
+                    type = typeKey,
+                    pmCost = pmCost
                 )
                 onSave(newRoll)
             }

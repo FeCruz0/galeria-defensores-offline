@@ -5,83 +5,44 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
 object UserRepository {
-    private val db = FirebaseFirestore.getInstance()
-    private val usersCollection = db.collection("users")
+    // In Offline Mode, we only really have the "Device Owner" user.
+    // 'findUserByPhone' for invites doesn't make sense unless we scan contacts or something, 
+    // but for now we'll just mock it.
 
     suspend fun findUserByPhone(phone: String): User? {
-        return try {
-            val snapshot = usersCollection.whereEqualTo("phoneNumber", phone).get().await()
-            if (!snapshot.isEmpty) {
-                snapshot.documents[0].toObject(User::class.java)
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+        // Mock: If phone matches current user, return it.
+        val current = SessionManager.currentUser
+        return if (current?.phoneNumber == phone) current else null
     }
 
     suspend fun registerUser(user: User) {
-        try {
-            val docRef = usersCollection.document(user.id)
-            val snapshot = docRef.get().await()
-
-            if (!snapshot.exists()) {
-                val newUser = user.copy(
-                    createdAt = System.currentTimeMillis(),
-                    updatedAt = System.currentTimeMillis()
-                )
-                docRef.set(newUser).await()
-            }
-            // If user exists, do nothing. We do not want to overwrite profile data with Auth data on login.
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        // Save to Session or local file
+        // For simplicity, just update SessionManager which is strictly in-memory or SharedPreferences in the real implementation
+        // But here SessionManager is mocked.
+        // We can save to a file `user_profile.json` using LocalFileManager if we want persistence.
+        com.galeria.defensores.data.LocalFileManager.saveJson(SessionManager.context, "user_profile.json", user)
     }
     
     suspend fun updateUser(user: User) {
-        try {
-            val updatedUser = user.copy(updatedAt = System.currentTimeMillis())
-            usersCollection.document(user.id).set(updatedUser).await()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        // Same as register
+        com.galeria.defensores.data.LocalFileManager.saveJson(SessionManager.context, "user_profile.json", user)
     }
 
     suspend fun updateLastLogin(userId: String) {
-        try {
-            usersCollection.document(userId).update("lastLoginAt", System.currentTimeMillis()).await()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        // No-op or update local timestamp
     }
     
     suspend fun getUser(id: String): User? {
-        return try {
-            val doc = usersCollection.document(id).get().await()
-            doc.toObject(User::class.java)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+         // Return current user if ID matches, or read from "contacts" if we had them.
+         val current = SessionManager.currentUser
+         return if (current?.id == id) current else null
     }
 
     suspend fun isUsernameTaken(name: String): Boolean {
-        return try {
-            val snapshot = usersCollection.whereEqualTo("name", name).get().await()
-            !snapshot.isEmpty
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false // Assume not taken on error to avoid blocking, or handle differently
-        }
+        return false // Offline mode, no collision check needed with others
     }
+    
     suspend fun deleteUser(userId: String) {
-        try {
-            usersCollection.document(userId).delete().await()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw e
-        }
+        com.galeria.defensores.data.LocalFileManager.deleteFile(SessionManager.context, "user_profile.json")
     }
 }

@@ -7,163 +7,125 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
 object TableRepository {
-    private val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
-    private val tablesCollection = db.collection("tables")
+    private const val PREFIX = "table_"
+    
+    // Similar Context strategy as CharacterRepository
+    private lateinit var appContext: android.content.Context
+
+    fun init(context: android.content.Context) {
+        appContext = context.applicationContext
+    }
+    
+    private fun getContext(): android.content.Context? {
+        return if (::appContext.isInitialized) appContext else null
+    }
 
     suspend fun getTables(): List<Table> {
-        return try {
-            val snapshot = tablesCollection.get().await()
-            snapshot.toObjects(Table::class.java)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emptyList()
+        val context = getContext() ?: return emptyList()
+        val allFiles = LocalFileManager.listFiles(context, PREFIX)
+        val tables = mutableListOf<Table>()
+        
+        for (file in allFiles) {
+            val table = LocalFileManager.readJson(context, file.name, Table::class.java)
+            if (table != null) {
+                 tables.add(table)
+            }
         }
+        return tables
     }
 
     suspend fun getTable(id: String): Table? {
-        return try {
-            val doc = tablesCollection.document(id).get().await()
-            doc.toObject(Table::class.java)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+         val context = getContext() ?: return null
+         return LocalFileManager.readJson(context, "$PREFIX$id.json", Table::class.java)
     }
 
     suspend fun addTable(table: Table): Boolean {
-        return try {
-            tablesCollection.document(table.id).set(table).await()
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
+        // Identical to save/update
+        return updateTable(table)
     }
 
     suspend fun updateTable(table: Table): Boolean {
-        return try {
-            tablesCollection.document(table.id).set(table).await()
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
+        val context = getContext() ?: return false
+        LocalFileManager.saveJson(context, "$PREFIX${table.id}.json", table)
+        return true
     }
 
-
-
     suspend fun deleteTable(id: String): Boolean {
-        return try {
-            // 1. Delete pending notifications for this table
-            com.galeria.defensores.data.NotificationRepository.deleteNotificationsForTable(id)
-            
-            // 2. Unlink characters
-            com.galeria.defensores.data.CharacterRepository.unlinkCharactersFromTable(id)
-            
-            // 3. Delete the table
-            tablesCollection.document(id).delete().await()
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
+        val context = getContext() ?: return false
+        
+        // 1. Delete pending notifications (Mocked/Local)
+        com.galeria.defensores.data.NotificationRepository.deleteNotificationsForTable(id)
+        
+        // 2. Unlink characters
+        com.galeria.defensores.data.CharacterRepository.unlinkCharactersFromTable(id)
+        
+        // 3. Delete file
+        return LocalFileManager.deleteFile(context, "$PREFIX$id.json")
     }
 
     suspend fun checkUserHasActiveTables(userId: String): Boolean {
-        return try {
-            val snapshot = tablesCollection
-                .whereEqualTo("masterId", userId)
-                .get()
-                .await()
-            // Check if any table has players (active)
-            // Or simpler: does user own ANY table? The requirement mentions "mesas com outros jogadores".
-            // Let's implement strict check: Table owned by user AND players list is NOT empty.
-            // But 'players' includes the master usually? No, masterId is separate field. players array is list of OTHER users.
-            
-            // Assuming 'players' field. Let's check schema. Table model has `val players: MutableList<String> = mutableListOf()`.
-            // Does it include master? Usually implementation dependent.
-            // If I look at create logic:
-            // Table(masterId = user.id, ...)
-            // It doesn't auto-add master to players list in constructor usually.
-            // So:
-            
-            snapshot.documents.any { doc ->
-                val table = doc.toObject(Table::class.java)
-                table != null && table.players.isNotEmpty()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            true // Fail safe: block deletion if we can't verify
-        }
+        // "Active" tables offline = any table the user created that has other players? 
+        // Since players are just strings/IDs, we can check.
+        // But in offline single player mode, "players" might just be empty or contain non-existent IDs.
+        // Let's iterate.
+        
+        val tables = getTables()
+        return tables.any { it.masterId == userId && it.players.isNotEmpty() }
     }
 
     suspend fun addPlayerToTable(tableId: String, playerId: String) {
-        try {
-            val tableRef = tablesCollection.document(tableId)
-            db.runTransaction { transaction ->
-                val snapshot = transaction.get(tableRef)
-                val table = snapshot.toObject(Table::class.java)
-                if (table != null && !table.players.contains(playerId)) {
-                    table.players.add(playerId)
-                    transaction.set(tableRef, table)
-                }
-            }.await()
-        } catch (e: Exception) {
-            e.printStackTrace()
+        val table = getTable(tableId) ?: return
+        if (!table.players.contains(playerId)) {
+            val updatedTable = table.copy(players = (table.players + playerId).toMutableList())
+            updateTable(updatedTable)
         }
     }
 
     suspend fun addRollToHistory(tableId: String, roll: com.galeria.defensores.models.RollResult) {
-        try {
-            android.util.Log.d("TableRepoDebug", "Adding roll to history: tableId=$tableId, roll=${roll.total}")
-            tablesCollection.document(tableId)
-                .update("rollHistory", com.google.firebase.firestore.FieldValue.arrayUnion(roll))
-                .await()
-            android.util.Log.d("TableRepoDebug", "Roll added successfully")
-        } catch (e: Exception) {
-            android.util.Log.e("TableRepoDebug", "Error adding roll", e)
-            e.printStackTrace()
+        val table = getTable(tableId) ?: return
+        val updatedHistory = table.rollHistory.toMutableList()
+        updatedHistory.add(roll)
+        // Limit history size to prevent massive JSONs
+        if (updatedHistory.size > 50) {
+            updatedHistory.removeAt(0)
         }
+        val updatedTable = table.copy(rollHistory = updatedHistory)
+        updateTable(updatedTable)
     }
 
     suspend fun clearRollHistory(tableId: String): Boolean {
-        return try {
-            val emptyList = emptyList<com.galeria.defensores.models.RollResult>()
-            tablesCollection.document(tableId)
-                .update("rollHistory", emptyList)
-                .await()
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
+         val table = getTable(tableId) ?: return false
+         val updatedTable = table.copy(rollHistory = mutableListOf())
+         updateTable(updatedTable)
+         return true
     }
 
     suspend fun broadcastVisualRoll(tableId: String, visualRoll: com.galeria.defensores.models.VisualRoll) {
-        try {
-            android.util.Log.d("VisualRollDebug", "Updating Firestore table $tableId with roll ${visualRoll.id}")
-            tablesCollection.document(tableId)
-                .update("lastVisualRoll", visualRoll)
-                .await()
-            android.util.Log.d("VisualRollDebug", "Firestore update successful")
-        } catch (e: Exception) {
-            android.util.Log.e("VisualRollDebug", "Firestore update failed: ${e.message}")
-            e.printStackTrace()
-        }
+         val table = getTable(tableId) ?: return
+         // Just setting it in the object, next poll/refresh would see it 
+         // (though polling isn't implemented for files, UI needs to refresh manually or observe something else)
+         val updatedTable = table.copy(lastVisualRoll = visualRoll)
+         updateTable(updatedTable)
     }
 
     fun getTableFlow(id: String): Flow<Table?> = callbackFlow {
-        val listener = tablesCollection.document(id).addSnapshotListener { snapshot, e ->
-            if (e != null) {
-                close(e)
-                return@addSnapshotListener
-            }
-            if (snapshot != null && snapshot.exists()) {
-                trySend(snapshot.toObject(Table::class.java))
-            } else {
-                trySend(null)
-            }
-        }
-        awaitClose { listener.remove() }
+        // File system doesn't support real-time listeners easily.
+        // We can emit the current value once.
+        // If we wanted updates, we'd need a custom observable or polling.
+        // For now, emit once and close, or just emit once.
+        // Flow allows emitting multiple times, but without a file watcher, we can't know when to emit next.
+        // UI might rely on this flow staying open? 
+        // Let's emit once.
+        val context = getContext()
+        val table = if (context != null) LocalFileManager.readJson(context, "$PREFIX$id.json", Table::class.java) else null
+        trySend(table)
+        
+        // We could implement a pseudo-polling here if crucial:
+        // while(isActive) { delay(2000); trySend(readJson...); }
+        // But that's heavy.
+        // Let's assume offline usage is mostly synchronous user actions updating UI.
+        
+        close() 
+        awaitClose { }
     }
 }

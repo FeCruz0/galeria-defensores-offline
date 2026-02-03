@@ -10,7 +10,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.galeria.defensores.R
-import com.galeria.defensores.data.FirebaseAuthManager
 import com.galeria.defensores.data.SessionManager
 import com.galeria.defensores.data.UserRepository
 import com.galeria.defensores.models.User
@@ -76,28 +75,16 @@ class UserProfileFragment : Fragment() {
         // Hide Edit/Logout if viewing another user
         val btnDeleteAccount = view.findViewById<Button>(R.id.btn_delete_account)
 
-        val currentUser = SessionManager.currentUser
-        if (userId != null && userId != currentUser?.id) {
-            btnEdit.visibility = View.GONE
-            btnLogout.visibility = View.GONE
-            btnDeleteAccount.visibility = View.GONE
-
-            }
-            
-            // Delete Account Logic
-
-            btnDeleteAccount.setOnClickListener {
-                 val dialog = DeleteAccountDialogFragment()
-                 dialog.show(parentFragmentManager, "DeleteAccountDialog")
-            }
-        btnLogout.setOnClickListener {
-            SessionManager.logout()
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, LoginFragment())
-                .run {
-                    parentFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
-                    commit()
-                }
+        // Hide sensitive actions for offline mode
+        btnEdit.visibility = View.VISIBLE 
+        btnLogout.visibility = View.GONE
+        btnDeleteAccount.visibility = View.GONE
+        
+        btnEdit.setOnClickListener {
+             parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, UserEditFragment())
+                .addToBackStack(null)
+                .commit()
         }
 
         btnBack.setOnClickListener {

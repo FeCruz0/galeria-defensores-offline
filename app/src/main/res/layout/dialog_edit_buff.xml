@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nome (ex: Fúria, Cegueira)"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp"/>
+    <EditText
+        android:id="@+id/edit_buff_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textCapSentences"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Valor (ex: +2, -1)"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp"/>
+    <EditText
+        android:id="@+id/edit_buff_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="numberSigned"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Aplica-se a:"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp"/>
+    <Spinner
+        android:id="@+id/spinner_buff_target"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:layout_marginBottom="12dp"/>
+
+</LinearLayout>

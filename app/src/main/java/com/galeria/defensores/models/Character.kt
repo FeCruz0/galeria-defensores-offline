@@ -1,6 +1,7 @@
 package com.galeria.defensores.models
 
 import java.util.UUID
+import com.galeria.defensores.models.InventoryItem
 
 data class Character(
     val id: String = UUID.randomUUID().toString(),
@@ -44,7 +45,10 @@ data class Character(
     var isHidden: Boolean = false,
     
     // Custom Rolls
-    var customRolls: MutableList<CustomRoll> = mutableListOf()
+    var customRolls: MutableList<CustomRoll> = mutableListOf(),
+
+    // Persistent Buffs
+    var buffs: MutableList<Buff> = mutableListOf()
 ) {
     fun getMaxPv(): Int = (resistencia * 5).coerceAtLeast(1)
     fun getMaxPm(): Int = (resistencia * 5).coerceAtLeast(1)
@@ -58,6 +62,7 @@ data class Character(
         
         return attrSum + advantagesSum + skillsSum + specsSum + uniqueAdvantageCost + savedPoints
     }
+    
 }
 
 data class AdvantageItem(
@@ -91,7 +96,9 @@ data class CustomRoll(
     var globalModifier: Int = 0,
     var primaryAttribute: String = "none",
     var secondaryAttribute: String = "none",
-    var accumulateCrit: Boolean = false // false: Single Crit (x2), true: +1 Mult per Crit
+    var accumulateCrit: Boolean = false, // false: Single Crit (x2), true: +1 Mult per Crit
+    var type: String = "OTHER", // ATTACK, DEFENSE, MAGIC, INITIATIVE, TEST, OTHER
+    var pmCost: Int = 0
 )
 
 data class RollComponent(
@@ -103,4 +110,11 @@ data class RollComponent(
     var canCrit: Boolean = false,
     var critRangeStart: Int? = null, // null means ONLY max value
     var critMultiplier: Int = 2
+)
+
+data class Buff(
+    val id: String = UUID.randomUUID().toString(),
+    var name: String = "",
+    var value: Int = 0, // e.g., +2 or -2
+    var targetType: String = "ALL" // ATTACK, DEFENSE, HAB, FOR, ETC.
 )
