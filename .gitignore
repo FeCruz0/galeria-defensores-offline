@@ -24,3 +24,7 @@ build_error*.txt
 build_output*.txt
 build_debug*.txt
 
+
+# Google Services
+google-services.json
+app/google-services.json
