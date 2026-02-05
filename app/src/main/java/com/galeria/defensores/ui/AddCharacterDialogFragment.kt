@@ -28,7 +28,6 @@ class AddCharacterDialogFragment(private val onCharacterCreated: (Character) -> 
             .setView(view)
             .setPositiveButton("Criar") { _, _ ->
                 val name = nameInput.text.toString()
-                val isHidden = view.findViewById<android.widget.CheckBox>(R.id.check_hidden).isChecked
                 if (name.isNotBlank()) {
                     val character = Character(
                         name = name,
@@ -36,8 +35,7 @@ class AddCharacterDialogFragment(private val onCharacterCreated: (Character) -> 
                         habilidade = habilidadePicker.value,
                         resistencia = resistenciaPicker.value,
                         armadura = armaduraPicker.value,
-                        poderFogo = pdfPicker.value,
-                        isHidden = isHidden
+                        poderFogo = pdfPicker.value
                     )
                     onCharacterCreated(character)
                 }

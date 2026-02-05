@@ -29,11 +29,17 @@ RUN if id -u ${USER_ID} >/dev/null 2>&1; then \
     touch /home/developer/.android/repositories.cfg && \
     chown -R developer:developer ${ANDROID_SDK_ROOT} /home/developer/.android
 
+# Copy entrypoint script
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 USER developer
 WORKDIR /workspace
 
 ARG ANDROID_SDK_VERSION=33
 ARG BUILD_TOOLS_VERSION=33.0.2
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 # Correção: determina JAVA_HOME a partir do java em PATH antes de chamar sdkmanager
 RUN export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which java))))" && \

@@ -19,7 +19,6 @@ import com.galeria.defensores.ui.CharacterSheetFragment
 import androidx.appcompat.app.AlertDialog
 import android.widget.ImageButton
 
-import com.galeria.defensores.data.NotificationRepository
 import com.galeria.defensores.models.Notification
 import com.galeria.defensores.models.NotificationStatus
 
@@ -66,11 +65,8 @@ class CharacterListFragment : Fragment() {
         // FAB Menu Logic
         val fabMenu = view.findViewById<FloatingActionButton>(R.id.fab_menu)
         val layoutFabNewSheet = view.findViewById<View>(R.id.layout_fab_new_sheet)
-        val layoutFabViewPlayers = view.findViewById<View>(R.id.layout_fab_view_players)
-        val layoutFabTransferOwnership = view.findViewById<View>(R.id.layout_fab_transfer_ownership) // Added
         val fabNewSheet = view.findViewById<FloatingActionButton>(R.id.fab_new_sheet)
-        val fabViewPlayers = view.findViewById<FloatingActionButton>(R.id.fab_view_players)
-        val fabTransferOwnership = view.findViewById<FloatingActionButton>(R.id.fab_transfer_ownership) // Added
+
         val layoutFabClearHistory = view.findViewById<View>(R.id.layout_fab_clear_history)
         val fabClearHistory = view.findViewById<FloatingActionButton>(R.id.fab_clear_history)
         
@@ -80,16 +76,14 @@ class CharacterListFragment : Fragment() {
             isMenuOpen = !isMenuOpen
             if (isMenuOpen) {
                 layoutFabNewSheet.visibility = View.VISIBLE
-                layoutFabViewPlayers.visibility = View.VISIBLE
+                view.findViewById<View>(R.id.layout_fab_import_character).visibility = View.VISIBLE // Added
                 if (isCurrentUserMaster) {
-                    layoutFabTransferOwnership.visibility = View.VISIBLE
                     layoutFabClearHistory.visibility = View.VISIBLE
                 }
                 fabMenu.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
             } else {
                 layoutFabNewSheet.visibility = View.GONE
-                layoutFabViewPlayers.visibility = View.GONE
-                layoutFabTransferOwnership.visibility = View.GONE
+                view.findViewById<View>(R.id.layout_fab_import_character).visibility = View.GONE // Added
                 layoutFabClearHistory.visibility = View.GONE
                 fabMenu.setImageResource(R.drawable.ic_more_vert)
             }
@@ -116,40 +110,47 @@ class CharacterListFragment : Fragment() {
                     // Close menu
                     isMenuOpen = false
                     layoutFabNewSheet.visibility = View.GONE
-                    layoutFabViewPlayers.visibility = View.GONE
-                    layoutFabTransferOwnership.visibility = View.GONE
                     layoutFabClearHistory.visibility = View.GONE
                     fabMenu.setImageResource(R.drawable.ic_more_vert)
                 } else {
                     Toast.makeText(context, "Erro ao criar ficha. Verifique se está logado.", Toast.LENGTH_SHORT).show()
                 }
             }
+
         }
 
-        fabViewPlayers.setOnClickListener {
-            if (tableId != null) {
-                val dialog = TablePlayersDialogFragment.newInstance(tableId!!)
-                dialog.show(parentFragmentManager, "TablePlayersDialog")
+        // Import Logic
+        val layoutFabImportCharacter = view.findViewById<View>(R.id.layout_fab_import_character)
+        val fabImportCharacter = view.findViewById<FloatingActionButton>(R.id.fab_import_character)
+
+        val importCharacterLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri != null && tableId != null) {
+                viewLifecycleOwner.lifecycleScope.launch {
+                     val success = com.galeria.defensores.data.BackupRepository.importCharacter(requireContext(), uri, tableId!!)
+                     if (success) {
+                         Toast.makeText(context, "Personagem importado!", Toast.LENGTH_SHORT).show()
+                         loadCharacters()
+                     } else {
+                         Toast.makeText(context, "Erro ao importar.", Toast.LENGTH_SHORT).show()
+                     }
+                }
             }
              // Close menu
             isMenuOpen = false
             layoutFabNewSheet.visibility = View.GONE
-            layoutFabViewPlayers.visibility = View.GONE
-            layoutFabTransferOwnership.visibility = View.GONE
+            layoutFabImportCharacter.visibility = View.GONE
             layoutFabClearHistory.visibility = View.GONE
             fabMenu.setImageResource(R.drawable.ic_more_vert)
         }
 
-        fabTransferOwnership.setOnClickListener {
-             showTransferOwnershipDialog()
-             // Close menu
-            isMenuOpen = false
-            layoutFabNewSheet.visibility = View.GONE
-            layoutFabViewPlayers.visibility = View.GONE
-            layoutFabTransferOwnership.visibility = View.GONE
-            layoutFabClearHistory.visibility = View.GONE
-            fabMenu.setImageResource(R.drawable.ic_more_vert)
+        fabImportCharacter.setOnClickListener {
+            // Filter JSON
+            importCharacterLauncher.launch(arrayOf("application/json"))
         }
+
+
+
+
 
         fabClearHistory.setOnClickListener {
              if (tableId != null) {
@@ -172,8 +173,6 @@ class CharacterListFragment : Fragment() {
              // Close menu
             isMenuOpen = false
             layoutFabNewSheet.visibility = View.GONE
-            layoutFabViewPlayers.visibility = View.GONE
-            layoutFabTransferOwnership.visibility = View.GONE
             layoutFabClearHistory.visibility = View.GONE
             fabMenu.setImageResource(R.drawable.ic_more_vert)
         }
@@ -193,62 +192,7 @@ class CharacterListFragment : Fragment() {
         return view
     }
 
-    private fun showTransferOwnershipDialog() {
-        if (tableId == null) return
-        
-        viewLifecycleOwner.lifecycleScope.launch {
-            val table = com.galeria.defensores.data.TableRepository.getTable(tableId!!) ?: return@launch
-            val playerIds = table.players.filter { it != table.masterId }
-            
-            if (playerIds.isEmpty()) {
-                Toast.makeText(context, "Não há outros jogadores para transferir a titularidade.", Toast.LENGTH_LONG).show()
-                return@launch
-            }
 
-            val players = mutableListOf<com.galeria.defensores.models.User>()
-            for (id in playerIds) {
-                val user = com.galeria.defensores.data.UserRepository.getUser(id)
-                if (user != null) players.add(user)
-            }
-            
-            val playerNames = players.map { it.name }.toTypedArray()
-            
-            AlertDialog.Builder(requireContext())
-                .setTitle("Transferir Titularidade")
-                .setItems(playerNames) { _, which ->
-                    val selectedUser = players[which]
-                    confirmTransfer(table, selectedUser)
-                }
-                .setNegativeButton("Cancelar", null)
-                .show()
-        }
-    }
-
-    private fun confirmTransfer(table: com.galeria.defensores.models.Table, newMaster: com.galeria.defensores.models.User) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Confirmar Transferência")
-            .setMessage("Tem certeza que deseja transferir a mesa '${table.name}' para ${newMaster.name}? Você deixará de ser o Mestre.")
-            .setPositiveButton("Transferir") { _, _ ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    val updatedTable = table.copy(masterId = newMaster.id)
-                    // Optionally add old master to players list if not there?
-                    // Usually yes.
-                    if (!updatedTable.players.contains(com.galeria.defensores.data.SessionManager.currentUser?.id)) {
-                        updatedTable.players.add(com.galeria.defensores.data.SessionManager.currentUser?.id ?: "")
-                    }
-                    
-                    val success = com.galeria.defensores.data.TableRepository.updateTable(updatedTable)
-                    if (success) {
-                        Toast.makeText(context, "Titularidade transferida com sucesso.", Toast.LENGTH_SHORT).show()
-                        loadCharacters() // Refresh UI (will hide master options)
-                    } else {
-                        Toast.makeText(context, "Erro ao transferir titularidade.", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-            .setNegativeButton("Cancelar", null)
-            .show()
-    }
     
     // ... loadCharacters ...
 
@@ -288,11 +232,7 @@ class CharacterListFragment : Fragment() {
                 val allCharacters = CharacterRepository.getCharacters(tableId)
                 android.util.Log.d("CharacterListDebug", "Fetched ${allCharacters.size} characters. CurrentUser=$currentUserId, isMaster=$isMaster")
                 
-                val filteredCharacters = if (isMaster) {
-                    allCharacters
-                } else {
-                    allCharacters.filter { !it.isHidden || it.ownerId == currentUserId }
-                }
+                val filteredCharacters = allCharacters
 
                 val sortedCharacters = filteredCharacters.sortedWith(
                     compareByDescending<Character> { it.ownerId == currentUserId }
@@ -364,41 +304,16 @@ class CharacterListFragment : Fragment() {
         inner class CharacterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             private val nameText: TextView = itemView.findViewById(R.id.character_name)
             private val descText: TextView = itemView.findViewById(R.id.character_description)
-            private val creatorText: TextView = itemView.findViewById(R.id.character_creator)
+
             private val deleteBtn: android.widget.ImageButton = itemView.findViewById(R.id.btn_delete_character)
 
             fun bind(character: Character, isMaster: Boolean, currentUserId: String?) {
                 nameText.text = character.name
                 descText.text = "F:${character.forca} H:${character.habilidade} R:${character.resistencia} A:${character.armadura} PdF:${character.poderFogo}"
                 
-                if (character.ownerName.isNotEmpty()) {
-                    creatorText.text = "Criado por: ${character.ownerName}"
-                } else if (character.ownerId.isNotEmpty()) {
-                    creatorText.text = "Criado por: ..."
-                    // Async fetch for existing characters
-                    itemView.post {
-                        val lifecycleOwner = itemView.context as? androidx.lifecycle.LifecycleOwner
-                        lifecycleOwner?.lifecycleScope?.launch {
-                            val user = com.galeria.defensores.data.UserRepository.getUser(character.ownerId)
-                            if (user != null) {
-                                character.ownerName = user.name
-                                // Update text only if this ViewHolder is still bound to the same character (simple check)
-                                if (nameText.text == character.name) {
-                                    creatorText.text = "Criado por: ${user.name}"
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    creatorText.text = "Criado por: Desconhecido"
-                }
 
-                if (character.isHidden) {
-                    itemView.alpha = 0.5f
-                    nameText.text = "${character.name} (Oculto)"
-                } else {
-                    itemView.alpha = 1.0f
-                }
+
+
                 
                 // Delete Logic
                 val isOwner = character.ownerId == currentUserId

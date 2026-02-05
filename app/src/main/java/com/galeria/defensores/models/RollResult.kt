@@ -10,7 +10,7 @@ data class RollResult(
     val isCritical: Boolean = false,
     val timestamp: Long = 0L,
     val name: String = "",
-    val isHidden: Boolean = false,
+
     val characterId: String = "",
     val details: String = "",       // Pre-formatted breakdown: "F(3) + 1d6(5) + Bonus(1)"
     val diceResults: List<Int> = emptyList() // Individual dice outcomes

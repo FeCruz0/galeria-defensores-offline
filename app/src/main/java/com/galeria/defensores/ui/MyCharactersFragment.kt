@@ -21,15 +21,27 @@ class MyCharactersFragment : Fragment() {
     private lateinit var textEmpty: TextView
     private lateinit var adapter: MyCharactersAdapter
 
+    private var pendingExportCharacter: Character? = null
+
+    private val exportCharacterLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        if (uri != null && pendingExportCharacter != null) {
+            val character = pendingExportCharacter!!
+            lifecycleScope.launch {
+                val success = com.galeria.defensores.data.BackupRepository.exportCharacter(requireContext(), character.id, uri)
+                if (success) {
+                    android.widget.Toast.makeText(context, "Personagem exportado com sucesso!", android.widget.Toast.LENGTH_SHORT).show()
+                } else {
+                    android.widget.Toast.makeText(context, "Erro ao exportar personagem.", android.widget.Toast.LENGTH_SHORT).show()
+                }
+                pendingExportCharacter = null
+            }
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Reusing fragment_character_list layout as it likely has recycler + empty text
-        // Or we should create a new one. Let's create 'fragment_my_characters.xml' to be safe,
-        // or just reuse 'fragment_notifications' structure which is generic list.
-        // Let's assume we can reuse 'fragment_character_list' if it fits.
-        // Actually, let's create a new layout to avoid confusion.
         return inflater.inflate(R.layout.fragment_my_characters, container, false)
     }
 
@@ -61,8 +73,6 @@ class MyCharactersFragment : Fragment() {
                     textEmpty.visibility = View.GONE
                     recyclerCharacters.visibility = View.VISIBLE
                     
-                    // We need to fetch table names for each character to display "Mesa: Nome"
-                    // This is N+1 query problem potential, but for a user list it's fine (rarely > 10 chars).
                     val charactersWithTableNames = characters.map { character ->
                         val tableName = if (character.tableId.isNotEmpty()) {
                              val table = TableRepository.getTable(character.tableId)
@@ -73,15 +83,34 @@ class MyCharactersFragment : Fragment() {
                         character to tableName
                     }
 
-                    adapter = MyCharactersAdapter(charactersWithTableNames) { character ->
-                        // OnClick: Open Character Sheet
-                        val fragment = CharacterSheetFragment.newInstance(character.id)
-                        
-                        parentFragmentManager.beginTransaction()
-                            .replace(R.id.fragment_container, fragment)
-                            .addToBackStack(null)
-                            .commit()
-                    }
+                    adapter = MyCharactersAdapter(charactersWithTableNames, 
+                        onClick = { character ->
+                            // Open Sheet
+                            val fragment = CharacterSheetFragment.newInstance(character.id)
+                            parentFragmentManager.beginTransaction()
+                                .replace(R.id.fragment_container, fragment)
+                                .addToBackStack(null)
+                                .commit()
+                        },
+                        onExport = { character ->
+                            pendingExportCharacter = character
+                            val safeName = character.name.replace("[^a-zA-Z0-9.-]".toRegex(), "_")
+                            exportCharacterLauncher.launch("char_${safeName}_${character.id.take(4)}.json")
+                        },
+                        onDelete = { character ->
+                             androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                                .setTitle("Excluir Personagem")
+                                .setMessage("Tem certeza que deseja excluir ${character.name}?")
+                                .setPositiveButton("Excluir") { _, _ ->
+                                    lifecycleScope.launch {
+                                        CharacterRepository.deleteCharacter(character.id)
+                                        loadCharacters() 
+                                    }
+                                }
+                                .setNegativeButton("Cancelar", null)
+                                .show()
+                        }
+                    )
                     recyclerCharacters.adapter = adapter
                 }
             }
@@ -90,13 +119,16 @@ class MyCharactersFragment : Fragment() {
 
     class MyCharactersAdapter(
         private val data: List<Pair<Character, String>>,
-        private val onClick: (Character) -> Unit
+        private val onClick: (Character) -> Unit,
+        private val onExport: (Character) -> Unit,
+        private val onDelete: (Character) -> Unit
     ) : RecyclerView.Adapter<MyCharactersAdapter.ViewHolder>() {
 
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val name: TextView = view.findViewById(R.id.tv_character_name)
             val tableInfo: TextView = view.findViewById(R.id.tv_table_name)
             val stats: TextView = view.findViewById(R.id.tv_character_stats)
+            val btnMore: android.widget.ImageButton = view.findViewById(R.id.btn_more)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -112,6 +144,23 @@ class MyCharactersFragment : Fragment() {
             holder.stats.text = "F:${character.forca} H:${character.habilidade} R:${character.resistencia} A:${character.armadura} PdF:${character.poderFogo}"
             
             holder.itemView.setOnClickListener { onClick(character) }
+
+            holder.btnMore.setOnClickListener { view ->
+                val popup = android.widget.PopupMenu(view.context, view)
+                popup.menu.add("Abrir Ficha")
+                popup.menu.add("Exportar JSON")
+                popup.menu.add("Excluir")
+                
+                popup.setOnMenuItemClickListener { item ->
+                    when (item.title) {
+                        "Abrir Ficha" -> onClick(character)
+                        "Exportar JSON" -> onExport(character)
+                        "Excluir" -> onDelete(character)
+                    }
+                    true
+                }
+                popup.show()
+            }
         }
 
         override fun getItemCount() = data.size

@@ -2,10 +2,8 @@ package com.galeria.defensores.data
 
 import com.galeria.defensores.models.Notification
 import com.galeria.defensores.models.NotificationStatus
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.tasks.await
 
 object NotificationRepository {
     // Offline: No notifications

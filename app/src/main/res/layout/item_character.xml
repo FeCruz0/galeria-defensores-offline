@@ -13,15 +13,7 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/character_privacy"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Privativa"
-            android:textColor="#D32F2F"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:visibility="gone" />
+
 
         <TextView
             android:id="@+id/character_name"
@@ -32,13 +24,7 @@
             android:maxLines="1"
             android:ellipsize="end" />
 
-        <TextView
-            android:id="@+id/character_creator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Criado por: ..."
-            android:textSize="12sp"
-            android:textColor="#757575" />
+
 
         <TextView
             android:id="@+id/character_description"

@@ -1,8 +1,7 @@
 package com.galeria.defensores.data
 
 import com.galeria.defensores.models.User
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
+
 
 object UserRepository {
     // In Offline Mode, we only really have the "Device Owner" user.

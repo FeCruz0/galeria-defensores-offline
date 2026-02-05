@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.Switch
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.galeria.defensores.R
 
 class SettingsFragment : Fragment() {
@@ -17,6 +19,20 @@ class SettingsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_settings, container, false)
+    }
+
+    private val exportAllLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/zip")) { uri ->
+        if (uri != null) {
+            lifecycleScope.launch {
+                android.widget.Toast.makeText(context, "Iniciando backup...", android.widget.Toast.LENGTH_SHORT).show()
+                val success = com.galeria.defensores.data.BackupRepository.exportAll(requireContext(), uri)
+                if (success) {
+                    android.widget.Toast.makeText(context, "Backup completo salvo com sucesso!", android.widget.Toast.LENGTH_LONG).show()
+                } else {
+                    android.widget.Toast.makeText(context, "Erro ao salvar backup.", android.widget.Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -91,6 +107,29 @@ class SettingsFragment : Fragment() {
             }.show(parentFragmentManager, "color_picker")
         }
 
+        view.findViewById<View>(R.id.btn_full_backup).setOnClickListener {
+            val dateStr = java.text.SimpleDateFormat("yyyyMMdd_HHmm", java.util.Locale.getDefault()).format(java.util.Date())
+            exportAllLauncher.launch("backup_3det_$dateStr.zip")
+        }
+
+        view.findViewById<View>(R.id.btn_full_restore).setOnClickListener {
+            importAllLauncher.launch(arrayOf("application/zip"))
+        }
+
         view.findViewById<View>(R.id.btn_logout).visibility = View.GONE
+    }
+
+    private val importAllLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            lifecycleScope.launch {
+                android.widget.Toast.makeText(context, "Restaurando backup...", android.widget.Toast.LENGTH_SHORT).show()
+                val success = com.galeria.defensores.data.BackupRepository.importAll(requireContext(), uri)
+                if (success) {
+                    android.widget.Toast.makeText(context, "Restauração completa! Por favor, navegue entre as telas para atualizar.", android.widget.Toast.LENGTH_LONG).show()
+                } else {
+                     android.widget.Toast.makeText(context, "Erro ao restaurar backup.", android.widget.Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 }

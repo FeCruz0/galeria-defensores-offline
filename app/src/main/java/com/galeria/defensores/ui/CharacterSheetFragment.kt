@@ -23,7 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.galeria.defensores.R
 import com.galeria.defensores.models.RollType
 import com.galeria.defensores.models.Spell
-import com.galeria.defensores.models.Buff
+
 import com.galeria.defensores.viewmodels.CharacterViewModel
 import androidx.activity.result.contract.ActivityResultContracts
 import com.bumptech.glide.Glide
@@ -56,6 +56,22 @@ class CharacterSheetFragment : Fragment() {
         } else if (result.resultCode == com.yalantis.ucrop.UCrop.RESULT_ERROR) {
             val cropError = com.yalantis.ucrop.UCrop.getError(result.data!!)
             Toast.makeText(requireContext(), "Erro ao cortar: ${cropError?.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val exportLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        if (uri != null) {
+            val char = viewModel.character.value
+            if (char != null) {
+                lifecycleScope.launch {
+                    val success = com.galeria.defensores.data.BackupRepository.exportCharacter(requireContext(), char.id, uri)
+                    if (success) {
+                        Toast.makeText(context, "Ficha exportada com sucesso!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Erro ao exportar ficha.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         }
     }
 
@@ -133,8 +149,7 @@ class CharacterSheetFragment : Fragment() {
         rollDetailText = view.findViewById(R.id.text_roll_detail)
         rollNameText = view.findViewById(R.id.text_roll_name)
         
-        val hiddenCheck = view.findViewById<android.widget.CheckBox>(R.id.check_hidden)
-        
+
         val avatarImage = view.findViewById<ImageView>(R.id.img_character_avatar)
         val editAvatarIcon = view.findViewById<ImageView>(R.id.img_edit_avatar_icon)
 
@@ -499,17 +514,7 @@ class CharacterSheetFragment : Fragment() {
                 notesEdit.isEnabled = canEdit
                 
                 // Hidden Checkbox (Master Only)
-                if (isMaster) {
-                    hiddenCheck.visibility = View.VISIBLE
-                    hiddenCheck.isChecked = char.isHidden
-                    hiddenCheck.setOnCheckedChangeListener { _, isChecked ->
-                        if (char.isHidden != isChecked) {
-                            viewModel.updateHidden(isChecked)
-                        }
-                    }
-                } else {
-                    hiddenCheck.visibility = View.GONE
-                }
+
                 // Enable/Disable Attribute Inputs
                 val attributeContainers = listOf(
                     view.findViewById<View>(R.id.attr_forca),
@@ -641,21 +646,8 @@ class CharacterSheetFragment : Fragment() {
                 )
                 invRecycler.adapter = invAdapter
     
-                // Update Buffs List
-                val buffsRecycler = view.findViewById<RecyclerView>(R.id.recycler_buffs)
-                buffsRecycler.layoutManager = LinearLayoutManager(context)
-                val buffsAdapter = BuffsAdapter(char.buffs, isMaster) { buffToDelete ->
-                     viewModel.removeBuff(buffToDelete)
-                }
-                buffsRecycler.adapter = buffsAdapter
-                
-                view.findViewById<Button>(R.id.btn_add_buff).visibility = if (isMaster) View.VISIBLE else View.GONE
-                view.findViewById<Button>(R.id.btn_add_buff).setOnClickListener {
-                     val dialog = EditBuffDialogFragment(null) { newBuff ->
-                         viewModel.addBuff(newBuff)
-                     }
-                     dialog.show(parentFragmentManager, "AddBuffDialog")
-                }
+
+
     
                 // Update Notes (Prevent overwriting if user is typing)
                 if (!view.findViewById<EditText>(R.id.edit_notes).hasFocus()) {
@@ -775,6 +767,17 @@ class CharacterSheetFragment : Fragment() {
         view.findViewById<Button>(R.id.btn_initiative).setOnClickListener {
             checkPermissionAndRoll(RollType.INITIATIVE)
         }
+
+
+        view.findViewById<Button>(R.id.btn_export_character).setOnClickListener {
+            val char = viewModel.character.value
+            if (char != null) {
+                val dateStr = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault()).format(java.util.Date())
+                val safeName = char.name.replace("[^a-zA-Z0-9.-]".toRegex(), "_")
+                exportLauncher.launch("char_${safeName}_$dateStr.json")
+            }
+        }
+
         // Delete Button
         val btnDelete = view.findViewById<Button>(R.id.btn_delete_character)
         btnDelete.setOnClickListener {
@@ -1016,36 +1019,5 @@ class CharacterSheetFragment : Fragment() {
         barView.max = max
         barView.progress = current
     }
-    private inner class BuffsAdapter(
-        private val items: List<Buff>,
-        private val canEdit: Boolean,
-        private val onDelete: (Buff) -> Unit
-    ) : RecyclerView.Adapter<BuffsAdapter.ViewHolder>() {
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val nameText: TextView = view.findViewById(R.id.text_advantage_name)
-            val descText: TextView = view.findViewById(R.id.text_advantage_description)
-            val deleteBtn: View = view.findViewById(R.id.btn_delete_item)
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_advantage, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = items[position]
-            holder.nameText.text = "${item.name} (${if(item.value >= 0) "+"+item.value else item.value})"
-            holder.descText.text = "Alvo: ${item.targetType}"
-            
-            if (canEdit) {
-                holder.deleteBtn.visibility = View.VISIBLE
-                holder.deleteBtn.setOnClickListener { onDelete(item) }
-            } else {
-                holder.deleteBtn.visibility = View.GONE
-            }
-        }
-
-        override fun getItemCount() = items.size
-    }
 }

@@ -1,6 +1,6 @@
 package com.galeria.defensores.models
 
-import com.google.firebase.firestore.PropertyName
+
 
 enum class MessageType {
     TEXT, ROLL, SYSTEM, IMAGE
@@ -21,5 +21,5 @@ data class ChatMessage(
     val replyToSenderName: String? = null,
     val replyToContent: String? = null,
     val replyToType: MessageType? = null,
-    @get:PropertyName("isEdited") val isEdited: Boolean = false
+    val isEdited: Boolean = false
 )

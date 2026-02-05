@@ -175,6 +175,35 @@
                 app:tint="#FFFFFF" />
         </LinearLayout>
 
+        <!-- Import Character FAB (Sub-menu) -->
+        <LinearLayout
+            android:id="@+id/layout_fab_import_character"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Importar Ficha"
+                android:textColor="@color/text_primary"
+                android:background="@color/card_background"
+                android:padding="4dp"
+                android:layout_marginEnd="8dp" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_import_character"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/stat_sys_download"
+                app:fabSize="mini"
+                app:backgroundTint="#10B981"
+                app:tint="#FFFFFF" />
+        </LinearLayout>
+
         <!-- Main FAB -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_menu"

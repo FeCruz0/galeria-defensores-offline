@@ -31,15 +31,9 @@ object FirebaseAuthManager {
     }
 
     // Google Sign-In - Disabled/Returning null/dummy
-    fun getGoogleSignInClient(activity: Activity): com.google.android.gms.auth.api.signin.GoogleSignInClient {
-      // Return a dummy or throw exception if used? 
-      // Ideally returning real client requires google-services.json which we might still have, 
-      // but let's just create a basic one or error out if not used. 
-      // Given we removed login UI, this shouldn't be called.
-      // But for compilation safety:
-      val gso = com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .build()
-      return com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(activity, gso)
+    // Google Sign-In - Disabled/Returning null/dummy
+    fun getGoogleSignInClient(activity: Activity): Any? {
+      return null
     }
 
     fun firebaseAuthWithGoogle(idToken: String, onSuccess: (User) -> Unit, onError: (String) -> Unit) {

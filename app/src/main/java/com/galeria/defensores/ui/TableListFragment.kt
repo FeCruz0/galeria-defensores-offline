@@ -11,6 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.galeria.defensores.R
@@ -22,6 +23,45 @@ import com.galeria.defensores.ui.MyCharactersFragment // Added
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class TableListFragment : Fragment() {
+
+    private var pendingExportTable: Table? = null
+
+    private val exportTableLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/zip")) { uri ->
+        if (uri != null && pendingExportTable != null) {
+            val table = pendingExportTable!!
+            lifecycleScope.launch {
+                val success = com.galeria.defensores.data.BackupRepository.exportTable(requireContext(), table.id, uri)
+                if (success) {
+                    Toast.makeText(context, "Mesa exportada com sucesso!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Erro ao exportar mesa.", Toast.LENGTH_SHORT).show()
+                }
+                pendingExportTable = null
+            }
+        }
+        }
+
+
+    private val importTableLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            lifecycleScope.launch {
+                val success = com.galeria.defensores.data.BackupRepository.importTable(requireContext(), uri)
+                if (success) {
+                    Toast.makeText(context, "Mesa importada com sucesso!", Toast.LENGTH_SHORT).show()
+                    // We need to refresh the table list. The loadTables is defined inside onViewCreated...
+                    // We can move loadTables to a class member or make this trigger a refresh indirectly.
+                    // Or check if we can access loadTables.
+                    // Actually, re-triggering the fragment setup or notify adapter is needed.
+                    // Let's rely on onResume? No, onResume calls loadTables if we move it there?
+                    // Currently loadTables is local. We should refactor or just copy logic?
+                    // Refactoring is better.
+                    parentFragmentManager.beginTransaction().detach(this@TableListFragment).attach(this@TableListFragment).commit()
+                } else {
+                    Toast.makeText(context, "Erro ao importar mesa.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,68 +86,30 @@ class TableListFragment : Fragment() {
                     
                     val currentUser = SessionManager.currentUser
                     val tables = TableRepository.getTables()
-                    val sortedTables = tables.sortedWith(
-                        compareByDescending<Table> { it.masterId == currentUser?.id }
-                            .thenBy { it.name }
-                    )
+                    // Simple sort by name
+                    val sortedTables = tables.sortedBy { it.name }
 
                     val adapter = TablesAdapter(
                         tables = sortedTables,
-                        currentUserId = currentUser?.id,
-                        scope = viewLifecycleOwner.lifecycleScope,
                         onTableClick = { table ->
-                            val currentUser = SessionManager.currentUser
-                            val isMaster = table.masterId == currentUser?.id
-                            val isPlayer = table.players.contains(currentUser?.id)
-
-                            if (!table.isPrivate || isMaster || isPlayer) {
-                                // Access Granted
-                                val fragment = TableContainerFragment.newInstance(table.id)
-                                parentFragmentManager.beginTransaction()
-                                    .replace(R.id.fragment_container, fragment)
-                                    .addToBackStack(null)
-                                    .commit()
-                            } else {
-                                // Access Denied - Show Password Dialog
-                                val input = EditText(context)
-                                input.hint = "Senha da Mesa"
-                                input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-                                
-                                AlertDialog.Builder(requireContext())
-                                    .setTitle("Mesa Privada")
-                                    .setMessage("Digite a senha para entrar:")
-                                    .setView(input)
-                                    .setPositiveButton("Entrar") { _, _ ->
-                                        val password = input.text.toString()
-                                        if (password == table.password) {
-                                            // Password Correct - Add user to table and enter
-                                            viewLifecycleOwner.lifecycleScope.launch {
-                                                if (currentUser != null) {
-                                                    TableRepository.addPlayerToTable(table.id, currentUser.id)
-                                                    
-                                                    val fragment = TableContainerFragment.newInstance(table.id)
-                                                    parentFragmentManager.beginTransaction()
-                                                        .replace(R.id.fragment_container, fragment)
-                                                        .addToBackStack(null)
-                                                        .commit()
-                                                }
-                                            }
-                                        } else {
-                                            Toast.makeText(context, "Senha incorreta!", Toast.LENGTH_SHORT).show()
-                                        }
-                                    }
-                                    .setNegativeButton("Cancelar", null)
-                                    .show()
-                            }
-                        },
-                        onInviteClick = { table ->
-                            showInviteDialog(table)
+                            // Access Granted directly
+                            val fragment = TableContainerFragment.newInstance(table.id)
+                            parentFragmentManager.beginTransaction()
+                                .replace(R.id.fragment_container, fragment)
+                                .addToBackStack(null)
+                                .commit()
                         },
                         onEditClick = { table ->
                             showEditTableDialog(table) { loadTables() }
                         },
                         onDeleteClick = { table ->
                             showDeleteTableDialog(table) { loadTables() }
+                        },
+                        onExportClick = { table ->
+                            pendingExportTable = table
+                            val dateStr = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault()).format(java.util.Date())
+                            val safeName = table.name.replace("[^a-zA-Z0-9.-]".toRegex(), "_")
+                            exportTableLauncher.launch("table_${safeName}_$dateStr.zip")
                         }
                     )
                     recyclerView.adapter = adapter
@@ -124,7 +126,7 @@ class TableListFragment : Fragment() {
         val fabMenu = view.findViewById<FloatingActionButton>(R.id.fab_menu)
         val layoutFabSettings = view.findViewById<View>(R.id.layout_fab_settings)
         val layoutFabCreateTable = view.findViewById<View>(R.id.layout_fab_create_table)
-        val layoutFabProfile = view.findViewById<View>(R.id.layout_fab_profile)
+
         val layoutFabMyCharacters = view.findViewById<View>(R.id.layout_fab_my_characters) // Added
         val fabSettings = view.findViewById<FloatingActionButton>(R.id.fab_settings)
         val fabCreateTable = view.findViewById<FloatingActionButton>(R.id.fab_create_table)
@@ -133,19 +135,23 @@ class TableListFragment : Fragment() {
         
         var isMenuOpen = false
 
+        // Import Table Logic
+        val layoutFabImportTable = view.findViewById<View>(R.id.layout_fab_import_table)
+        val fabImportTable = view.findViewById<FloatingActionButton>(R.id.fab_import_table)
+
         fabMenu.setOnClickListener {
             isMenuOpen = !isMenuOpen
             if (isMenuOpen) {
                 layoutFabSettings.visibility = View.VISIBLE
                 layoutFabCreateTable.visibility = View.VISIBLE
-                layoutFabProfile.visibility = View.VISIBLE
-                layoutFabMyCharacters.visibility = View.VISIBLE // Added
+                layoutFabMyCharacters.visibility = View.VISIBLE
+                layoutFabImportTable.visibility = View.VISIBLE // Added
                 fabMenu.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
             } else {
                 layoutFabSettings.visibility = View.GONE
                 layoutFabCreateTable.visibility = View.GONE
-                layoutFabProfile.visibility = View.GONE
-                layoutFabMyCharacters.visibility = View.GONE // Added
+                layoutFabMyCharacters.visibility = View.GONE
+                layoutFabImportTable.visibility = View.GONE // Added
                 fabMenu.setImageResource(R.drawable.ic_more_vert)
             }
         }
@@ -157,10 +163,21 @@ class TableListFragment : Fragment() {
                 isMenuOpen = false
                 layoutFabSettings.visibility = View.GONE
                 layoutFabCreateTable.visibility = View.GONE
-                layoutFabProfile.visibility = View.GONE
-                layoutFabMyCharacters.visibility = View.GONE // Added
+                layoutFabMyCharacters.visibility = View.GONE
+                layoutFabImportTable.visibility = View.GONE // Added
                 fabMenu.setImageResource(R.drawable.ic_more_vert)
             }
+        }
+
+        fabImportTable.setOnClickListener {
+            importTableLauncher.launch(arrayOf("application/zip", "application/octet-stream")) // Zip mainly
+             // Close menu after action
+            isMenuOpen = false
+            layoutFabSettings.visibility = View.GONE
+            layoutFabCreateTable.visibility = View.GONE
+            layoutFabMyCharacters.visibility = View.GONE
+            layoutFabImportTable.visibility = View.GONE
+            fabMenu.setImageResource(R.drawable.ic_more_vert)
         }
 
         fabSettings.setOnClickListener {
@@ -173,25 +190,11 @@ class TableListFragment : Fragment() {
             isMenuOpen = false
             layoutFabSettings.visibility = View.GONE
             layoutFabCreateTable.visibility = View.GONE
-            layoutFabProfile.visibility = View.GONE
             layoutFabMyCharacters.visibility = View.GONE // Added
             fabMenu.setImageResource(R.drawable.ic_more_vert)
         }
 
-        fabProfile.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, UserProfileFragment())
-                .addToBackStack(null)
-                .commit()
 
-            // Close menu
-            isMenuOpen = false
-            layoutFabSettings.visibility = View.GONE
-            layoutFabCreateTable.visibility = View.GONE
-            layoutFabProfile.visibility = View.GONE
-            layoutFabMyCharacters.visibility = View.GONE // Added
-            fabMenu.setImageResource(R.drawable.ic_more_vert)
-        }
 
         // New Listener
         fabMyCharacters.setOnClickListener {
@@ -204,40 +207,12 @@ class TableListFragment : Fragment() {
             isMenuOpen = false
             layoutFabSettings.visibility = View.GONE
             layoutFabCreateTable.visibility = View.GONE
-            layoutFabProfile.visibility = View.GONE
             layoutFabMyCharacters.visibility = View.GONE
             fabMenu.setImageResource(R.drawable.ic_more_vert)
         }
     }
 
-    private fun showInviteDialog(table: Table) {
-        val input = EditText(context)
-        input.hint = "Telefone do Convidado"
-        input.inputType = android.text.InputType.TYPE_CLASS_PHONE
-        
-        AlertDialog.Builder(requireContext())
-            .setTitle("Convidar Jogador")
-            .setView(input)
-            .setPositiveButton("Convidar") { _, _ ->
-                val phone = input.text.toString()
-                if (phone.isNotBlank()) {
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        val user = UserRepository.findUserByPhone(phone)
-                        if (user != null) {
-                            // User exists, add to table
-                            TableRepository.addPlayerToTable(table.id, user.id)
-                            android.widget.Toast.makeText(context, "${user.name} adicionado à mesa!", android.widget.Toast.LENGTH_SHORT).show()
-                        } else {
-                            // User not found, generate code
-                            val inviteCode = java.util.UUID.randomUUID().toString().substring(0, 6).uppercase()
-                            android.widget.Toast.makeText(context, "Usuário não encontrado. Código de convite: $inviteCode", android.widget.Toast.LENGTH_LONG).show()
-                        }
-                    }
-                }
-            }
-            .setNegativeButton("Cancelar", null)
-            .show()
-    }
+
 
     private fun showAddTableDialog(onTableAdded: () -> Unit) {
         val layout = android.widget.LinearLayout(context)
@@ -248,63 +223,78 @@ class TableListFragment : Fragment() {
         inputName.hint = "Nome da Mesa"
         layout.addView(inputName)
 
+
         val inputDescription = EditText(context)
         inputDescription.hint = "Descrição da Mesa"
         layout.addView(inputDescription)
 
-        val checkPrivate = android.widget.CheckBox(context)
-        checkPrivate.text = "Mesa Privada"
-        layout.addView(checkPrivate)
+        // Rule System Selection
+        val spinnerLabel = android.widget.TextView(context)
+        spinnerLabel.text = "Sistema de Regras"
+        spinnerLabel.setPadding(0, 20, 0, 5)
+        layout.addView(spinnerLabel)
 
-        val inputPassword = EditText(context)
-        inputPassword.hint = "Senha da Mesa"
-        inputPassword.visibility = View.GONE
-        layout.addView(inputPassword)
+        val systemSpinner = android.widget.Spinner(context)
+        layout.addView(systemSpinner)
 
-        checkPrivate.setOnCheckedChangeListener { _, isChecked ->
-            inputPassword.visibility = if (isChecked) View.VISIBLE else View.GONE
+        val loadingSystems = viewLifecycleOwner.lifecycleScope.async {
+            com.galeria.defensores.data.RuleSystemRepository.getSystems()
         }
-        
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val systems = loadingSystems.await()
+            val systemNames = systems.map { it.name }
+            val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, systemNames)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            systemSpinner.adapter = adapter
+        }
+
         AlertDialog.Builder(requireContext())
             .setTitle("Nova Mesa")
             .setView(layout)
             .setPositiveButton("Criar") { _, _ ->
                 val name = inputName.text.toString()
                 val description = inputDescription.text.toString()
-                val isPrivate = checkPrivate.isChecked
-                val password = inputPassword.text.toString()
+                
+                var ruleSystemId = "3det_alpha_base" // Default
+                if (systemSpinner.selectedItemPosition >= 0) {
+                     // We need to fetch the ID again or map indices to IDs. 
+                     // Since we loaded systems async, we should probably store them in a fast accessible way or re-read
+                     // But simpler: just blocking wait/check inside the click or store in a local var from the launch above?
+                     // Let's store in a var.
+                }
 
-                if (name.isNotBlank()) {
-                    if (isPrivate && password.isBlank()) {
-                        android.widget.Toast.makeText(context, "Senha é obrigatória para mesas privadas", android.widget.Toast.LENGTH_SHORT).show()
-                        return@setPositiveButton
+                viewLifecycleOwner.lifecycleScope.launch {
+                    // Re-fetch systems safely or rely on index if list didn't change
+                    val systems = com.galeria.defensores.data.RuleSystemRepository.getSystems()
+                    if (systemSpinner.selectedItemPosition >= 0 && systemSpinner.selectedItemPosition < systems.size) {
+                        ruleSystemId = systems[systemSpinner.selectedItemPosition].id
                     }
 
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        var currentUser = SessionManager.currentUser
-                        if (currentUser == null) {
-                            SessionManager.refreshUser()
-                            currentUser = SessionManager.currentUser
-                        }
+                    var currentUser = SessionManager.currentUser
+                    if (currentUser == null) {
+                        SessionManager.refreshUser()
+                        currentUser = SessionManager.currentUser
+                    }
 
-                        if (currentUser != null) {
-                            val newTable = Table(
-                                name = name, 
-                                description = description,
-                                masterId = currentUser.id,
-                                isPrivate = isPrivate,
-                                password = if (isPrivate) password else null
-                            )
-                            val success = TableRepository.addTable(newTable)
-                            if (success) {
-                                android.widget.Toast.makeText(context, "Mesa criada com sucesso!", android.widget.Toast.LENGTH_SHORT).show()
-                                onTableAdded()
-                            } else {
-                                android.widget.Toast.makeText(context, "Erro ao criar mesa. Tente novamente.", android.widget.Toast.LENGTH_SHORT).show()
-                            }
+                    if (currentUser != null) {
+                        val newTable = Table(
+                            name = name, 
+                            description = description,
+                            masterId = currentUser.id,
+                            isPrivate = false,
+                            password = null,
+                            ruleSystemId = ruleSystemId
+                        )
+                        val success = TableRepository.addTable(newTable)
+                        if (success) {
+                            android.widget.Toast.makeText(context, "Mesa criada com sucesso!", android.widget.Toast.LENGTH_SHORT).show()
+                            onTableAdded()
                         } else {
-                            android.widget.Toast.makeText(context, "Erro: Usuário não identificado. Faça login novamente.", android.widget.Toast.LENGTH_LONG).show()
+                            android.widget.Toast.makeText(context, "Erro ao criar mesa. Tente novamente.", android.widget.Toast.LENGTH_SHORT).show()
                         }
+                    } else {
+                        android.widget.Toast.makeText(context, "Erro: Usuário não identificado. Faça login novamente.", android.widget.Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -327,20 +317,7 @@ class TableListFragment : Fragment() {
         inputDescription.hint = "Descrição da Mesa"
         layout.addView(inputDescription)
 
-        val checkPrivate = android.widget.CheckBox(context)
-        checkPrivate.text = "Mesa Privada"
-        checkPrivate.isChecked = table.isPrivate
-        layout.addView(checkPrivate)
 
-        val inputPassword = EditText(context)
-        inputPassword.hint = "Senha da Mesa"
-        inputPassword.setText(table.password)
-        inputPassword.visibility = if (table.isPrivate) View.VISIBLE else View.GONE
-        layout.addView(inputPassword)
-
-        checkPrivate.setOnCheckedChangeListener { _, isChecked ->
-            inputPassword.visibility = if (isChecked) View.VISIBLE else View.GONE
-        }
         
         AlertDialog.Builder(requireContext())
             .setTitle("Editar Mesa")
@@ -348,20 +325,13 @@ class TableListFragment : Fragment() {
             .setPositiveButton("Salvar") { _, _ ->
                 val name = inputName.text.toString()
                 val description = inputDescription.text.toString()
-                val isPrivate = checkPrivate.isChecked
-                val password = inputPassword.text.toString()
-
+                
                 if (name.isNotBlank()) {
-                     if (isPrivate && password.isBlank()) {
-                        android.widget.Toast.makeText(context, "Senha é obrigatória para mesas privadas", android.widget.Toast.LENGTH_SHORT).show()
-                        return@setPositiveButton
-                    }
-
                     val updatedTable = table.copy(
                         name = name, 
                         description = description,
-                        isPrivate = isPrivate,
-                        password = if (isPrivate) password else null
+                        isPrivate = false,
+                        password = null
                     )
                     viewLifecycleOwner.lifecycleScope.launch {
                         TableRepository.updateTable(updatedTable)

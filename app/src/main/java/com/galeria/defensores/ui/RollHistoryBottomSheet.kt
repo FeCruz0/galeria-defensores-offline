@@ -18,15 +18,12 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.lifecycle.lifecycleScope
 
-import com.google.android.material.tabs.TabLayout
 
 class RollHistoryBottomSheet(private val tableId: String) : BottomSheetDialogFragment() {
 
     private var allRollsCache: List<RollResult> = emptyList()
-    private var hiddenIdsCache: Set<String> = emptySet()
-    private var isMasterCache: Boolean = false
-    private var currentTab: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,85 +40,25 @@ class RollHistoryBottomSheet(private val tableId: String) : BottomSheetDialogFra
         val recycler = view.findViewById<RecyclerView>(R.id.recycler_roll_history)
         recycler.layoutManager = LinearLayoutManager(context)
 
-        val tabLayout = view.findViewById<TabLayout>(R.id.tab_layout_history)
-        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                currentTab = tab?.position ?: 0
+
+        // Offline Load
+        viewLifecycleOwner.lifecycleScope.launch {
+            val table = withContext(Dispatchers.IO) {
+                TableRepository.getTable(tableId)
+            }
+            
+            if (table != null) {
+                allRollsCache = table.rollHistory.sortedByDescending { it.timestamp }
+                
                 updateUI(view, recycler)
-            }
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-        })
-
-        // Use SnapshotListener for real-time updates
-        val docRef = com.google.firebase.firestore.FirebaseFirestore.getInstance()
-            .collection("tables").document(tableId)
-
-        docRef.addSnapshotListener { snapshot, e ->
-            if (e != null) {
-                android.widget.Toast.makeText(context, "Erro ao carregar histórico.", android.widget.Toast.LENGTH_SHORT).show()
-                return@addSnapshotListener
-            }
-
-            if (snapshot != null && snapshot.exists()) {
-                val table = snapshot.toObject(com.galeria.defensores.models.Table::class.java)
-                allRollsCache = table?.rollHistory?.sortedByDescending { it.timestamp } ?: emptyList()
-                
-                val currentUserId = com.galeria.defensores.data.SessionManager.currentUser?.id
-                isMasterCache = table?.masterId == currentUserId || table?.masterId == "mock-master-id"
-                
-                // Fetch characters to check current hidden status (Retroactive hiding)
-                CoroutineScope(Dispatchers.Main).launch {
-                    val characters = withContext(Dispatchers.IO) {
-                        try {
-                            com.galeria.defensores.data.CharacterRepository.getCharacters(tableId)
-                        } catch (e: Exception) {
-                            emptyList()
-                        }
-                    }
-                    
-                    hiddenIdsCache = characters.filter { it.isHidden }.map { it.id }.toSet()
-                    updateUI(view, recycler) // Update UI with new data
-                }
+            } else {
+                android.widget.Toast.makeText(context, "Mesa não encontrada.", android.widget.Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun updateUI(view: View, recycler: RecyclerView) {
-        val tabLayout = view.findViewById<TabLayout>(R.id.tab_layout_history)
-        
-        if (isMasterCache) {
-            tabLayout.visibility = View.VISIBLE
-        } else {
-            tabLayout.visibility = View.GONE
-        }
-
-        val displayedHistory = if (isMasterCache) {
-            // Master Logic
-            if (currentTab == 1) {
-                // Tab 1: Hidden Rolls Only
-                 allRollsCache.filter { roll ->
-                    val isHiddenSnapshot = roll.isHidden
-                    val isHiddenNow = hiddenIdsCache.contains(roll.characterId)
-                    (isHiddenSnapshot || (roll.characterId.isNotEmpty() && isHiddenNow))
-                }
-            } else {
-                // Tab 0: General (All Visible Rolls)
-                // Mutually exclusive: Hide hidden rolls here too
-                allRollsCache.filter { roll ->
-                    val isHiddenSnapshot = roll.isHidden
-                    val isHiddenNow = hiddenIdsCache.contains(roll.characterId)
-                    !(isHiddenSnapshot || (roll.characterId.isNotEmpty() && isHiddenNow))
-                }
-            }
-        } else {
-            // Player Logic: Filter out hidden
-            allRollsCache.filter { roll ->
-                val isHiddenSnapshot = roll.isHidden
-                val isHiddenNow = hiddenIdsCache.contains(roll.characterId)
-                !(isHiddenSnapshot || (roll.characterId.isNotEmpty() && isHiddenNow))
-            }
-        }
+        val displayedHistory = allRollsCache
 
         if (displayedHistory.isEmpty()) {
             view.findViewById<TextView>(R.id.text_no_history).visibility = View.VISIBLE

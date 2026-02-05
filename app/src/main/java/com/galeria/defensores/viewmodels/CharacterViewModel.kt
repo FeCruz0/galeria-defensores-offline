@@ -14,6 +14,8 @@ import kotlin.random.Random
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.galeria.defensores.data.TableRepository
+import com.galeria.defensores.data.RuleSystemRepository
+import com.galeria.defensores.models.RuleSystem
 
 class CharacterViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -27,7 +29,19 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
     val lastRoll: LiveData<RollResult> = _lastRoll
 
     private val _rollEvent = MutableLiveData<com.galeria.defensores.utils.Event<RollResult>>()
+
     val rollEvent: LiveData<com.galeria.defensores.utils.Event<RollResult>> = _rollEvent
+
+    // Rule System
+    private var currentRuleSystem: RuleSystem = RuleSystem() // Default to base
+
+    fun getAttributeName(key: String): String {
+        return currentRuleSystem.attributes.find { it.key == key }?.name ?: key.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
+    }
+    
+    fun getDerivedStatName(key: String): String {
+         return currentRuleSystem.derivedStats.find { it.key == key }?.name ?: key.uppercase()
+    }
 
     // Settings
     var isAnimationEnabled = true
@@ -35,23 +49,34 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
     fun loadCharacter(id: String?, tableId: String? = null) {
         viewModelScope.launch {
             android.util.Log.d("CharacterDebug", "Loading character: id=$id, tableId=$tableId")
+            
+            // Load Character first
+            var loadedChar: Character? = null
             if (id != null) {
-                val char = CharacterRepository.getCharacter(id)
-                if (char != null) {
-                    android.util.Log.d("CharacterDebug", "Character found: ${char.id}, owner=${char.ownerId}")
-                    _character.value = char
-                    return@launch
-                } else {
-                    android.util.Log.e("CharacterDebug", "Character NOT found for id=$id")
-                }
+                loadedChar = CharacterRepository.getCharacter(id)
             }
-            // Default new character if ID not found or null
-            android.util.Log.d("CharacterDebug", "Creating default character fallback")
-            val currentUser = com.galeria.defensores.data.SessionManager.currentUser
-            _character.value = Character(
-                tableId = tableId ?: "",
-                ownerId = currentUser?.id ?: "" // Try to set owner if falling back
-            )
+            
+            if (loadedChar == null) {
+                android.util.Log.d("CharacterDebug", "Creating default character fallback")
+                val currentUser = com.galeria.defensores.data.SessionManager.currentUser
+                loadedChar = Character(
+                    tableId = tableId ?: "",
+                    ownerId = currentUser?.id ?: ""
+                )
+            }
+            
+            // Now load Rule System based on Table
+            val effectiveTableId = if (loadedChar.tableId.isNotEmpty()) loadedChar.tableId else tableId
+            if (!effectiveTableId.isNullOrEmpty()) {
+                val table = TableRepository.getTable(effectiveTableId)
+                if (table != null) {
+                    currentRuleSystem = RuleSystemRepository.getSystemOrDefault(table.ruleSystemId)
+                }
+            } else {
+                currentRuleSystem = RuleSystemRepository.getSystemOrDefault(null) // Base
+            }
+
+            _character.value = loadedChar!!
         }
     }
 
@@ -135,12 +160,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         saveCharacter()
     }
 
-    fun updateHidden(isHidden: Boolean) {
-        val currentChar = _character.value ?: return
-        currentChar.isHidden = isHidden
-        _character.value = currentChar
-        saveCharacter()
-    }
+
 
     fun updateSavedPoints(points: Int) {
         val currentChar = _character.value ?: return
@@ -326,22 +346,22 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
             when (type) {
                 RollType.ATTACK_F, RollType.SPECIAL_F -> {
                     attrVal = char.forca
-                    displayAttr = "Força"
+                    displayAttr = getAttributeName("forca")
                     reqType = com.galeria.defensores.models.RollRequestType.ATTACK_F
                 }
                 RollType.ATTACK_PDF, RollType.SPECIAL_PDF -> {
                     attrVal = char.poderFogo
-                    displayAttr = "Poder de Fogo"
+                    displayAttr = getAttributeName("poderFogo")
                     reqType = com.galeria.defensores.models.RollRequestType.ATTACK_PDF
                 }
                 RollType.DEFENSE -> {
                     attrVal = char.armadura
-                    displayAttr = "Armadura"
+                    displayAttr = getAttributeName("armadura")
                     reqType = com.galeria.defensores.models.RollRequestType.DEFENSE
                 }
                 RollType.INITIATIVE -> {
                     attrVal = 0
-                    displayAttr = "Iniciativa"
+                    displayAttr = "Iniciativa" // Usually standard, but could be customizable?
                     reqType = com.galeria.defensores.models.RollRequestType.INITIATIVE
                 }
                 RollType.ATTRIBUTE -> {
@@ -360,7 +380,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
 
                 // Broadcast to table
                 if (char.tableId.isNotEmpty()) {
-                    val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: char.ownerId
+                    val currentUserId = com.galeria.defensores.data.SessionManager.currentUser?.id ?: char.ownerId
                     val visualRoll = com.galeria.defensores.models.VisualRoll(
                         senderId = currentUserId,
                         senderName = char.name,
@@ -415,7 +435,6 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                         isCritical = fakeDie == 6,
                         timestamp = System.currentTimeMillis(),
                         name = "Rolando...",
-                        isHidden = char.isHidden,
                         characterId = char.id
                     )
                     _lastRoll.value = fakeResult
@@ -647,29 +666,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         saveCharacter()
     }
 
-    fun addBuff(buff: com.galeria.defensores.models.Buff) {
-        val currentChar = _character.value ?: return
-        val newBuffs = currentChar.buffs.toMutableList()
-        newBuffs.add(buff)
-        currentChar.buffs = newBuffs
-        _character.value = currentChar
-        saveCharacter()
-    }
-    
-    fun removeBuff(buff: com.galeria.defensores.models.Buff) {
-        val currentChar = _character.value ?: return
-        val newBuffs = currentChar.buffs.toMutableList()
-        newBuffs.removeIf { it.name == buff.name && it.targetType == buff.targetType && it.value == buff.value } // Buff has no ID?
-        // Ideally Buff should have ID or use equals.
-        // Assuming data class equality works if no ID.
-        // Or remove by object reference which won't work across recreations easily.
-        // Let's rely on data class equals unless it doesn't have ID.
-        // Step 216 says Buff has name, valule, targetType. No ID.
-        // So removal by equality is correct.
-        currentChar.buffs = newBuffs
-        _character.value = currentChar
-        saveCharacter()
-    }
+
 
     // --- Unique Advantage Logic ---
     
@@ -830,7 +827,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
 
                 // Broadcast
                 if (char.tableId.isNotEmpty()) {
-                    val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: char.ownerId
+                    val currentUserId = com.galeria.defensores.data.SessionManager.currentUser?.id ?: char.ownerId
                     val visualRoll = com.galeria.defensores.models.VisualRoll(
                         senderId = currentUserId,
                         senderName = char.name,
@@ -901,9 +898,9 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         val total = effectiveAttr + skillVal + die + bonus
         
         val displayAttr = when(type) {
-             RollType.ATTACK_F -> "Força"
-             RollType.ATTACK_PDF -> "PdF"
-             RollType.DEFENSE -> "Armadura"
+             RollType.ATTACK_F -> getAttributeName("forca")
+             RollType.ATTACK_PDF -> getAttributeName("poderFogo")
+             RollType.DEFENSE -> getAttributeName("armadura")
              RollType.INITIATIVE -> "Iniciativa"
              else -> "Atributo"
         }
@@ -925,7 +922,6 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
             timestamp = System.currentTimeMillis(),
             name = char.name,
             characterId = char.id,
-            isHidden = char.isHidden,
             details = details,
             diceResults = listOf(die)
         )
@@ -1053,7 +1049,6 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
             isCritical = isCriticalSummary,
             timestamp = System.currentTimeMillis(),
             name = "${char.name} - ${roll.name}",
-            isHidden = char.isHidden,
             characterId = char.id,
             details = finalString,
             diceResults = allDice
@@ -1099,6 +1094,6 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         val currentChar = _character.value ?: return
         currentChar.imageUrl = url
         _character.postValue(currentChar) // Update UI immediately
-        saveCharacter() // Save big string to Firestore
+        saveCharacter() // Save big string to local file
     }
 }

@@ -42,13 +42,10 @@ data class Character(
     val anotacoesRich: String = "", // Para futuro suporte a rich text se precisar persistir html/markdown
     
     var anotacoes: String = "",
-    var isHidden: Boolean = false,
+
     
     // Custom Rolls
-    var customRolls: MutableList<CustomRoll> = mutableListOf(),
-
-    // Persistent Buffs
-    var buffs: MutableList<Buff> = mutableListOf()
+    var customRolls: MutableList<CustomRoll> = mutableListOf()
 ) {
     fun getMaxPv(): Int = (resistencia * 5).coerceAtLeast(1)
     fun getMaxPm(): Int = (resistencia * 5).coerceAtLeast(1)
@@ -112,9 +109,3 @@ data class RollComponent(
     var critMultiplier: Int = 2
 )
 
-data class Buff(
-    val id: String = UUID.randomUUID().toString(),
-    var name: String = "",
-    var value: Int = 0, // e.g., +2 or -2
-    var targetType: String = "ALL" // ATTACK, DEFENSE, HAB, FOR, ETC.
-)

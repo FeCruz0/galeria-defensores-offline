@@ -143,6 +143,21 @@
     </LinearLayout>
 
     <Button
+        android:id="@+id/btn_full_backup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Fazer Backup Completo (ZIP)"
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/btn_full_restore"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Restaurar Backup Completo"
+        android:layout_marginTop="8dp"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+    <Button
         android:id="@+id/btn_logout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
