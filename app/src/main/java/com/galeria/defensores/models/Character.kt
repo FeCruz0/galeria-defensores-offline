@@ -45,7 +45,16 @@ data class Character(
 
     
     // Custom Rolls
-    var customRolls: MutableList<CustomRoll> = mutableListOf()
+    var customRolls: MutableList<CustomRoll> = mutableListOf(),
+
+    // System Flexibility
+    // If not null, this character uses a custom version of the system (overrides Table/Global system)
+    var systemOverride: RuleSystem? = null,
+    
+    // Dynamic Values (Mapped by Attribute Key)
+    // Legacy fields (forca, etc) will stay for now but we will sync them
+    var attributeValues: MutableMap<String, Int> = mutableMapOf(),
+    var resourceValues: MutableMap<String, Int> = mutableMapOf() // Current values for resources
 ) {
     fun getMaxPv(): Int = (resistencia * 5).coerceAtLeast(1)
     fun getMaxPm(): Int = (resistencia * 5).coerceAtLeast(1)

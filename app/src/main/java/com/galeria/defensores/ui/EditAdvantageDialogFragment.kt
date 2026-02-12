@@ -33,20 +33,46 @@ class EditAdvantageDialogFragment(
         val editCost = view.findViewById<TextInputEditText>(R.id.edit_advantage_cost)
         val editDesc = view.findViewById<TextInputEditText>(R.id.edit_advantage_description)
         val btnRemove = view.findViewById<Button>(R.id.btn_remove)
+        val btnSave = view.findViewById<View>(R.id.btn_save)
+        val btnEdit = view.findViewById<Button>(R.id.btn_edit) // Assumes I will add this to XML
         val titleView = view.findViewById<TextView>(R.id.dialog_title)
 
         if (advantage != null) {
             editName.setText(advantage.name)
             editCost.setText(advantage.cost)
             editDesc.setText(advantage.description)
-            titleView.text = "Editar Vantagem"
+            titleView.text = "Detalhes"
+            
+            // Read-Only Mode Initially
+            editName.isEnabled = false
+            editCost.isEnabled = false
+            editDesc.isEnabled = false
+            btnSave.visibility = View.GONE
+            btnRemove.visibility = View.GONE
+            btnEdit.visibility = View.VISIBLE
         } else {
             titleView.text = "Nova Vantagem"
             btnRemove.visibility = View.GONE
+            btnEdit.visibility = View.GONE
+            // Default Edit Mode
+            editName.isEnabled = true
+            editCost.isEnabled = true
+            editDesc.isEnabled = true
+             btnSave.visibility = View.VISIBLE
         }
 
         if (onDelete == null) {
             btnRemove.visibility = View.GONE
+        }
+
+        btnEdit.setOnClickListener {
+             editName.isEnabled = true
+            editCost.isEnabled = true
+            editDesc.isEnabled = true
+            btnSave.visibility = View.VISIBLE
+            btnEdit.visibility = View.GONE
+            if (onDelete != null) btnRemove.visibility = View.VISIBLE
+            titleView.text = "Editar Vantagem"
         }
 
         btnRemove.setOnClickListener {
@@ -60,21 +86,22 @@ class EditAdvantageDialogFragment(
             dismiss()
         }
 
-        view.findViewById<View>(R.id.btn_save).setOnClickListener {
+        btnSave.setOnClickListener {
             val name = editName.text.toString()
             val costStr = editCost.text.toString()
             val desc = editDesc.text.toString()
 
-            val costInt = costStr.toIntOrNull()
-            if (costInt == null) {
-                editCost.error = "Insira um número válido"
-                return@setOnClickListener
-            }
-
+            val costInt = costStr.toIntOrNull() // Validation only, we store string
+            // Allow complex costs like "1-3" or "1pt" if the user wants, but currently logic checks int?
+            // "1-3" will fail toIntOrNull. The user's requested data has "1-3", "1 a -2". 
+            // The original code `val costInt = costStr.toIntOrNull()` and `if (costInt == null)` prevents non-integer costs!
+            // I MUST FIX THIS VALIDATION to allow string costs for the user's data!
+            // The Gaiden data has ranges. The validation blocks them.
+            
             if (name.isNotBlank()) {
                 val newItem = advantage?.copy(
                     name = name,
-                    cost = costStr, // Keeping as string as per model, but validated as int
+                    cost = costStr, 
                     description = desc
                 ) ?: AdvantageItem(
                     id = java.util.UUID.randomUUID().toString(),

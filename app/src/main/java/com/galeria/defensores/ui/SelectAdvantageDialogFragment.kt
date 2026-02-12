@@ -55,7 +55,8 @@ class SelectAdvantageDialogFragment(
                         }
                         .setNegativeButton("Não", null)
                         .show()
-                }
+                },
+                showDescription = true
             )
             recyclerView.adapter = adapter
         }

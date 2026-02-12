@@ -53,7 +53,8 @@ class SelectSkillDialogFragment(
                         }
                         .setNegativeButton("Não", null)
                         .show()
-                }
+                },
+                showDescription = true
             )
             recyclerView.adapter = adapter
         }

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:minWidth="300dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Opções do Sistema"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingBottom="16dp" />
+
+    <Button
+        android:id="@+id/btn_save_as"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Salvar como Novo Sistema"
+        android:backgroundTint="@color/purple_600"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="8dp" />
+
+    <Button
+        android:id="@+id/btn_reset_system"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Restaurar Padrões (3D&amp;T)"
+        android:backgroundTint="#EF4444"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="8dp" />
+
+    <Button
+        android:id="@+id/btn_export"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Exportar para Arquivo (.json)"
+        android:backgroundTint="@color/blue_600"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="8dp" />
+
+    <Button
+        android:id="@+id/btn_import"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Importar Sistema (JSON)"
+        android:backgroundTint="@color/orange_600"
+        android:textColor="@android:color/white"
+        android:padding="12dp"
+        android:layout_marginBottom="8dp" />
+
+    <Button
+        android:id="@+id/btn_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cancelar"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:textColor="@color/gray_600" />
+
+</LinearLayout>

@@ -1,0 +1,355 @@
+AMBIENTE ESPECIAL
+Você depende de um ambiente específico (ex: água, frio extremo, floresta densa).
+-1PT Fora de seu ambiente, após um número de dias igual à sua R, perde –1R por dia (PV e PM caem proporcionalmente), sem risco de morte. Recupera a R perdida ao passar 1 PRD no ambiente
+-2PT Se chegar a R0, morre no turno seguinte, ignorando efeitos como Imortal ou Regeneração.
+1PT Enquanto estiver no seu ambiente, torna-se imune a todos os STN e cancela os efeitos de qualquer um já ativo.
+ASSOMBRADO
+Você é atormentado por uma presença constante (fantasma, doença, mal-funcionamento, etc.).
+-1PT Em combate, role 1d6; com 4+, você sofre –1 em FA e FD e paga +1PM para ativar Vantagens até o fim da CNA.
+-2PT O redutor é de –1d em FA, FD e testes, e Vantagens custam +2PM.
+1PT Se não for afetado, um inimigo na CNA pode ser assombrado (R para negar). Se o alvo resistir ou sair da CNA após assombrado, você sofre os efeitos no lugar.
+2PT Se você não foi assombrado pode, uma vez no combate, enviar a assombração a um inimigo (R para negar). Você não é mais assombrado caso um alvo resista à assombração.
+BATERIA
+Você depende de energia para funcionar. Pode atuar por um número de CNAs igual ao dobro da sua R. Após isso, sofre –1 em F, H (para MOV) e R por CNA adicional; PV e PM caem proporcionalmente.
+Se um desses Atributos chegar a 0, você fica inconsciente até recarregar. Cada CNA de repouso absoluto recupera energia para mais 1 CNA ativa. Um PRD de descanso restaura totalmente sua carga.
+COMPLEXO
+Você tem traços de personalidade marcantes que dificultam a convivência social.
+Sofre -1 em testes sociais. O redutor é cumulativo para cada caráter que possuir.
+Cada Complexo é uma Desvantagem Suave, alguns possuindo variação Grave.
+Amnésia: Você não lembra nada do passado. O mestre escolhe suas Vantagens e Desvantagens. Você vai ter ao menos uma Desvantagem.
+Antissocial: Sofre -1 em todos os testes (incluindo FA e FD) na presença de desconhecidos.
+	+1PT (1PM) +1 em todos os testes (incluindo FA e FD) quando FDA de espectadores, inimigos que enfrentar não contam como espectadores.
+Atrapalhado: Sempre tropeçando, esbarrando nos outros, quebrando coisas, dizendo bobagens… Recebe -1 em todas as PRC, precisa do dobro do tempo para executar uma ação sem redutor.
+Consumista: Você é um consumidor frenético. Perde 1 moeda sempre que chega em uma cidade.
+Complexo de Culpa: Você se sente responsável por todas as pessoas próximas. Qualquer mal que aconteça com eles, pra você a culpa é sua. Ao se sentir culpado sofre -1 em todos os testes, por 2d CNA.
+Covarde: Você simplesmente não foi feito para o combate! Sofre -1 na FD.
+	+1PT Foge automaticamente sem perder Pontos de Experiência. Se escapar ileso, recupera 1d PM.
+Curioso: Precisa abrir os armários, portas ou apertar botões vermelhos com simbolos de caveiras. Testa R sempre que algo atiçar sua curiosidade, se falhar já sabe.
+Desorientado: Você não tem senso de equilíbrio. Sob situação de estresse deve testar H, se falhar fica indefeso por um turno.
+Diurno: Sempre que agir à noite, sofre -1 em todos os testes (incluindo FA e FD).
+Ganancioso: Não divide pertences nem empresta nada. Nunca se satisfaz com o que tem, nem faz um favores de graça. Testa R para não aceitar de imediato dinheiro, recompensas ou ofertas aparentemente vantajosas.
+	+1PT +1 em testes de uma tarefa da qual seja contratado para executar.
+Gatilho: Certa coisa específica desencadeia um colapso mental temporário. Escolha uma cena, uma fala, um som, ou similar, que não seja tão comum nem tão raro. Caso o gatilho ocorra teste R. Falha impõe condição de "Atordoado" por um turno.
+Gregário: Odeia ficar sozinho. -1 em testes (incluindo FA e FD) quando FDA de aliados.
+	+1PT (1PM) +1 quando agrupado com aliados conhecidos.
+Indiferente: Tem dificuldade em lidar com o que não está interessado (coisas não ligadas a Devoção, Dependência, Código, ou similar). Sofre -1 em testes com assuntos que são de sua indiferença. Testa R para prestar atenção em tópicos que não são de seu interesse.
+Memória Recente: Não lembra nada ocorrido há mais de uma CNA.	Anula PRC e poderes “gravados” com Memória Expandida e Adaptador. Nunca se lembra dos poderes desenvolvidos após a Memória Recente.
+Mundano: Sem experiência com o sobrenatural, tem até medo de coisas fora do comum. Normal em campanhas realistas, refletindo o medo natural que as pessoas têm do sobrenatural.
+	-1PT Não pode ter Vantagens que exijam PM ou permitam lançar poderes.
+	-2PT Testa R para não ter Medo em situações onde pode ocorrer algo sobrenatural. Caso alguém use PM fica sob Medo automaticamente.
+Noturno: Sempre que agir durante o dia, sofre -1 em todos os testes (incluindo FA e FD).
+Novato: Acabou de descobrir os poderes e misticismo do cenário. Precisa de testar H para usar PDR e Vantagens de cunho místico. Recebe -1 ao testar Ocultismo.
+Onomatopaico: Fala emitindo efeitos sonoros das coisas que menciona. Similar à Inculto, porém você ainda compreende os outros.
+Preguiçoso: Você evita a fadiga.
+	-1PT Gasta 1PM para entrar em combate.
+	-2PT Gasta 1PM por rolagem de dado. Se ficar sem PM não pode rolar dados.
+	+1PT Você não representa ameaça de tão preguiçoso. Em grupo, caso esteja sem PM, você deixa de ser alvo de ataques.
+Sanguinário: Sempre mata seus adversários, mesmo após desmaiados ou indefesos. Caso não consiga matar um oponente derrotado, sofre -1 em todos os testes por um dia. Quem presencie seu comportamento sádico o trata como se você tivesse Má Fama.
+Soluço Descontrolado: Você soluça o tempo todo. Gasta 1PM para usar PRC, em testes sociais. PDR e Vantagens que utilizem concentração ou voz custam +1PM.
+Tapado: Você não tem um pingo de bom senso. Testa R em situações que exijam bom senso, senão terá a pior atitude possível.
+Trauma: Algo te marcou profundamente. Ao ver uma cena, pessoa ou objeto que lembre seu trauma evitará aquilo de qualquer maneira. Precisa testar R, se falhar, ficará paralisado até se afastar do trauma.
+Viciado: Similar a dependência, porém mais acessível. Possui vício forte por substância ou ação (álcool, jogos, comida, tabaco, droga). Cada PRD sem seu vício acarreta em -1 em todos os testes (incluindo de FA e FD).
+Vocabulário Limitado: Só consegue formar frases de uma ou duas palavras.
+CÓDIGO
+Você segue um ou mais princípios rígidos de conduta, auto impostos por convicção, cultura ou doutrina. Esses princípios limitam seu comportamento em situações específicas.
+Cada Código adotado que for violado acarreta perda de 1 Ponto de Experiência ao fim da sessão.
+Se interpretar fielmente seu Código durante a sessão, o mestre pode conceder +1 PD (máximo 1 por sessão, independentemente do número de Códigos).
+Ter múltiplos Códigos é permitido, mas exige aprovação do mestre. Códigos devem entrar em conflito real com o cenário em algum momento.
+Cada código é uma Desvantagem Suave.
+Código da Abstinência: Jamais consumir carne, álcool, drogas ou se envolver em atos carnais.
+	+1PT Recebe 1 sucesso automático por cena contra efeitos de controle mental, sedução ou ilusão emocional.
+Código de Área: Nunca iniciar combate ou usar poderes ofensivos em um tipo de terreno específico (ex: cidades, florestas, santuários ou opções da Vantagem Arena). Mesmo sob ataque, deve tentar recuar do terreno antes de responder à agressão.
+Código do Caçador: Jamais matar fêmeas grávidas ou filhotes, nem permitir que outros o façam. Nunca abandonar uma presa abatida. Sempre escolher como oponente a criatura mais perigosa à vista.
+Código dos Cavalheiros: Nunca atacar mulheres (ou fêmeas racionais), mesmo que oponham resistência, nem permitir que outros o façam. Sempre atender pedidos de ajuda delas.
+Código do Combate: Nunca atacar inimigos indefesos, caídos ou em menor número, nem permitir que outros o façam.
+	+1PT (1PM) Ganha +1 em FA e FD ao lutar em inferioridade numérica ou contra oponentes que usem truques injustos (bônus perdido se a situação mudar).
+Código da Derrota: Nunca aceitar derrota ou rendição. Se capturado ou reduzido a 0 PV em combate justo, deve tirar a própria vida. Só aplicável em combates formais, duelos ou batalhas diretas.
+Código do Desafio: Jamais recusar desafios (duelos, enigmas, jogos). Deve cumprir punições acordadas em caso de derrota. Sempre que possível, deve priorizar desafios individuais.
+	+1PT Em duelo formal, recebe +2 em FA/FD se o adversário tiver apoio externo. Se um aliado seu intervir, o efeito se perde.
+Código da Gratidão: Se alguém salva sua vida (ou ente querido), você deve servi-lo até retribuir o favor. Deve colocar essa pessoa acima de seus objetivos até “pagar a dívida”.
+Código da Guerra: Jamais recuar ou abandonar aliados em combate. Nunca se curar com magia, itens ou efeitos sobrenaturais.
+Código dos Heróis: Jamais mentir, enganar, ou quebrar promessas. Sempre proteger os mais fracos e atender pedidos de ajuda.
+	+1PT Pode usar as manobras Ajudar e Proteger sem gastar ACT.
+Código da Hierarquia: Jamais desobedecer autoridades reconhecidas ou quebrar leis formais, nem permitir que aliados o façam. Não pode agir contra leis locais, mesmo se injustas, a menos que possua outro código conflitante.
+Código da Honestidade: Jamais mentir, roubar ou trapacear. Impede qualquer uso de disfarces, blefes ou armadilhas baseadas em engano.
+Código da Obediência: Escolha uma ancestralidade racional (ex: elfos, anões, humanos). Sempre obedecer ordens dadas por membros dessa raça, exceto se contrariar outro Código.
+Código da Máscara: Sempre cobrir o rosto com capuz ou máscara. Se alguém comum vir seu rosto, deve: matá-lo (ganha Rival), ou amá-lo (ganha Devoção). O Código é substituído até o destino da pessoa ser resolvido.
+Código Ninja: Jamais abandonar uma missão. Deve completá-la a qualquer custo, inclusive a própria vida.
+Código do Pacifista: Evita violência sempre que possível. Nunca inicia combate, mesmo contra criaturas irracionais. Só causa dano não letal, mesmo em legítima defesa.
+Código dos Piratas: Nunca perdoar um insulto. O inimigo de um companheiro é seu inimigo. Nunca atacar membros do próprio grupo, salvo em duelo justo.
+Código do Protetor: Escolha uma ancestralidade. Jamais prejudicar ou permitir que prejudiquem membros dela.
+	+1PT Ao proteger personagens da ancestralidade escolhida, ganha +1 em testes, FA e FD.
+Código da Rebeldia: Jamais aceitar ordens sem questionar. Sempre desafiar leis, normas e hierarquias injustas. Sempre que receber uma ordem de autoridade, deve questioná-la ou desobedecer se for contrária a seus princípios.
+Código da Redenção: Jamais atacar primeiro. Sempre aceitar rendição. Nunca matar alvos inconscientes, desarmados ou derrotados. Nunca confia em quem não saiba aceitar uma rendição.
+Código do Samaritano: Jamais ferir nenhum ser vivo (inclui animais, insetos, criaturas irracionais e seres sencientes).
+	+1PT Criaturas com R inferior a sua não o atacam espontaneamente. Com R maior, testam R por ataque para tentar feri-lo.
+Código da Selva: Jamais usar objetos de metal. Apenas madeira, couro ou partes de criaturas mortas naturalmente. Nunca atacar animais, exceto em legítima defesa.
+Código do Trapaceiro: Jamais recusar oportunidade de enganar, burlar ou ludibriar alguém. Sempre enganar quando possível. Não pode deixar de aplicar um golpe ou mentir mesmo que isso piore sua situação.
+CORPO ARTIFICIAL
+Seu corpo é feito de metal, cerâmica, madeira encantada, cristal ou outro material inorgânico. Embora sua mente ainda seja racional, seu corpo não é vivo.
+-1PT Você é imune a asfixia, desnutrição, doenças, sono e venenos, e não precisa comer, beber, dormir nem respirar. No entanto:
+Só recupera PV por meios mecânicos: é necessário um aliado com a PRC Tecnologias.
+Se destruído (0 PV), não morre definitivamente, mas só pode ser reparado com Tecnologias.
+Não pode ser ressuscitado por métodos mágicos, místicos ou naturais.
+Não recebe Pontos de Experiência em sessões em que tenha sido destruído.
+É possível um aliado tentar reparo improvisado com -2 no teste, recuperando no máximo 1PV por CNA.
+-2PT Além de tudo, não pode adquirir Vantagens de cura pessoal, como Energia Extra e Regeneração.
+DEBILITAÇÃO
+Seu personagem possui uma limitação física ou sensorial, congênita ou adquirida, que afeta sua eficiência. Cada debilitação aplica penalidade igual ao valor da Desvantagem variando de Suave à Grave (-1 a -3) em FA, FD e em testes de um Atributo específico.
+Albinismo (R): Pele e olhos claros, sem proteção natural contra o sol. Perde 1PV por ponto da Desvantagem a cada CNA sob sol comum, ou 5PV sob sol intenso (verão/deserto). Roupas pesadas prolongam o tempo de exposição. Impossível se disfarçar em multidões.
+Audição (H): Redutor em testes de percepção auditiva. Surdez (-3), não realiza testes baseados em som e recebe +4 FD contra Tipo de Dano (Som). Audição Ruim (-1 a -2), com penalidade apenas em testes auditivos. Não pode comprar Audição Aguçada.
+Desmembrado (H): Ausência de membros. Mão/pé (-1 a -2) ou braço/perna (-2 a -3). Penalidades maiores representam a mão hábil.
+Fragilidade (A): Extremamente vulnerável a dano físico. Ao sofrer dano, recebe redutor igual à Desvantagem no próximo turno.
+Hemofilia (R): Ferimentos causam sangramento contínuo: perde 1PV por ponto da Desvantagem a cada ataque recebido. Pode ser mitigada por Regeneração de mesmo valor.
+Locomoção (H): Dificuldades para se mover. Penalidades entre -1 e -3 conforme gravidade (de claudicação a paraplegia). Sempre sob efeito de Lentidão sem equipamentos auxiliares.
+Visão (H): Visão Ruim (-1 a -2), não pode comprar Visão Aguçada. Cegueira (-3) pode ser reduzida para -2 se possuir Radar.
+Voz (H): Alterada (-1 a -2) com gagueira, fala arrastada ou vocalização limitada, ou Mudez (-3) onde o personagem é incapaz de se comunicar verbalmente. Penalidades em testes sociais e uso de PDR baseados em fala ou comando.
+DEPENDÊNCIA
+Você precisa consumir algo raro, proibido ou inumano diariamente (como sangue, sofrimento, órgãos, emoções, etc.).
+Essa Dependência pode ser agradável ou não, mas você deve satisfazê-la todos os dias. Esta Desvantagem é mais apropriada para vilões.
+-1PT Caso não sacie essa necessidade, sofre redutor cumulativo de -1 em R por dia. Isso também reduz seus PV e PM. Ao atingir R0, fica com apenas 1PV (Muito Fraco); no dia seguinte, cai com 0 PV. Saciar a dependência restaura sua R e te estabiliza, mas não recupera PV.
+-2PT Após cair Muito Fraco, cada dia seguinte, piora progressivamente até morrer.
++1PT Ao saciar sua dependência, ganha +1d em testes (incluindo FA/FD) por uma CNA e recupera PV igual à sua R. Se a dependência for por sangue, recupera 1PV por PV da vítima.
+DEVOÇÃO
+Você é obcecado por uma missão, juramento ou pessoa. Nada além disso importa.
+Essa Dependência deve ser específica, restrita e situacional. Não pode ser algo aplicável a qualquer combate ou cena genérica. Pode ser a uma pessoa (como um mestre ou ídolo), mas nesse caso implica submissão total.
+-1PT Sempre que realizar algo que não esteja diretamente ligado à sua Devoção, sofre –1 em todos os testes.
+-2PT Após uma CNA seguida longe de seu objetivo, o redutor se torna –1d até que volte a agir conforme a Devoção.
++1PT Enquanto realiza ações diretamente ligadas à sua Devoção, recebe +1 em testes (incluindo FA e FD). (1PM) Recebe +1d para resistir a efeitos mentais enquanto seguir sua Devoção. (1PM) Pode ignorar redutores de outras Desvantagens por um turno, desde que isso beneficie diretamente sua Devoção.
+FETICHE
+Você depende de um item específico para canalizar seus poderes. Exemplos: varinha, cajado, amuleto, instrumento musical, grimório, etc.
+Sempre que sofrer dano, teste H. Se falhar, deixa o fetiche cair (recuperá-lo exige 1 ACT).
+-1PT Sem seu Fetiche, não pode usar Vantagens que gastem PM. Se estiver usando um fetiche improvisado ou danificado (ex: galho no lugar da varinha), o custo de PM dobra. Seu fetiche é comum e pode ser substituído em cidades facilmente (1 moeda).
+-2PT Seu Fetiche é raro, exige tempo para elaborar, materiais específicos ou é um local apropriado (ex: biblioteca, laboratório). Não pode ser improvisado e custa no mínimo 10 moedas em cidades.
++1PT Reduz o custo de PM em -1 ao usar poderes com o fetiche.
++1PT +1 em testes, FA ou FD ao usar poderes com o fetiche. (1PM) Aumenta o bônus em +1 por um turno.
++1PT Uma vez por CNA pode usar uma Vantagem com +1d bônus.
+FRAQUEZA
+Sob certa condição, você fica fraco. Em fraqueza perde 1PV e 1PM por turno.
+A cada 5PV perdidos, sofre –1 cumulativo em todas as rolagens até um máximo de -3. Ao se afastar da causa, remove 1 redutor por turno. PV e PM não se recuperam automaticamente.
+A Fraqueza deve ser aprovada pelo mestre, que pode ajustar efeitos desequilibrados.
+-1PT Incomum: Acontece pelo menos 25% do tempo. Por exemplo, quando escuta uma palavra específica; quando fica molhado; quando pisa em grama; quando sente cheiro de perfume; quando alguém tira uma foto sua; quando está sem fazer uma refeição decente há menos de uma hora…
+-2PT Comum: Acontece pelo menos 50% do tempo. Por exemplo, quando no escuro ou à luz do dia; quando está sozinho (FDA de aliados); quando há animais próximos…
+-3PT Muito Comum: Acontece quase o tempo todo. Por exemplo, quando está sendo observado; quando está seco; quando fica sem ouvir música (e você sempre andará com um mp3...); quando tira os pés do chão por qualquer motivo (incluindo entrar em um veículo ou elevador).
+FURIOSO
+Similar à Fúria. Sob determinada condição definida com o mestre (ex: ver aliados feridos, ser atacado, lua cheia), você testa R. Se falhar, entra em fúria.
+Durante a fúria recebe +1 em FA, FD e testes de F, mas não pode usar PDR, Vantagens que gastem PM, nem realizar esquivas. Deve atacar imediatamente o alvo de sua irritação.
+A fúria termina quando o alvo é derrotado ou foge. Após a fúria sofre –1 em FA e FD por uma CNA. Se entrar em fúria novamente no mesmo PRD, os redutores se acumulam.
+GUIA
+Você depende de material de consulta (livros, anotações, arquivos digitais) para usar suas PRC.
+-1PT Recebe -1 ao testar PRC sem o guia. Com guia improvisado consegue realizar um teste normalmente, mas o guia se esgota após dois usos.
+-2PT Sem o guia recebe -1d redutor ao testar PRC. Com guia improvisado o redutor cai para -1, e o guia se esgota após um uso.
+-3PT Incapaz de usar PRC sem o guia físico original completo. Não consegue usar guias improvisados.
+INAPTIDÃO
+Você é incapaz de interagir com o sistema de poder central do cenário (magia, ki, aura, tecnologia, etc.). Não possui nenhum traço, habilidade ou compreensão prática sobre ele. Não pode adquirir PDR.
+-2PT Todas as Vantagens que gastam PM devem ter justificativa mundana (ex: talento, ciência, biotecnologia) e o mestre pode limitá-las como quiser. Ainda consegue usar itens que sejam feitos com PDR normalmente. Recebe sucesso automático contra quaisquer efeitos que permitam teste para resistir (mas ainda sofre dano).
+-3PT Nenhum efeito de PDR funciona em você, mesmo que não exija teste (cura, buffs, debuffs, teleporte, controle, etc.). Não consegue utilizar itens que usem PDR. Em compensação, você também nunca pode ser afetado por efeitos de PDR a não ser que seja dano direto no PV.
+INCULTO
+Você tem dificuldades sérias de comunicação, seja por analfabetismo, barreiras culturais ou linguagem extremamente limitada.
+Não sabe ler nem escrever, e se comunica com esforço. Leva um turno para transmitir ou entender informações. Recebe –1d em testes de PRC fora de sua especialidade, conforme o mestre. Se tiver um Mentor, Patrono, Aliado, Protegido Indefeso ou outro personagem ligado a uma Vantagem ou Desvantagem, ele será capaz de te entender.
+INSANO
+Você sofre de algum distúrbio mental grave. Ninguém confia em você após poucos minutos de conversa, mesmo que seu comportamento não seja imediatamente evidente.
+Apenas aliados adquiridos via Vantagens ou Desvantagens (como Mentor ou Patrono) costumam confiar em você — e mesmo assim, com ressalvas. Sempre que alguém souber da sua insanidade, você sofre –2 em testes sociais com ele. Esse redutor não se acumula, independentemente do número de insanidades.
+Cada insanidade tem seu custo individual (de 0 a –3PT). Algumas insanidades replicam efeitos de outras Desvantagens, e estão aqui pois podem ser adquiridas em campanha por poderes, maldições ou efeitos mentais.
+Todas as insanidades podem ser vencidas por uma CNA com um teste de R, sob supervisão do mestre.
+Insanidades Suaves
+Ansioso: Ao entrar em combate ou presenciar algo inesperado, role 1d. Com 4–6, sofre Medo até o fim da CNA.
+Cleptomaníaco: Sempre que puder roubar algo, teste R. Em falha, o faz sem pensar. Nunca devolve o que roubou. Alguns cleptos podem nem se dar conta do que fazem.
+Compulsivo: Deve realizar uma ação específica a cada hora (comer, lavar as mãos, tocar instrumento…). Se ficar mais de uma CNA sem fazê-lo, teste R por turno. Em falha, interrompe tudo para saciar a compulsão, o que toma 5 turnos.
+Depressivo: Sempre que for agir, role 1d6. Em 6, perde a ACT devido a apatia ou crise existencial.
+Eco: Toda vez que alguém terminar uma frase falando com o personagem, você repete as últimas palavras. Isso causa confusão em diálogos, impõe –1d em testes sociais.
+Eufórico: Aceita qualquer ideia como algo divertido e interessante, até as mais perigosas. Recebe –2 para resistir a manipulações e sugestões.
+Fantasia: Acredita ser alguém ou algo que não é. Fala disso constantemente e ignora contradições com a realidade. Você fala de si mesmo o tempo todo para anunciar sua fantasia para todos à volta. Teste R por CNA para tentar “sair da fantasia”.
+Fobia Suave: Medo paralisante de algo que encontra pelo menos 25% do tempo. Sempre que exposto, sofre Medo. Exemplos: água, animais inofensivos, animais selvagens (vale para animais inofensivos tentando ser agressivos), armas brancas (em campanhas medievais essa pode ser tida como uma Fobia Comum), armas de fogo (Fobia Comum para cenários atuais ou futurísticos; Fobia Maior para cenários de guerra), criaturas sobrenaturais, efeitos climáticos, estrangeiros (de outra região, raça ou cultura; similar a Xenofobia), ficar sozinho, fogo (Fobia Comum em cenários medievais), insetos, lugares altos (10 metros acima do chão, ou a beira de uma queda de 5 a 10 metros), monstros (personagens com Monstruoso ou com ancestralidade Inumano), nudez (humanos, semi-humanos ou humanoides desnudos), objetos brilhantes, objetos humanoides (estátuas, bonecos, espantalhos, etc), plantas pequenas (flores, capins e folhas, incluindo artificiais, mas não árvores), sangue (não importa se for vermelho, azul ou verde florescente).
+Hipocondríaco: Uma vez por sessão, role 1d. Em 4–6, acredita ter contraído uma doença e sofre seus efeitos fictícios.
+Histérico: Você sofre de crises emocionais intensas e incontroláveis. Sempre que estiver em situação de estresse (combate, fuga, risco iminente, falha crítica, ser contrariado, etc.), role 1d6. Resultado 1: você começa a rir compulsivamente (não consegue realizar ACT); Resultado 2–3: entra em pânico ou desespero (–2 em todos os testes até o fim da cena); Resultado 4: você desmaia ou entra em colapso, ficando Incapaz por um turno.
+Insônia: Só dorme se falhar em R+2. Caso consiga, acorda cansado (efeito de Sono).
+Masoquista: Todo dia, logo ao amanhecer, sofre 3PV de dano auto infligido que não pode ser curado por meios naturais ou descanso, apenas por itens ou poderes de cura. Se não aplicar esse dano voluntariamente, deve testar R a cada CNA ou será obrigado a fazê-lo (inclusive em meio a combate, o que toma um turno).
+Mentiroso: Nunca diz a verdade. Pode tentar vencer a compulsão com teste de R (feito em segredo pelo mestre).
+Narcoléptico: Role 1d por CNA. Em 4–6, dorme involuntariamente. Acorda só após alguns minutos ou dano.
+Paranoico: Não confia em ninguém. Recusa qualquer tipo de ajuda, mesmo mágica ou de cura.
+Sádico: Precisa causar dor diariamente. Caso não o faça, testa R. Em falha, ataca a primeira pessoa disponível.
+Sonâmbulo: Ao dormir, role 1d. Em 5–6, anda dormindo. Não luta e pode parar em locais perigosos. Por -2PT, não acorda nem se sofrer dano! Por -3PT, caso você acorde enquanto estiver sonâmbulo deve testar R, se falhar, morre.
+Insanidades Graves
+Canibal: Deseja consumir carne da própria espécie. Ao menos uma vez por dia ao ver um semelhante vivo ou recém-morto, teste R. Em falha, tenta atacar ou consumir.
+Dissonia: Você nunca consegue entrar em sono profundo. Sempre que descansar, recupera apenas 1PV e 1PM por PRD, independentemente das condições. Outros efeitos dependem de descanso para serem anulados ou ativados também são afetados. Não pode possuir Insano (Narcoléptico).
+Fobia Grave: Medo paralisante de algo ou situação que encontra 50% do tempo. Exemplos: animais, armas, caracteres (palavras ou números escritos por extenso, mesmo em outra língua), escuridão, gênero específico (forma humanoide masculina ou feminina), grande astro (sol ou lua), lugares fechados, móveis, multidões (dez pessoas num cômodo ou vinte pessoas em lugar aberto já te deixam aflito), ancestralidade (medo de seres inteligentes de outra espécie ou etnia), sombras.
+Homicida: Deve matar alguém de sua espécie a cada 1d dias. Se falhar ao testar R, ataca o primeiro ser que vê. Não recomendada para jogadores.
+Megalomaníaco: Acredita ser invencível. Nunca recua, se rende ou nega um desafio.
+Riso Involuntário: Sempre que falhar um teste ou sofrer dano, role 1d. Em 5-6, começa a rir por um turno. Durante esse tempo, sofre –1d em testes de Atributos e não pode se esconder.
+Suicida: Busca a morte ativamente. Assume riscos extremos sem se importar com a própria vida.
+Insanidades Letais
+Esquizofrenia: Sua loucura é fora dos padrões. Escolha um conjunto de -3PT em Insanidades, você sofre o efeito de todas simultaneamente como uma única Desvantagem, porém o mestre (ou você, com consentimento) pode a qualquer momento alterá-las.
+Fobia Letal: Medo paralisante de algo que você encontra quase o tempo todo. Exemplos: aparelhos eletrônicos (em cenários medievais é adaptado como fobia a itens místicos), barulho, líquidos, lugares abertos, luz, meios de transporte (veículos ou montarias), metais, música, pessoas (seres intelectuais de aparência minimamente humana), vegetais, vento.
+Múltipla Personalidade: Você abriga duas personalidades distintas no mesmo corpo. Cada uma possui ficha própria, com metade do total de PT do personagem. Elas não compartilham memórias nem consciência e podem ter Atributos, Vantagens, Desvantagens e PRC completamente diferentes.
+	Role 1d6 no início de cada aventura e sempre que sofrer dano crítico ou forte abalo emocional. Resultado 5–6: você muda de personalidade.
+	A nova personalidade assume por 1 PRD completo, ou até uma nova troca ser acionada.
+	Uma personalidade não sabe o que a outra fez, mas pode encontrar pistas ou suspeitas.
+	As duas personalidades evoluem juntas.
+MÁ-FAMA
+Você é infame. Pode ser um ex-criminoso tentando se regenerar, um desertor, alguém publicamente humilhado, ou pertencente a um grupo odiado. Seja qual for o motivo, você carrega um estigma: sua presença gera desconfiança e tensão imediata.
+-1PT Sempre que sua má-fama for reconhecida, sofre -1 em testes de Lábia, Sedução e Barganha. Além disso, você será o primeiro suspeito em qualquer situação de conflito, crime ou mal-entendido. Mesmo companheiros próximos podem sofrer os efeitos indiretos de sua reputação.
+Recebe +1 em Interrogatório e Intimidação – ninguém quer estar do lado errado da sua fama. Pode disfarçar ou ocultar sua identidade com Disfarce ou habilidades similares, a critério do mestre.
+-2PT Sua má-fama se converteu em ódio aberto por parte de um grupo específico (ex: mulheres, anões, soldados) ou em uma região (ex: um reino ou cidade). Sofre -2 nos testes sociais. Pode ser hostilizado, perseguido ou linchado ao ser identificado. Seus aliados também sofrem -1 nos mesmos testes, apenas por estarem com você.
+MALDIÇÃO
+Você sofre uma maldição persistente. Nada do que fizer poderá eliminá-la permanentemente — sempre retornará. A maldição pode ser sugerida pelo jogador, mas seu efeito final é definido pelo mestre. Algumas podem ser removidas por sacerdotes poderosos, geralmente mediante exigência de pagamento ou missão.
+Suave: Mais irritante ou constrangedora que qualquer outra coisa, esta Maldição traz problemas, mas não apresenta riscos. Exemplo: Pode ser que você mude de sexo ou tome a aparência de um animal feroz (mas ainda mantendo suas memórias, Vantagens, Desvantagens e Atributos) quando molhado com água fria, e depois volte ao normal quando molhado com água quente.
+Grave: Algo que coloca sua vida em risco. Se você se transforma em gatinho, porquinho ou pato quando é molhado com água fria (e enquanto está nessa forma com 0 em quase todos os Atributos, menos um deles que provavelmente será H…), isso acaba sendo um grande problema!
+Letal: Sua vida é um inferno e se você ainda está vivo é porque ou pegou a maldição a pouco tempo, ou tem muita sorte. Não poder recuperar PV nem com descanso ou poderes é um tipo de maldição letal.
+Maldições Fúteis: Algumas maldições não põe em risco a vida do personagem e muitas vezes nem incomodam tanto, sendo mais um efeito estético irritante. Essas maldições custam zero PT (0PT).
+Maldições podem ser removidas por sacerdotes poderosos o bastante. No entanto, é quase certo que ele vai exigir algum tipo de compensação por esse grande serviço – seja em dinheiro, seja na forma de uma missão.
+Em cenários medievais, ser deficiente ou insano é o mesmo que ser amaldiçoado. Por esse motivo, em termos de jogo apenas, uma deficiência ou insanidade é similar a uma maldição. Um mago maligno pode rogar uma maldição para torná-lo cego, e mais tarde você pode recorrer a um personagem com clericato para recobrar a visão. A decisão de usar deficiências físicas e mentais como maldições pertence ao mestre. Tenha cuidado para não ofender ou magoar alguém.
+Maldições Fúteis
+Barulho Incômodo: Sua presença é sempre acompanhada por um som estranho e irritante, como sapatos de palhaço enquanto anda.
+Boca Maldita: Você sempre tenta ver o lado bom das coisas, mas o universo parece zombar disso. Sempre que começa com um “Veja pelo lado positivo...”, “Pelo menos não...”, ou “Podia ser pior...”, tudo dá errado — às vezes, nem precisa terminar a frase.
+Chuva Ambulante: Você é seguido por uma nuvem de chuva — apenas sobre você, mesmo em ambientes fechados. Alternativamente, o local onde você for a chuva o acompanha, Uma CNA após chegar num local nuvens começam a se formar e na CNA seguinte começa a chover, até em desertos.
+Dedo Verde: Plantas e flores crescem descontroladamente à sua volta. Bastam algumas horas no mesmo lugar para um bosque começar a surgir.
+Desorientado: Você só encontra seu destino por sorte (1 em 1d), mesmo com ajuda ou estando perto. Só se orienta quando está em grupo.
+Gênero Invertido: Você foi transformado em uma versão atraente do gênero oposto ao seu e permanecerá assim até a maldição ser quebrada.
+Guia Enrolado: Você sempre conhece o caminho até seu destino — o mais longo e perigoso. Prejudica deslocamento e exploração, mas pode ser útil para evitar armadilhas ou emboscadas (“Você acha que devemos seguir por ali? Certo, então vamos por aqui!”).
+Ímã Amoroso: Você atrai atenção romântica constante, gerando situações constrangedoras sem impacto mecânico.
+Pé Frio: Sempre que tirar um crítico em um teste que não seja de combate, mesmo sendo bem sucedido, algo acontece que desvia o caminho do personagem ou do grupo.
+Reflexo Amaldiçoado: Sua imagem não aparece em reflexos, filmagens ou retratos — ou assume forma monstruosa. Quem percebe a anomalia desconfia de você, impondo -1 em testes sociais.
+Sombra Maldita: Você não tem sombra ou ela tem vontade própria, movendo-se sozinha, zombando e mexendo em objetos (F/PDF 0). Em ambos os casos, sofre -1 em testes sociais e as pessoas suspeitam que você seja uma criatura sobrenatural.
+Super Deformed: Ao presenciar algo engraçado ou constrangedor, você assume uma versão caricata de si mesmo – e nunca mais será levado a sério por seus amigos.
+Maldições Suaves
+Água Corrente: Você é incapaz de atravessar rios ou cursos d’água corrente por qualquer meio. Mesmo carregado, seu corpo trava antes de cruzar, como se uma barreira invisível o impedisse. Ponte, barco ou voo não fazem diferença.
+Antipatia Animal: Feras o evitam, rosnam ou mostram desconforto próximo a você. Recebe -2 em testes de interação com Animais. Insetos costumam picar você mais que o normal.
+Atração Animal: Animais são irresistivelmente atraídos por você, mas não obedecem. Está sempre cercado por bichos que o seguem, atrapalham e chamam atenção indesejada — de cães e gatos a criaturas perigosas.
+Atrasado: Você nunca chega pontualmente a compromissos — sempre há um imprevisto. Sofre INI -2, pois algo inevitavelmente o atrasa no início de combates.
+Caçado: Você feriu ou matou alguém querido por um grupo específico. Agora, parentes, aliados e seguidores da vítima o caçam constantemente como inimigo pessoal.
+Chaga Espiritual: Sempre que perde PV, você perde a mesma quantidade de PM. Curar PV não recupera PM. O personagem precisa ter ao menos uma Vantagem que gaste PM.
+Coceira Constante: Você está sempre se coçando. Ao entrar em combate, role 1d6; com 4, 5 ou 6, perde seu MOV em todos os turnos para se coçar. Se passar uma ACT sem coçar-se, sofre -1 em FA e FD.
+Combustível: Pode pegar fogo apenas por estar JNT a uma chama, sofrendo ao menos 1d de dano por turno. Leva no mínimo um turno para apagar as chamas.
+Coração Confuso: Suas emoções são invertidas. Situações de pânico te encorajam, incentivos te assustam. Você agride quem ama e se apaixona por quem quer te matar.
+Crescimento de Pelo: Seus cabelos e barba crescem 1 metro por PRD. Se não forem aparados, causam lentidão por atrapalharem seus movimentos.
+Dedos de Manteiga: Suas mãos são instáveis, dificultando o manuseio de objetos. Sofre -2 em testes com ferramentas e -1 em FA e FD durante o combate.
+Degradação das Matas: Plantas vivas apodrecem e viram pó onde você passa. Criaturas vegetais perdem 1PV por turno perto de você. Não afeta madeira morta. Druidas não vão com a sua cara.
+Descontrole Amoroso: Se apaixona por qualquer pessoa atraente conforme sua orientação sexual, ignorando tudo (exceto Desvantagens) para conquistá-la. Dirá segredos, dará presentes e fará de tudo por um sorriso. Essa paixão avassaladora cessa minutos após a pessoa se afastar e recomeça ao conhecer alguém atraente.
+Extintor: Toda chama não mágica na mesma CNA se apaga ao seu redor. Você ainda sofre dano por Fogo, mas não pode permanecer em chamas — o fogo se extingue no turno seguinte.
+Fedido: Seu odor é insuportável. Testes sociais sofrem -2, e todos na mesma CNA devem testar R por turno para permanecer. Criaturas com Olfato Aguçado testam para não fugir com Medo.
+Flatulência: Você sofre de flatulência constante e extrema. Testes sociais sofrem -2 e você é instintivamente evitado por todos ao redor.
+Incorpóreo: Você é um espectro. Possui Intangibilidade 3PT, mas não pode se materializar nem usar ATV de ataque da Vantagem.
+Ligação Espiritual: Você está vinculado a outra pessoa desconhecida. Todo mal que a atingir — dano, doença ou morte — também afeta você. A conexão é passiva, constante e imprevisível.
+Mão Rebelde: Uma de suas mãos tem vontade própria. Em combate ou tensão, há chance de 4-6 em 1d dessa parte agir contra você, causando redutor de H-1. Pode realizar ações simples como roubar ou atacar.
+Marca do Mentiroso: Sempre que mente, um sinal evidente denuncia a falsidade: trovão ao longe, pássaro morto caindo, gagueira ou nariz crescendo.
+Mil Caras: Após dormir, você acorda com aparência totalmente diferente: cor da pele, olhos, cabelos, altura, peso e sexo mudam, mas sua raça permanece a mesma. Sua identidade visual varia, mas seus Atributos não se alteram. Você sempre precisa dormir, independentemente da forma.
+Mil Vidas: Você é imortal, mas possui apenas 1PV fixo, independentemente de R ou PV Extra. É comum entre aventureiros que mataram uma fênix de forma desonrada. Se a maldição for da própria fênix, não pode ser curada por meios mágicos; apenas uma divindade ou outra fênix pode removê-la — e só após genuína redenção.
+Permissão de Entrada: Você não pode entrar em residências sem convite explícito do morador. A maldição não se aplica a estabelecimentos públicos ou locais de livre acesso.
+Pestilência: Você tem saúde, mas todos perto de você adoecem. Criaturas vivas na mesma CNA devem testar R ou adquirem algum STN representando uma doença como Dano Contínuo, Desnutrição, Lentidão ou efeitos de Enfraquecer. Sucesso no teste imuniza contra essa maldição.
+Reflexo Insuportável: Ao ver seu reflexo, você é afetado por Medo por 1d turnos, tornando-se incapaz de agir. O gatilho pode ser qualquer superfície refletora.
+Repulsa Amorosa: Após dois turnos interagindo com alguém do sexo oposto, teste R-1 por turno. Se falhar, vomita violentamente, encerrando a interação de forma constrangedora.
+Saúde Invertida: Vantagens e PDR que curam causam dano no personagem, enquanto PDR ou Vantagens com Trevas, recuperam seus PV.
+Sedativo: Após quatro turnos ouvindo sua fala ou canto, criaturas na mesma CNA testam R+1 por turno para não dormir. Não afeta em combate ou sob tensão.
+Toque da Banalidade: Seu toque reduz 1PM por turno de quem estiver em contato com sua pele, incluindo Construtos e Mortos-Vivos. O efeito exige contato contínuo (não vale para ataques) e afeta também quem te tocar desprotegido.
+Toque da Morte: Criaturas vivas perdem 1PV por turno de contato direto com sua pele (exceto mortos-vivos e construtos). Não afeta ataques normais. Personagens que toquem você também sofrem o efeito.
+Toque da Múmia: Ao tocar alguém, o alvo deve testar R ou contrair uma doença com efeito de Dano Contínuo (par) ou Enfraquecer (ímpar). Imune se a R do alvo for maior que a do personagem.
+Uruca: Você espalha azar por onde passa. Todos na mesma CNA sofrem -1 em testes. Objetos quebram, pessoas tropeçam, acidentes acontecem. Quem descobre sua maldição age como se você tivesse Má Fama e evita sua presença.
+Vórtice de Energia: Seu corpo reduz 1PM por turno de qualquer ser na mesma CNA.
+Maldições Graves
+Azarado: A má sorte te persegue implacavelmente. Está sempre no lugar errado, na hora errada. Se algo ruim for acontecer, você é o alvo. Em um grupo, você é o ímã para todo o sofrimento, atraindo ataques especiais e armadilhas. Para piorar, uma vez por sessão, o mestre pode te colocar numa situação terrível, como um erro crítico automático, falha em um teste crucial ou revelação de um segredo embaraçoso.
+Caos Invertido: Em testes de Atributos ou PRC (exceto combate), seus acertos contam como falhas e vice-versa. Bônus viram redutores e redutores viram bônus.
+Chagas da Natureza: Você está profundamente ligado à natureza. Qualquer dano ao ambiente na CNA — como cortar uma árvore, quebrar uma rocha ou matar um animal — causa a perda de 1d PV. Em terrenos urbanos, perde 1PV por turno.
+Corpo Rebelde: Metade do corpo tem vontade própria. Em combate ou tensão, há chance de 4-6 em 1d dessa parte agir contra você, causando redutor de H-3. Pode executar sua ACT ou seu MOV contra sua vontade.
+Energia Degradante: Toda vez que usa uma Vantagem que consome PM, perde 1PM permanente adicional.
+Herege: você profanou um local sagrado ou ofendeu uma entidade poderosa. Diariamente, sofre efeitos sobrenaturais hostis (como maldições, acidentes, ou ataques mágicos).
+Homicida Sensível: Sempre que mata um inimigo em combate, sofre -1 em todos os testes por 1 CNA. Além disso, seus ataques ignoram o Teste de Morte: qualquer alvo reduzido a 0 PV por você morre imediatamente.
+Forma Inofensiva: Durante metade do dia, você se transforma em uma ser indefeso, como um bebê ou um hamster (Atributos 0, sem Vantagens de combate), mantendo memória e personalidade. Retorna ao normal apenas à noite.
+Gêmeo Maligno: Um sósia seu comete crimes e espalha sua má fama. Você é perseguido, confundido com ele e pode ser preso, linchado ou caçado por suas ações. Redutor social constante.
+Ímã de Raios: Em dias limpos, há 1/6 de chance (1 em 1d) por PRD de ser atingido por um raio (1d PV). Em chuvas ou tempestades, a chance sobe para 1/3 (1, 2 ou 3 em 1d) por CNA.
+Intuição Poderosa: Você recebe visões involuntárias, como Premonição, mas perde todos os PV e PM ao recebê-las, ficando exausto até descansar.
+Marca da Presa: Toda criatura do tipo Fera o considera uma ameaça e o ataca à primeira oportunidade, sem testes ou provocações. Pode incluir animais domesticados ou mágicos. Fugas ou disfarces são ineficazes enquanto estiver na mesma CNA.
+Pesadelos: Sempre que dorme, perde PV igual à sua R devido a sonhos horríveis. Não recupera PV ao descansar.
+Poder Limitado: Seu valor máximo de PM é fixo no inicial e não pode ser aumentado por nenhum meio, incluindo R elevada ou compra de PM Extra.
+Recuperação Parcial: Leva o dobro de tempo para recuperar PV e PM. Vantagens, itens e poderes de cura restauram apenas metade dos PV e PM que deveriam.
+Recuperação Restrita: Não pode ser curado com medicina, PDR, Vantagens, poções ou outros itens de cura. Só recupera PV com descanso.
+Ruína Solar: Sob luz solar direta, você perde 1PV por turno. Em dias nublados ou sob roupas pesadas, perde 2PV por CNA. Se combinar ambos, a perda cai para 1PV por CNA.
+Sede de Sangue: Você só recupera PV e PM ao beber sangue humanoide (1PV/PM por PV drenado da vítima). A cada dia sem sangue, perde 1PV por PRD seguinte. Se chegar a Perto da Morte por abstinência e falhar em R, entra em fúria e ataca o primeiro que ver. Ao chegar a 0 PV por esse motivo, não morre, mas perde 1PT em todos os Atributos por PRD. Com todos os Atributos a 0, cai Inconsciente, piorando um estado por dia. Sangue animal não cura, mas adia os efeitos por 1 PRD.
+Toque da Falha: Todo dispositivo mecânico ou eletrônico acima da complexidade de uma lâmpada falha em suas mãos: armas emperram, veículos quebram, mecanismos travam. Sofre 1d redutor em testes envolvendo Tecnologia. Construtos tecnológicos reagem com hostilidade imediata.
+Toque Gremlin: Qualquer objeto com partes móveis (mínimo duas) quebra, emperra ou desmonta ao seu toque. Você não pode usar ferramentas, operar máquinas ou viajar em veículos. Construtos que o toquem devem testar R+1 ou caem a 0 PV.
+Toque da Putrefação: Tudo que você toca com as mãos apodrece em 1d turnos, virando massa negra. Afeta apenas objetos não mecânicos.
+Velhice Acelerada: Você envelhece dez vezes mais rápido que o normal (ex.: um ano por mês para humanos), encurtando drasticamente sua expectativa de vida sem cura ou tratamento.
+Maldições Letais
+Karma: Todo mal que causar retorna a você com efeito idêntico (dano, feitiço ou perda). Torna inviável qualquer ação ofensiva direta.
+Maldição do Rei Demônio: Cada crítico que você desferir desconta de você 1PV permanente.
+Marca Maldita: Você atrai inimigos poderosos e não pode fugir deles. Uma vez por sessão um adversário com o dobro de seus PT ou mais surge para te matar e se tentar fugir você morre. O mestre define o oponente, ficha, encontro e outros detalhes.
+Olhar da Medusa: Toda criatura viva que olhar nos seus olhos paralisa por um turno se falhar em R. Incontrolável. Mesmo aliados devem testar R ao menos uma vez por CNA.
+Poder Vital: Você não possui PM. Para usar PDR ou manobras que consomem PM, deve gastar PV em igual quantidade. Deve possuir ao menos uma Vantagem que gaste PM.
+Recuperação Impossível: É impossível para você recuperar PV ou PM de qualquer maneira, até livrar-se da maldição.
+Recuperação Limitada: Você não consegue mais recuperar PV e PM com descanso ou PRC, apenas com Vantagens, PDR ou itens místicos.
+Retribuição: Sempre que causar mal ou atacar qualquer criatura viva, perde 1PV permanente.
+MENTE ARTIFICIAL
+Seu cérebro é uma máquina com inteligência artificial ou similar. Você é imune a Telepatia e aos STN de Afeição e Medo. Porém, sofre -1 em testes de Artes, Persuasão e Intuição que envolvam criação, interação, abstração ou interpretação, sem penalidade em tarefas de conhecimento concreto.
+MODELO ESPECIAL
+Seu corpo é anormalmente grande, pequeno ou com membros fora do lugar. Você não pode usar roupas, equipamentos ou máquinas padrão para humanos, apenas itens feitos sob medida. Da mesma forma, seus pertences não servem a outros.
+Se a campanha for fortemente orientada a equipamentos, essa desvantagem pode ser avaliada em até -2PT devido à limitação significativa de acesso a recursos essenciais.
+MONSTRUOSO
+Sua aparência é repulsiva ou ameaçadora, causando medo ou desconfiança em personagens comuns, com R0.
+-1PT Todas as interações sociais exigem teste de Persuasão para evitar reações negativas; falhas resultam em hostilidade ou rejeição. Você sofre -1 em todos os testes sociais. Não pode ter Aparência Inofensiva simultaneamente. Aliados podem interagir normalmente, mas não anulam suas penalidades sociais.
+-2PT Além dos efeitos padrões, emana uma espécie de aura sombria expandindo a área dos efeitos para PRT, causando calafrios e incômodos inexplicáveis, luzes se apagam, animais se agitam, plantas murcham, comidas ficam amargas, a água vira sangue. Seres com Sentidos Especiais detectam sua presença automaticamente.
+MUNIÇÃO LIMITADA
+Você só pode carregar munição igual a 3 × seu PDF. Quando esgotada, não poderá mais disparar até reabastecer (comprando, fabricando, etc.). Essa é toda a munição que possui — não há reserva além disso.
+Munição Improvisada: Após esgotar a munição, você pode improvisar projéteis (flechas de galho, balas achadas, etc.), mas cada tiro assim recebe FA -2. Improvisar projétil também toma um MOV por recarga e depende de aprovação do mestre.
++1PT Pode gastar PM (máximo = PDF) para reduzir em -2 o redutor de FA por Munição Improvisada. Pode gastar munição extra num único disparo, ganhando +1 na FA por projétil gasto (máximo = munição restante, não pode usar com Munição Improvisada).
+PODER DEFEITUOSO
+Seus poderes são instáveis, ineficientes ou apresentam falhas. Toda vez que usa uma Vantagem ou habilidade que consome PM, um defeito se manifesta. Você pode escolher um dos efeitos abaixo, que sempre se aplica ao uso de poderes. Não pode trocar depois.
+Alternativamente, pode aplicar um único defeito a uma Vantagem específica. Nesse caso, o custo do poder é reduzido em -1PM (mínimo 1PM), mas não recebe PT.
+Agradável: Seus poderes geram efeitos visuais alegres (chuvas de pétalas, música, corações...). Adversários recebem +1 em A e R contra eles.
+Constrangedor: Exige frases ridículas e gestos chamativos. Você sofre FA-2.
+Descontrolado: Uma vez por combate, role 1d6. Se sair 5 ou 6, um de seus poderes é ativado aleatoriamente, consome PM e perde o turno.
+Desgastante: Todos os poderes consomem +1PM.
+Exagerado: Exige poses dramáticas e efeitos teatrais. Alvos ganham +1 em R e FD contra seus poderes.
+Exaustivo: Após usar um poder, perde a ACT no próximo turno (ainda pode se mover). O custo dos poderes é reduzido em 1PM.
+Falho: Antes de usar um poder, role 1d6. Se sair 6, ele falha e você perde o turno (sem gastar PM).
+Ileso: Caso esteja com PV cheio, o custo de seus poderes aumenta em +1PM.
+Impreciso: Seus poderes que exigem superar FD não afetam alvos com H igual ou maior que a sua.
+Limitado: Cada Vantagem só pode ser usada 3 vezes por PRD. Ainda consome PM normalmente.
+Perto da Morte: Só pode usar poderes com PV igual ou inferior a 1/4 do total. Em troca, o custo de PM é reduzido em 1 (mínimo 1).
+Repetitivo: Após usar um poder, deve repeti-lo nas próximas 2 ACT. Se estiver sem PM, perde a ACT.
+Seletivo: Escolha uma ancestralidade. Seu poder afeta apenas seres que pertencem à ancestralidade escolhida. O mestre decide quando esse efeito é viável, visto que alguns cenários podem ter apenas humanos.
+Vingativo: Sempre que usa um poder, perde 1PV (sem direito a teste).
+PONTO FRACO
+Você tem uma fraqueza tática que pode ser explorada. Oponentes que conhecem seu ponto fraco recebem +1 em H e +2 em FA e R em combate e testes de manobra contra você.
+Essa fraqueza só pode ser descoberta com um teste de Habilidade bem-sucedido após observar você lutando por ao menos um turno. Inimigos com Estratégia ou Sentidos Especiais fazem esse teste com +2 bônus. Personagens famosos têm seu ponto fraco amplamente conhecido.
+Se repetir muito a mesma manobra ou ação em combate, o mestre pode considerar que o ponto fraco foi revelado automaticamente após certo número de usos.
+PRISÃO DE REPOUSO
+Você depende de um local específico (como uma tumba, lago ou cripta) para manter sua força vital.
+-1PT Pode permanecer longe dele por até R×2 dias. Após isso, sofre –1 em R, PV e PM máximos a cada dois dias. Em locais semelhantes ao original, o efeito é pausado, mas não revertido.
+-2PT Ao atingir R 0, você morre no turno seguinte, ignorando imunidades.
++1PT Dentro da prisão de repouso, você é imortal. Se já possuir Imortal (3PT), ao morrer dentro dela, retorna no turno seguinte.
+PROTEGIDO INDEFESO
+Você possui um protegido (ou item precioso) que precisa defender a qualquer custo. Ele é frequentemente visado por inimigos, e colocá-lo em risco causa distração.
+Variante - Protetor da Relíquia: Você carrega um objeto especial, pessoal ou místico. Perder ou ter este item destruído causa os mesmos efeitos da versão padrão. O item sempre chama atenção de forma mística ou visual (H+1 para notá-lo).
+Ter mais de um protegido acumula redutores.
+-1PT Sempre que seu protegido estiver em perigo, aprisionado ou ferido, você sofre H–1 até que esteja seguro. Caso ele morra ou desapareça permanentemente, você perde –1PT em H.
+-2PT Protegido Mimado: Seu protegido pode ser indefeso, mas não é bonzinho. Arruma confusão com outros, cria desavenças, rouba e não faz questão de ser percebido.
++1PT Quando JNT do protegido você é imune a Medo (exceto provenientes de Desvantagens), além de receber +1 em todos os testes. (1PM) Quando JNT do protegido pode ignorar uma de suas Desvantagens por um turno.
++2PT Caso o protegido esteja em perigo PRT, aprisionado ou muito ferido em vez de redutores, recebe +1d em ACT que vise socorrê-lo. Esse bônus aumenta com o número de protegidos em perigo que possuir.
+RESISTÊNCIA INFERIOR
+Você é mais suscetível a certos tipos de efeitos que exigem testes de R. Escolha uma das opções abaixo. Você sofre –2 nesses testes.
+Aflições: Inclui venenos, doenças, pragas mágicas, maldições ou similares.
+Poder Especial: Inclui efeitos de Vantagens, poderes místicos ou equipamentos mágicos.
+Vantagens Ofensivas: Inclui Vantagens que impõem estados ou efeitos negativos ao superar sua R (exclui PDR).
+Como alternativa, você pode escolher um subtipo específico (ex: “Venenos”, “Controle Mental”, “Equipamentos Místicos”) e sofrer –1d de redutor. Porém, se o tipo escolhido for raro ou irrelevante na campanha, o mestre pode reduzir o valor da desvantagem para 0PT.
+RESTRIÇÃO
+Você possui dificuldade para usar poderes e vantagens que consomem PM sob certas condições. Quando a condição ocorre, o custo de PM é dobrado. A gravidade da desvantagem depende da frequência com que a condição aparece durante a campanha:
+-1PT Incomum: a condição ocorre em até 25% das situações (ex: durante uma fase específica da lua, sob chuva, contra goblinoides, em superfícies metálicas, debaixo d’água). O mestre pode considerar esta Desvantagem Fútil caso a condição escolhida afete pouco a campanha.
+-2PT Comum: a condição ocorre com frequência moderada, entre 25% e 75% do tempo (ex: durante o dia, contra humanos, em locais fechados, quando observado).
+-3PT Muito Comum: a condição ocorre na maior parte do tempo ou é praticamente constante (ex: contra criaturas vivas, durante qualquer combate, ao ser observado por qualquer criatura, ou quando em locais abertos).
+Restrição Severa: Adicionalmente, você pode escolher tornar a restrição ainda mais grave. Com essa opção, quando a condição estiver presente, você não pode usar nenhuma Vantagem ou poder que consuma PM. Custa –1PT extra.
+Restrição de Atributo: Alternativamente, a restrição pode afetar apenas um Atributo (como Força, Habilidade ou PDF). Exemplo: “só posso usar PDF em combate”. O mestre deve avaliar a relevância e atribuir o valor adequado, geralmente –1PT.
+RIVAL
+Você tem um rival com o mesmo número de PT que você, controlado pelo mestre. Ele aparece ao menos uma vez por sessão para competir, atrapalhar ou roubar seus feitos, nunca para matá-lo diretamente. O rival pode ser um antigo colega, inimigo jurado ou rival amigável, mas seu objetivo é sempre provar que é melhor que você.
+O rival é tão forte quanto você, com poderes e estilo semelhantes ou opostos. Ele pode surgir em qualquer situação relevante, desafiando ou frustrando seus planos.
+Se morrer, você perde 1PT a menos que adote outro rival. Ambos não podem ser mais fortes que o outro.
+VULNERÁVEL
+Você é especialmente suscetível a um tipo de dano. Escolha um Tipo de Dano: sempre que sofrer esse tipo de dano, o total de PV perdidos (após FD) é dobrado.
+-1PT Energia: Ácido, Elétrico, Fogo, Frio, Luz Psíquico, Químico, Sônico, Trevas ou Veneno.
+-2PT Físicos: Contusão ou Lacerante.
+-3PT Gerais: F, PDF ou PDR.
+Regras adicionais:
+Só pode ser escolhida na criação do personagem.
+Máximo de 1 Vulnerabilidade por personagem.
+Caso o dano ignore FD, ainda é dobrado.
+O mestre deve aprovar a escolha conforme a frequência do Tipo de Dano na campanha.
+Vulnerabilidade Específica: Um personagem pode adquirir vulnerabilidade contra um dano único, como um Tipo de Dano ou PDR de certa campanha, ou contra uma Vantagem. Dessa forma ataques incomuns custam -1PT (armas de prata em cenário medieval, por exemplo), enquanto algo mais comum (armas de fogo, num cenário atual) custaria -2PT.

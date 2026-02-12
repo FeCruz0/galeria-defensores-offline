@@ -11,7 +11,8 @@ import com.galeria.defensores.models.AdvantageItem
 class AdvantagesAdapter(
     private val items: List<AdvantageItem>,
     private val onItemClick: (AdvantageItem) -> Unit,
-    private val onLongClick: ((AdvantageItem) -> Unit)? = null
+    private val onLongClick: ((AdvantageItem) -> Unit)? = null,
+    private val showDescription: Boolean = false
 ) : RecyclerView.Adapter<AdvantagesAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -31,6 +32,12 @@ class AdvantagesAdapter(
         holder.name.text = item.name
         holder.cost.text = item.cost
         holder.description.text = item.description
+
+        if (showDescription && item.description.isNotEmpty()) {
+            holder.description.visibility = View.VISIBLE
+        } else {
+            holder.description.visibility = View.GONE
+        }
         
         // Hide delete button if it exists in XML but we don't use it anymore
         holder.itemView.findViewById<View>(R.id.btn_delete_item)?.visibility = View.GONE

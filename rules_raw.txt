@@ -1,0 +1,274 @@
+ACELERAÇÃO
+Você é rápido.
+1PT Recebe um MOV extra por turno, permitindo que você se mova duas vezes e ainda aja, ou se mova três vezes; Pode realizar um MOV antes da INI. (1PM) H+1 para cálculos de perseguição, fuga, FD e situações que envolvam MOV, como Ataque Especial Múltiplo. Não cumulativo com Teleporte. A ativação não toma turno e dura até o fim do combate.
+2PT Com um MOV pode alcançar qualquer lugar PRT instantaneamente, mas obstáculos podem atrapalhar ou impedir o MOV; Inimigos com metade do seu valor de H são considerados cegos contra seus ataques. (+2PM) Pode aumentar o bônus de H da ATV de 1PT para +2, não toma turno para ativar. (+2PM) Pode aplicar o bônus também na FA até o fim do combate, sem consumir turno para ativar.
+3PT Pode percorrer grandes distâncias com um MOV, seja PRT, LNG, ou FDA, evitando obstáculos e alterando a distância do combate livremente. No entanto, isso pode ser considerado uma fuga, não rendendo Pontos de Experiência. (3PM) Troca todos os seus MOV por uma única ACT extra. (3PM) Ao realizar a manobra especial Contra-Golpe, sua F ou PDF terá +3 em vez dos bônus normais. (3PM) Troca todos os seus MOV do próximo turno para ignorar uma única FA uma vez por turno. (3PM) Pode executar uma Vantagem ou poder como uma Reação, pelo dobro de PM da Vantagem ou poder, além do custo em PM dessa ATV. Só é possível fazer isso uma vez por turno.
+ADAPTADOR
+Você é versátil em combate, facilmente adaptando seu estilo ao usar diferentes armas, criar novas técnicas, improvisar golpes, ou copiar estilos e técnicas de seus oponentes.
+1PT Pode mudar seu Tipo de Dano à vontade, limitado apenas pela sua criatividade e pela aprovação do mestre. Ao reduzir um inimigo a 0PV, pode optar por deixá-lo apenas inconsciente. Adquire uma Manobra Especial. (1PM) Após desferir ou receber um ataque de um oponente que cause perda de PV, nos próximos ataques, pode optar por receber FA+1 se atacou ou FD+1 se foi atacado, adaptando-se ao estilo de combate do inimigo.
+2PT Recebe +2 ao executar ou resistir a Manobras Especiais. (2PM) Similar a Memória Expandida, pode copiar um número de Manobras Especiais igual ao seu valor de H ao vê-las sendo executadas. (+1PM) Ao adaptar-se ao estilo de combate do oponente (ATV de 1PT) pode aumentar o bônus em +1.
+3PT Pode combinar duas Manobras Especiais numa única ACT; O bônus ao executar ou resistir a Manobras Especiais aumenta para +3. (3PM) Similar à Memória Expandida, pode copiar qualquer Ataque Especial ou Defesa Especial ao vê-los sendo executados. A soma dos PT dos ataques e defesas copiados não pode exceder o seu valor de R. Por exemplo, com R3, pode copiar três ataques especiais de 1PT ou um ataque especial de 1PT e uma defesa especial de 2PT; (+1PM) Ao adaptar-se ao estilo de luta do oponente (ATV de 1PT), pode aumentar o bônus em +1 livremente.
+ALIADO
+Você possui alguém ou algo que pode te ajudar numa tarefa específica, seja um animal, invocação ou mecha.
+1PT Especialidade: Aliados não possuem uma ficha completa, mas têm uma especialidade. A especialidade pode ser uma PRC ou uma Vantagem na qual os efeitos do aliado são aplicados. O aliado fornece naturalmente um bônus de +1 em sua especialidade para você ou para um personagem JNT. Ajuda: Em vez de usar sua especialidade, o aliado pode realizar uma ACT menor, como carregar ou ativar itens, interagir com o ambiente, entregar mensagens, ou algo similar. Caso possua mais de um aliado, precisa usar seu MOV para coordenar cada um deles. Vida: Aliados não tem PV. Se o aliado sofrer um ataque direto, ele ficará debilitado (ferido, desmaiado, amedrontado, incapacitado) até o fim da CNA. Um personagem JNT pode optar por receber o ataque no lugar do aliado, mas rola sua FD indefeso. Proteção: Um aliado pode defender um ataque contra um personagem JNT, ficando debilitado até o fim do combate ou CNA. (1PM) Ao auxiliar um personagem com sua especialidade pode aumentar o bônus para +2.
+2PT O aliado adquire uma segunda especialidade, mas só pode fornecer bônus de uma delas por turno. O aliado pode dar suporte a uma quantia de personagens JNT igual sua R. Se for atacado, em vez de sair de combate, o aliado perde temporariamente uma de suas especialidades (aleatoriamente ou escolha do mestre). Caso perca todas as especialidades, fica fora de combate. (+2PM) Ao auxiliar um personagem com sua especialidade pode aumentar o bônus para 1d bônus.
+
+3PT O aliado adquire uma terceira especialidade. O aliado pode fornecer seu bônus para um único personagem PRT, em vez de personagens JNT. Pode fornecer o bônus de mais de uma especialidade ao mesmo tempo, mas cada especialidade consome PM separadamente. (3PM) “Recomponha-se!”: Pode fazer com que o aliado volte a atuar na CNA mesmo após estar debilitado, exceto se o aliado tenha protegido um personagem. (3PM) Pode auxiliar um personagem PRT extra, até um máximo de personagens PRT igual seu valor de R.
+APARÊNCIA INOFENSIVA
+Por alguma razão, você não parece ser uma ameaça. Isso lhe permite infiltrar-se em locais protegidos sem levantar suspeitas.
+1PT Você pode realizar um ataque antes da INI contra personagens que nunca o viram lutar. Se optar por não atacar, não será alvo de ataques até que represente uma ameaça (como atacar, usar PRC, Vantagens, ou similar); (1PM) Recebe +1 em um teste social.
+2PT Se for alvo de um ataque, há uma chance de 1 ou 2 em 1d6 de que o oponente se volte contra um aliado seu (se houver) que esteja ao alcance do atacante; (2PM) Você pode distrair todos os oponentes PRT que possam vê-lo, forçando-os a usar apenas ACT ou MOV no próximo turno e impedindo-os de usar Reações. Também pode focar em um único alvo, limitando-o a usar apenas MOV no próximo turno. Alvos podem testar R; caso obtenham sucesso, não poderão ser afetados novamente até um PRD. Essa habilidade também cancela efeitos que exigem concentração. 
+3PT Se for alvo de um ataque, há 50% de chance (resultado par de um dado) de que o oponente se volte contra um aliado seu (se houver) que esteja ao alcance do atacante; (3PM) Pode realizar um ataque extra antes da INI, mesmo contra inimigos que já o conheçam ou o tenham visto lutar. (3PM) Recebe 1d bônus em testes sociais.
+ÁREA DE BATALHA
+Você possui um campo de batalha especial onde luta melhor e pode aprisionar oponentes.
+	Observação! Esta é uma Vantagem especial que permite ajustar seus efeitos e configurações conforme o personagem desejar, desde que tenha PM suficiente para isso. A configuração e o custo da área devem ser definidos no momento da ativação e não podem ser alterados enquanto a área estiver ativa. A área não é cancelada por vontade própria.
+1PT (1PM/Turno) Ao ativar essa área, você recebe 2PT em seus Atributos conforme desejar. Pode prender consigo um número de criaturas igual à sua R, desde que estejam PRT. Não é possível transportar um oponente com R superior à sua. Enquanto a área de batalha estiver ativa, é impossível escapar dela. Se você for derrotado, a área se desfaz. (+1PM) Sem perder turno, você pode reduzir o custo de energia dentro da área, fazendo com que todas as Vantagens consumam -1PM.
+2PT Adversários com R superior devem testar R para evitar serem presos na área. (+1PM/Turno) Escolha um Tipo de Dano ao adquirir essa Vantagem e, ao ativar a área, decida se o Tipo de Dano terá 1d bônus ou redutor enquanto a área durar. (+2PM/Turno) A área passa a conceder 2PT extras de Atributo.
+3PT Ao ativar a área, você anula qualquer STN que o esteja afetando, tornando-se imune a todos eles enquanto a área durar. No entanto, os STN retornam assim que a área se desfaz. (+1PM/Turno) Pode optar por recuperar 1PV por turno (como se tivesse regeneração), e todos os personagens dentro da área perdem 1PV por turno, sem FD ou teste de R; (+3PM/Turno) Recebe 1d bônus em FA e FD enquanto a área estiver ativa.
+ARENA
+Você tem um terreno de luta preferido ou treinou especificamente para se destacar em determinado tipo de ambiente. Escolha entre:
+Água: praias, barcos, chuva, superfícies aquáticas ou submerso.
+Céu: combate aéreo, aplicável apenas quando seu oponente também está voando.
+Regiões Estéreis: desertos áridos ou arenosos, montanhas, geleiras.
+Regiões Selvagens: florestas tropicais, temperadas, savanas, pântanos, etc.
+Regiões Urbanas: ruas, telhados, prédios, aposentos, corredores, escadas;
+Subterrâneos: cavernas, masmorras, esgotos;
+Local Único: um local específico no mundo, como sua base de operações ou cidade natal.
+1PT Recebe H+1 quando estiver em sua arena, sempre que esta puder favorecer o personagem, seja em combate ou testes de PRC. (1PM) Mesmo fora de sua arena, pode receber um bônus temporário de H+1 por uma CNA, utilizando o ambiente ao seu redor a seu favor.
+2PT O bônus PSV aumenta para H+2; recebe +1d em testes de furtividade dentro de sua arena. (1PM) Pode sentir a presença de seres dentro da arena, percebendo sua força em comparação à sua (fraco, equivalente ou forte), distância (PRT ou LNG), e direção.
+3PT Na arena, poderes consomem -1PM (mínimo de 1PM); dentro de um território composto de sua arena, você possui um refúgio ou base de operações. Neste local, seu bônus PSV se aplica a qualquer PRC. É um esconderijo seguro e desconhecido por outros, ideal para armazenar seus pertences e com recursos suficientes para sustentar várias pessoas. (3PM) Recebe 1d bônus em testes de PRC onde sua arena possa ser utilizada; (3PM) Após um PRD de estudo do ambiente atual, você pode tratá-lo como sua arena, recebendo todos os bônus e efeitos. Este efeito dura até você gastar um PRD em outro ambiente.
+ARMADURA EXTRA
+O personagem é resistente a um Tipo de Dano específico. A FA do ataque é reduzida à metade antes de você rolar sua FD. Além disso, recebe +2 em testes para resistir a efeitos causados pelo Tipo de Dano ao qual é resistente. Armadura Extra ignora Dano de Impacto. Os tipos de Armadura Extra disponíveis são:
+Energia [1PT cada]: Ácido, Elétrico, Fogo, Frio, Luz, Psíquico, Químico, Sônico, Trevas ou Veneno.
+Físicos [2PT cada]: Lacerante ou Contusão.
+Gerais [3PT cada]: F, PDF ou PDR.
+Específicos [especial]: Um personagem pode adquirir Armadura Extra contra um Tipo de Dano específico ou uma Vantagem. Ataques raros custam 1PT (como armas de prata), enquanto algo mais comum (como armas de fogo em um cenário moderno) custa 2PT.
+É recomendado que o mestre permita a compra dessa Vantagem apenas na criação da ficha, como uma característica natural do personagem.
+[+3PT] Invulnerável (energia apenas): O personagem se torna praticamente imune ao dano escolhido. A FA é dividida por dez (arredonde para baixo) antes de rolar FD.
+[+3PT] Absorção (energia apenas): O personagem absorve naturalmente o dano do tipo escolhido. Ataques comuns (sem custo em PM) recuperam 1PV. Ataques com custo em PM recuperam em um turno quantia maior que seu valor de R.
+ATAQUE ESPECIAL
+Ao adquirir esta Vantagem, escolha o Atributo do seu Ataque Especial (F ou PDF). Ao usá-lo, você recebe um bônus de +1 no Atributo por 1PM.
+Cada PT gasto no Ataque Especial aumenta o bônus de Atributo e o custo em PM em +1. Assim, é possível comprar um Ataque Especial com +2 no Atributo por 2PT (custo de 2PM) ou um Ataque Especial com +3 no Atributo por 3PT (custo de 3PM), e assim por diante. O bônus máximo do Ataque Especial é de +5, custando 5PT e 5PM.
+Algumas Vantagens para Ataque Especial podem aumentar o Multiplicador de Crítico, elevando-o para x3, ou aumentar a Chance de Crítico, permitindo que um crítico ocorra com um resultado de 5 ou 6 (ou maior). Observação: no caso de um 5, o resultado deve ser considerado como 5 e não 6. Exemplo: (Fx2)+H+5.
+Não é possível adquirir uma Vantagem de Ataque Especial sem possuir um Ataque Especial básico. Exemplo: você não pode ter um Ataque Especial apenas com a Vantagem Poderoso por 1PT; seu Ataque Especial deve ter pelo menos +1 no Atributo, mais a Vantagem Poderoso, custando ao todo 2PT e 2PM para uso.
+Ataques Especiais não evoluem automaticamente como um personagem. Você não pode gastar mais PT para fortalecê-lo depois de criado. No entanto, um personagem pode comprar um novo Ataque Especial, representando uma nova versão ou melhoria.
+Vantagens de Ataque Especial aumentam o custo final em PM equivalente ao seu custo em PT, a menos que seja especificado o contrário.
+Vantagens para Ataque Especial:
+Amplo [+1PT; +3PM]: Atinge todos os oponentes PRT (para F) ou LNG (para PDF).
+Antecipado [+1PT]: Seu primeiro ataque é poderoso, recebendo +3 no Atributo.
+Antimagia [+1PT]: Em vez de causar dano aos PV, este ataque afeta os PM do alvo.
+Arriscado [+1PT]: Quando estiver Perto da Morte, recebe +3 no Atributo.
+Carregável [+1PT]: Renuncie ao seu turno para se concentrar. Na sua próxima ACT, seu Atributo será dobrado ao atacar (triplicada em um crítico). Não cumulativo com bônus de Multiplicador de Crítico.
+Ceifador [+1PT]: Quando um ataque Ceifador mata um inimigo, você recupera 1PM. Caso seu ataque mate múltiplos alvos recupera no máximo 3PM em um turno. Alvos com Corpo Artificial são imunes.
+Crítico [+1PT]: Se você tiver dados extras na FA ou FD, pode transformar qualquer resultado 6 dos dados extras em crítico por 1PM. Se mais de um dado resultar em 6, os efeitos não se acumulam (você não pode obter múltiplos críticos). Considere modificadores de Chance de Crítico. Assim, se você tiver Chance de Crítico +1, um resultado de 5 ou 6 em dados extras são convertíveis em um crítico.
+Decisivo [+1PT]: Aumenta a Chance de Crítico em +1.
+Devastador [+1PT; +10PM]: Contra alvos que tenham escala superior, o ataque aumenta em uma escala.
+Difusor [+1PT]: O ataque espalha energia. Escolha um Tipo de Dano de energia (Ácido, Elétrico, Fogo, Frio, Luz, Psíquico, Químico, Sônico, Trevas ou Veneno): um alvo que sofre dano ficará vulnerável a um ataque do Tipo de Dano escolhido até o fim da CNA. Após receber o ataque o difusor será cancelado e deverá ser aplicado novamente.
+Final [+1PT]: O último ataque especial que você desferir será devastador, com +2 no Atributo. Isso pode ocorrer em quatro situações: 1) Quando você gasta seus últimos PM no ataque; 2) Se possui Poder Defeituoso: Limitado e desferir o último ataque diário; 3) Quando está Perto da Morte, nesse caso cai Inconsciente após o ataque. As condições são cumulativas. Se todas forem atendidas, recebe +6 no Atributo.
+Flagelador [+1PT ou +2PT]: Escolha um STN. Caso supere a FA, role 1d6, com um resultado 1 ou 2 o alvo é afetado pelo STN, por 2PT as chances de infligir o STN são de 1 a 4 no d6.
+Incapacitante [+1PT]: Além do dano normal, o ataque desestabiliza o alvo ou desestrutura sua defesa. O alvo testa A (vs Atributo de ataque); se falhar, será considerado Indefeso até seu próximo turno. Criaturas com A superior à seu Atributo são imunes a este ataque.
+Místico [+1PT]: O dano de seu ataque especial é considerado como do tipo do PDR do cenário.
+Múltiplo [+1PT; +1 a +3PM]: Pode aumentar a FA Final em +1 para cada PM extra que gastar, até um máximo de FA+3 por +3PM.
+Poderoso [+1PT]: Possui Multiplicador de Crítico +1.
+Sorrateiro [+1PT]: Sua FA final é dobrada quando ataca alvos Indefesos pegos em futividade.
+Trespassante [+1PT]: Após um ataque que reduza os PV de um alvo a zero, você pode pagar novamente o custo em PM para realizar um novo ataque contra um único novo alvo em alcance JNT (para F) ou PRT (para PDF). Apenas um alvo extra por turno.
+Vampírico [+1PT]: Para cada 2 de dano que causar você recupera 1PV. Máximo de 5PV por ataque. Personagens com Corpo Artificial são imunes a esse efeito.
+Vingativo [+1PT]: Seu ataque se torna mais poderoso contra quem lhe causou dano no turno anterior. Recebe um bônus na FA igual ao valor de PV perdido. Máximo de FA+5. Observação: o personagem não recebe bônus na FA por ataques que tenha permitido.
+CATALISADOR
+Você possui a capacidade de catalisar e converter energias e poderes diversos. Seja por meio da compreensão das leis da natureza e do sobrenatural, traçando diagramas alquímicos, ou utilizando dispositivos para armazenar e amplificar energia.
+1PT Escolha um número de ATV igual ao seu valor de R.  O custo total desses poderes será reduzido em 1PM (mínimo de 1PM). (1PM) Pode abrir mão de seu turno para que, na próxima ACT, você possa usar um poder por -2PM. Se sofrer dano enquanto usa esse ATV, o processo falha. É necessário anunciar antes qual Vantagem pretende usar. Um personagem com PDR ou Ocultismo que veja um poder sendo catalisado saberá imediatamente qual Vantagem será usada.
+2PT Escolha uma ATV. Seu custo será reduzido em 2PM. (2PM) Armazenar Poder: Pode armazenar um poder em um item, local ou até mesmo em uma pessoa. Para isso, gaste os PM normais do poder, mais o custo desse ATV, e defina um gatilho, como "ao toque" ou "ao ser destruído". Os PM gastos dessa forma não podem ser recuperados até que o poder armazenado seja ativado ou cancelado.
+3PT Escolha uma Vantagem. Você usa apenas seu MOV para usar a ATV de 1PT dessa Vantagem. Pode armazenar poderes de aliados. O aliado gasta os PM do poder dele, mas você precisa gastar os seus para armazenar poder. (3PM) Pode, em um turno, ampliar o efeito de um poder que usará no próximo turno, aumentando o PT da Vantagem em +1 nesse uso, ou para Vantagem de 3PT aumentar em um grau o bônus, alcance ou duração.
+CURA
+O personagem possui habilidades de cura.
+1PT (1PM) Restaura 1d6PV para si mesmo ou para um personagem JNT; causa dano em personagens com a maldição Saúde Invertida.
+2PT Soma seu valor de R como bônus à cura. (+2PM) Cura 2d6PV de um personagem JNT. (2PM) Permite que um personagem refaça um teste para anular um STN;
+3PT Ao curar à distância (ver abaixo), consegue curar mais de um personagem de uma vez (cada cura tem seu próprio gasto em PM). (+3PM) Cura 3d6PV de um personagem JNT. (3PM) Consegue utilizar sua cura em um personagem que esteja PRT.
+CRIAÇÃO
+Você é capaz de criar e modificar matéria inanimada de qualquer tipo que conheça. Quanto mais familiar for com o material ou objeto, maior será a qualidade da criação.
+1PT Cria itens simples sem grande valor, como roupas e ferramentas básicas. Domina matérias simples como madeira, lã, seda, pedra, algodão, couro, ferro, etc. (1PM) Cria um EQP comum de 1PT. (1PM) Restaura 1d6PV de um construto JNT. (1PM) Pode criar pequenos objetos de matéria-prima comum, como um escudo de madeira.
+2PT Constrói objetos mais complexos ou peças elaboradas, como engrenagens e roldanas. (2PM) Cria um EQP comum de 2PT. (2PM) Conserta 2 usos de um EQP comum. Um EQP comum quebrado é consertado, mas ainda está danificado com 4 usos. (2PM) Restaura 2d6PV de um construto JNT. (2PM) Pode criar objetos médios de matéria composta ou minérios incomuns, como portas, janelas ou armas, de aço, alumínio, vidro ou cobre.
+3PT  Confecciona objetos minuciosos, como parafusos milimétricos, ou componentes elaborados, como chips ou mosfets. (3PM) Cópia Nobre: Ao ver um EQP especial, pode testar H para tentar copiá-lo. A cópia é imperfeita com máximo de 3PT do original. Apenas você pode utilizar a cópia nobre. Somente uma cópia nobre pode ser usada por vez, e ela quebra como um EQP comum. Após quebrar, você precisa ver o EQP especial novamente para "recopiá-lo". (3PM) Conserta 4 usos de um EQP comum. Um EQP comum quebrado é consertado, mas ainda está danificado com 2 usos. (3PM) Restaura 3d6PV de um construto JNT. (3PM) Pode criar objetos grandes de qualquer material que tenha visto e tocado, mesas, camas, ou quem sabe uma cabana.
+DEFESA ESPECIAL
+Você possui um poder ou habilidade especial de defesa que, ao ser ativado, concede um bônus de A+1 por 1PM contra um ataque específico.
+Cada PT gasto em Defesa Especial aumenta tanto o bônus de A quanto o custo em PM em +1. Por exemplo, uma Defesa Especial de 2PT concede A+2 e custa 2PM, enquanto uma de 3PT concede A+3 e custa 3PM, e assim por diante. O bônus máximo para uma Defesa Especial é de +5 (por 5PT e custa 5PM por utilização).
+A Defesa Especial é tratada como uma Reação e só pode ser usada uma vez até a sua próxima rodada. Ela ignora Dano de Impacto.
+Vantagens de Defesa Especial têm um acréscimo no custo final de PM equivalente ao seu custo em PT, a menos que seja especificado o contrário.
+Vantagens para Defesa Especial:
+Ampla [+1PT; +3PM]: Defende todos os aliados PRT. Conta como uma defesa extra para os aliados, e você não pode usar outra defesa especial até seu próximo turno.
+Absorção [+1PT, +3PM]: Após rolar a FD, reduza o dano final à metade.
+Crítica [+1PT, +1PM]: Se você tiver dados extras na FA ou FD, pode transformar qualquer resultado 6 dos dados extras em crítico por 1PM. Se mais de um dado resultar em 6, os efeitos não se acumulam (você não pode obter múltiplos críticos). Considere modificadores de Chance de Crítico. Assim, se você tiver Chance de Crítico +1, um resultado de 5 ou 6 em dados extras são convertíveis em um crítico.
+Decisiva [+1PT]: Aumenta a Chance de Crítico em +1.
+Deflexiva [+1PT; +3PM]: Dobra sua A na FD contra um ataque.
+Dispersiva [+1PT]: Escolha um Tipo de Dano baseado em energia (Ácido, Elétrico, Fogo, Frio, Luz, Psíquico, Químico, Sônico, Trevas ou Veneno). Sua defesa dispersa esse tipo de energia, anulando vulnerabilidades, caso existam, e concedendo 1d de bônus na defesa contra essa energia.
+Estável [+1PT; +3PM]: Ao receber um ataque que tenha recebido bônus por concentração (como Ataque Especial: Carregável), pode anular o bônus recebido por concentração.
+Impenetrável [+1PT; +10PM]: Contra um ataque de escala superior, sua defesa aumenta em uma escala (FA +10).
+Mística [+1PT]: Sua defesa especial é eficaz contra ataques que utilizam o PDR do cenário. Concede 1d de bônus na FD contra esse tipo de ataque e permite rolar FD mesmo contra efeitos de PDR que normalmente ignorariam FD.
+Múltipla [+1PT]: Você pode usar sua defesa especial um número de vezes até seu próximo turno igual ao número de Reações que possui.
+Perfeita [+1PT; +5PM]: Evita completamente um ataque direto contra você, deixando uma cópia em seu lugar. Ineficaz contra ataques de área. Se o atacante tiver H inferior à sua, você o pega de surpresa no seu próximo ataque.	
+Perigosa [+1PT]: Quando está Perto da Morte, recebe A+3 na defesa especial.
+Poderosa [+1PT]: Possui Multiplicador de Crítico +1.
+Precedente [+1PT]: A primeira defesa especial usada em combate possui A+3.
+Reflexiva [+1PT; +3PM]: Se sua FD for igual ou maior que a FA, você redireciona o ataque (com FA original) para um alvo dentro do alcance (JNT para ataques de F, PRT para ataques de PDF).
+Resistente [+1PT; +1 a +3PM]: Você pode somar +1 na FD Final por PM gasto até um máximo de FD+3 por +3PM.
+Retaliadora [+1PT]: Ao receber um ataque, o atacante perde automaticamente uma quantia de PV equivalente ao seu valor de A.
+ELEMENTALISTA
+Escolha um elemento (água, ar, fogo ou terra, ou outros elementos permitidos pelo mestre como plantas ou metais) para ter afinidade e controle sobre ele.
+1PT Você pode criar e manipular manifestações elementais com F1 ou R1. Pode mudar seu Tipo de Dano de acordo com o elemento escolhido ou alterar o Tipo de Dano de um aliado. (1PM) Aumenta FA+1 (com Tipo de Dano baseado no elemento) ou FD+1 até o fim da CNA. (1PM) Efeitos Elementais - Escolha entre: 1) Cura 2PV JNT (não afeta personagens com Corpo Artificial). 2) Move objetos com F1. 3) Causa a perda de 2PV sem FD. 4) Cria objetos com F1 ou R1 ou EQP comuns de 1PT, mas duram por uma CNA.
+2PT Cria e controla manifestações elementais com F2 ou R2. Ignora 1 de dano de Tipo de Dano baseado no elemento escolhido. (2PM) Acrescenta FA+2 (com Tipo de Dano baseado no elemento) ou FD+2 até o fim da CNA; (2PM) Pode utilizar o Efeito Elemental com poder aumentado em +1. (2PM) Cria e controla fenômenos climáticos ou materiais do elemento que domina. Fogo aumenta a temperatura ambiente. Água provoca chuva torrencial e enchentes. Ar gera furacões. Terra provoca terremotos. Planta gera crescimento de florestas. Todos PRT devem testar A (xH) por turno para evitar perda de 1PV.
+3PT Cria e controla manifestações elementais com F3 ou R3. Ignorar 3 de dano de Tipo de Dano baseado no elemento escolhido. (3PM) Acrescenta FA+3 (com Tipo de Dano baseado no elemento) ou FD+3 até o fim da CNA. (3PM) Pode utilizar o Efeito Elemental com poder aumentado em +2. (3PM/Turno) Corpo Elemental: Transforma-se em elemento puro. A aplicação prática varia de acordo com o elemento, mas geralmente você recebe 1d de bônus em FA e FD contra qualquer ataque ou defesa que não use PDR ou não seja de um elemento diretamente oposto. Além disso, pode atravessar qualquer lugar, manipulando seu corpo. A ativação é livre.
+ENERGIA EXTRA
+Quando ferido, você desperta uma força interior que acelera sua recuperação de maneira impressionante.
+Nota: Energia Extra não pode ser combinada com Energia Vital! Não é permitido sacrificar PV para recuperar PV!
+1PT Recebe 1d bônus contra Atordoamento. (1PM) Recupera PV igual ao seu valor de R com um MOV.
+2PT Recebe 1d bônus contra Debilitação e Incapacitação. (2PM) Recupera PV igual a Rx3 em um turno.
+3PT  Recebe 1d de bônus contra Paralisia e Envenenamento. Ao usar Energia Extra quando estiver Perto da Morte, ganha +1 em um Atributo (exceto R) à sua escolha por uma CNA. Máximo de +1 por Atributo. (3PM) Recupera a consciência voltando a 1PV, caso tenha sido reduzido a 0 PV no último turno.
+ENERGIA VITAL
+Você pode sacrificar sua própria vida para alimentar poderes e vantagens, ainda que isso lhe cause dano.
+1PT (1PV:2PM) Converte 1PV em 2PM. Toma um turno.
+2PT (1PV:1PM) Usa 1PV para reduzir o custo em PM de qualquer poder. Cada PV equivale a 1PM. Toma um MOV. Requer gasto mínimo de 1PM por uso. (1PV:1PM) Pode transferir sua Energia Vital para um companheiro, permitindo que ele ative poderes usando seus PV no lugar dos PM dele, desde que esteja JNT. Toma uma Reação e exige consumo mínimo de 1PM do aliado.
+3PT (1PV:3PM) Ao recuperar seus PM, 1PV passa a valer 3PM. (+3PM) Quando JNT, pode restaurar 3PM de um aliado.
+ENFRAQUECER
+Você possui a capacidade de enfraquecer o desempenho de seus inimigos em combate.
+1PT Ao acertar ataque comum (F ou PDF), alvo testa R. Se falhar, sofre –1 em FA ou FD (à escolha) até próximo ACT. Efeito não cumulativo. Se resistir, fica imune até próximo PRD. (1PM) Escolha 1 Atributo na compra. Pode tentar reduzir o Atributo do alvo em –1 até fim da CNA, se alvo falhar R.
+2PT O redutor em FA/FD aumenta para -2. Escolhe mais dois Atributos para reduzir, mas ainda pode afetar apenas uma por turno. (2PM) Pode tentar reduzir o Atributo em -2 até fim da CNA, se alvo falhar R.
+3PT O redutor em FA/FD aumenta para -3. Pode escolher afetar qualquer uma dos Atributos, mas apenas uma por turno. (3PM) Pode tentar reduzir o Atributo em -3 até fim da CNA, se alvo falhar R. (3PM) Pode aumentar o alcance para PRT.
+EQUIPAMENTO ESPECIAL
+	O personagem possui um EQP especial e único, exclusivo para ele (ou, possivelmente, outro personagem com a mesma Vantagem).
+Uso:
+Utilizar um EQP especial consome 1PM (ou mais, dependendo do EQP) por CNA, por ponto de EQP (PT). Um personagem não pode usar um EQP com mais PT do que seu valor de R. EQP especiais não fornecem bônus, mas têm efeitos (como Vantagens) ou defeitos (como Desvantagens) variados. EQPs com defeitos são considerados danificados ou amaldiçoados, mesmo que seus poderes compensem.
+Tipos de Equipamento:
+Armas: Um personagem pode carregar mais de uma arma, mas usar apenas uma por vez. Trocar de arma consome um MOV (e novos PM). Se o personagem possuir a Manobra Especial: Ambidestria, pode empunhar duas armas simultaneamente.
+Armaduras: São itens de defesa, como proteções ou vestimentas completas. Um personagem só pode carregar uma armadura por vez.
+Acessórios: Equipamentos com efeitos variados, como brincos, pulseiras, colares, botas, etc. Um personagem pode usar apenas um anel, brinco ou pulseira por mão, orelha ou pulso. Alguns itens místicos funcionam em pares (ex: luvas e brincos).
+Limitações:
+Um EQP não pode evoluir. Após adquirir o EQP, você pode gastar mais PT na Vantagem, mas não pode fortalecê-lo. Caso queira um EQP mais poderoso, será necessário obter outro EQP especial, o que pode envolver uma missão ou reforja do seu EQP.
+Efeitos de Equipamentos Especiais:
+Anticriatura [1PT; Armas ou Armaduras]: Forte contra uma raça ou tipo específico de criatura. Armas causam 3PV de dano (ignorando FD) contra um tipo de criatura ou 6PV contra uma raça específica. Armaduras ignoram 3 de dano recebido de um tipo de criatura ou 6 de dano de uma raça específica, ambas as versões ignoram Dano de Impacto.
+Arma de Área [1PT; Armas]: Todos os ataques da arma causam explosões que atingem todos em área, incluindo aliados e o próprio personagem.
+Condutor [1PT; Acessórios]: O acessório facilita a canalização do seu poder, reduzindo o custo de qualquer de seus poderes em -1PM.
+Copiloto [1PT; Máquinas]: A máquina possui cabine ampla, botões auxiliares no banco de passageiro, ou mesmo uma arma embutida para outros usarem enquanto você pilota. Outro personagem pode usar a máquina com você, também recebendo os benefícios da mesma. Esse efeito pode ser comprado mais de uma vez, aumentando a quantidade de copilotos.
+Escorregadia [1PT; Armaduras]: O usuário pode escapar facilmente de aprisionamentos, agarramentos e efeitos similares. Recebe 1d bônus para evitar ficar aprisionado ou paralisado e, uma vez por sessão, pode se livrar automaticamente de aprisionamentos.
+Etéreo [1PT; Armas e Armaduras]: Seu EQP é feito de alguma energia, atacando diretamente a energia do alvo. Armas: Quando ataca, em vez de tirar o PV do alvo, você tira o PM. Armaduras: caso seja alvo de ataques que reduzam seus PM diretamente, você não é afetado.
+Gatilho [1PT]: O EQP possui um meio específico de ativação, como um botão, gesto, palavra mágica ou frase (“E lá vamos nós!”). Pode ser algo externo, como uma armadilha, sendo o EQP um mecanismo ou engenhoca.
+I.A. [1PT; Máquinas]: Sua máquina possui uma inteligência artificial, podendo ser um sistema simples de apoio à decisão ou uma inteligência complexa, porém ainda incapaz de emoção. Sua máquina fornece uma ação menor extra por turno, com aprovação do mestre.
+Imbatível [1PT; Armas e Armaduras]: O EQP possui Multiplicador de Crítico +1.
+Implacável [1PT; Armas e Armaduras]: O EQP possui Chance de Crítico +1.
+Longo Alcance [1PT; Armas]: Armas corpo a corpo podem atacar alvos PRT. Armas de PDF podem alcançar alvos FDA, mas dentro de sua visão. Em tabuleiros, armas de F calculam alcance como se tivesse PDF, e armas de PDF não precisam calcular o alcance.
+Máquina [+1PT]: Uma máquina pode assumir diversas formas, funcionando como arma, armadura (vestimenta ou robô) ou acessório (cinto, mochila, visor), podendo adquirir características de qualquer tipo de EQP. Além disso, pode ser um veículo, traje tecnológico ou robô gigante.
+Máquinas podem ser usadas por personagens sem a Vantagem EQP Especial, desde que tenham a PRC Tecnologias.
+Uma máquina não consome PM. Em vez disso, ela funciona por um número de CNA igual à quantidade de PT que possui. Após isso, é necessário testar Tecnologias em um turno para tentar reativá-la por mais uma CNA.
+Após um período de descanso, a máquina é reabastecida ou reparada, podendo ser reutilizada normalmente.
+Místico [1PT]: O EQP é mágico ou similar, criado por um personagem que domina algum tipo de PDR. Armas ou itens com esse efeito podem ferir oponentes vulneráveis ao PDR com o qual foi construído.
+Poderoso [1PT; Armas ou Armaduras]: O EQP é mais poderoso que o normal, fornecendo 1d bônus em FA ou FD, dependendo do tipo de EQP.
+Potente [1PT; Armas e Armaduras]: Se você tiver dados extras na FA ou FD, pode transformar qualquer resultado 6 dos dados extras em crítico por 1PM. Se mais de um dado resultar em 6, os efeitos não se acumulam (você não pode obter múltiplos críticos). Considere modificadores de Chance de Crítico. Assim, se você tiver Chance de Crítico +1, um resultado de 5 ou 6 em dados extras são convertíveis em um crítico.
+Profano [1PT; Armas ou Armaduras]: O EQP é abençoado por deuses ou poderes malignos. EQP profanos têm 1d bônus na FA (armas) ou FD (armaduras) contra alvos benignos (seres de energia positiva, luz, criados com PDR benigno, ou detentores de alguns Códigos como dos Heróis e da Honestidade). Esse tipo de EQP não pode ser usado por seres benignos.
+Retornável [1PT]: Se o item for derrubado, arremessado ou roubado, ele retorna ao personagem no próximo turno. Armas de F podem ser arremessadas para ataque à distância, calculando o alcance com a F do personagem.
+Sagrado [1PT; Armas ou Armaduras]: O EQP é abençoado por deuses ou poderes benignos. EQP sagrados têm 1d bônus na FA (armas) ou FD (armaduras) contra alvos malignos (seres de energia negativa, trevas, criados com PDR maligno, ou detentores de algumas Insanidades (Homicida). Esse tipo de EQP não pode ser usado por seres malignos.
+Silencioso [1PT]: O EQP foi forjado para não fazer ruído, concedendo 1d bônus em Furtividade.
+Sistema de Ejeção [1PT; Máquinas]: Ao receber um ataque que zere seus PV, no mesmo instante o personagem é ejetado ficando com apenas 1PV, mas perdendo a máquina até a próxima CNA.
+Super Máquina [1PT; Máquinas]:	Sua máquina não é uma máquina qualquer, talvez ela tenha sido criada com alta tecnologia ou com muito poder arcano, podendo ser um robô gigante ou até mesmo um golem pilotável!
+	Ela será maior que o normal, tendo Modelo Especial (Enorme) e não podendo entrar em cavernas, cidades ou locais mais estreitos sem causar alguns probleminhas, como impedir o trânsito ou destruir estruturas.
+	Em compensação, sua máquina fornece uma escala ao lutar contra oponentes com escala maior que a sua! A Super Máquina pode ser invocada uma vez por sessão.
+Utilitário [1PT; Acessórios]: O acessório possui um conjunto de ferramentas e utilidades para uma PRC específica, fornecendo 1d bônus na PRC.
+Veículo [1PT; Máquinas]: Sua máquina é um veículo, fornece F+3 para carga e pode carregar até 5 passageiros. Apenas o piloto recebe os benefícios da máquina. Esse efeito pode ser comprado mais de uma vez, cada compra aumenta o bônus em +3 e a capacidade de passageiros em +5.
+Vorpal [3PT, 10PM; Armas]: Apesar de “Vorpal” ser uma qualidade costumeira em armas de corte, deixamos aqui como um efeito que pode causar morte instantânea, podendo se aplicar a qualquer tipo de armas. Em caso de acerto crítico, contra um alvo cuja A seja inferior à F ou PDF do personagem, este pode cortar 10PM para matá-lo automaticamente. Criaturas com Corpo Artificial não são afetadas.
+
+Defeitos de EQP especiais:
+Curto Alcance [-1PT; Armas]: Apesar de ser uma arma de PDF, só atinge alvos PRT. Em tabuleiros, o alcance é reduzido à metade. Armas corpo a corpo não podem ser arremessadas. Mesmo que o personagem use outra arma o efeito ainda se aplica.
+Enfraquecido [-1PT; Armas e Armaduras]: O EQP é quase inútil. Causa 1d redutor na FA (armas) ou FD (armaduras). Criaturas reduzidas a 0PV ficam apenas inconscientes.
+Lento [-1PT]: O EQP é pesado ou mal projetado, fazendo com que o personagem gaste o turno inteiro ao utilizá-lo.
+Maldito [-1PT]: Um EQP maldito se prende ao personagem, sendo impossível lutar sem ele. Se o PM acabar, o personagem ainda deve usá-lo, mas recebe 1d de penalidade nas ações. Se o EQP for perdido, também sofre redutor até recuperá-lo.
+Quebrável [-1PT]: Apesar de ser um EQP especial ele quebra após uma CNA de uso, precisando ser consertado.
+Vantagens e Desvantagens para EQP especiais:
+Segue abaixo alguns efeitos alternativos ou adicionais que Vantagens de EQP podem conferir além dos efeitos normais conferidos ao personagem.
+Adaptador (Arma): A arma pode mudar de forma para alterar seu Tipo de Dano.
+Aparência Inofensiva: O EQP parece insignificante, sendo subestimado por adversários.
+Fama: O EQP é conhecido por seu papel em uma batalha significativa ou por ter derrotado uma personalidade famosa.
+Forma Alternativa: O EQP ao mudar de forma, pode mudar seu Tipo de Dano sem causar penalidades, ou mesmo alterar seu Atributo de ataque.
+Imortal: Caso o EQP quebre, ele se reconstrói com o tempo, como um artefato.
+Ligação Natural: O EQP possui uma ligação com outro item ou com um personagem específico. (“Meu precioooooso!”).
+Fetiche: O EQP possui partes que precisam ser unidas para funcionar.
+Má Fama: O EQP é conhecido por sua conexão com um sacrilégio ou entidade maligna.
+Modelo Especial: Feito propriamente para personagens com essa Desvantagem. Se o personagem não tiver um Modelo Especial compatível com o do item, não poderá usá-lo também.
+FAMA
+Você é reconhecido e respeitado entre heróis, aventureiros e a maioria das pessoas comuns, mas essa notoriedade pode atrair atenções indesejadas. Suas Vantagens, Desvantagens e PRC são amplamente conhecidas, o que pode permitir que seus inimigos se preparem melhor contra você.
+1PT Você pode conseguir abrigo e comida de excelente qualidade em cidades sem gastar dinheiro. Além disso, uma vez por dia, você tem sucesso automático em um teste social. (1PM) Você pode estender sua fama a um aliado JNT, elogiando-o ou afirmando ser seu amigo, concedendo +1 em testes sociais para ele.
+2PT Uma vez por missão, você pode obter um EQP comum de 1PT (definido pelo mestre), dois itens consumíveis, refúgio, uma soma em dinheiro, ou uma informação crucial. No final da missão, os itens não utilizados são devolvidos. (+2PM) Quando você estende sua fama a um aliado, o bônus em testes sociais aumenta para +3.
+3PT Antes de uma missão, você pode visitar uma taverna ou lugar similar para recrutar alguém para sua causa. O NPC recrutado funcionará como um Aliado de 1PT, controlado pelo mestre. (3PM) Passe Livre! Uma vez por sessão pode se livrar (ou livrar aliados) de uma situação social desconfortável ou potencialmente desastrosa.
+FAMILIAR
+O personagem possui um vínculo com uma criatura de pequeno porte. Embora o vínculo não precise ser místico, ele confere efeitos considerados sobrenaturais.
+1PT O familiar é semelhante a um aliado, mas tem duas Vantagens de 1PT cada. Como não possui ficha o familiar utiliza os PM do portador para ativar suas Vantagens. Como um aliado, se receber um ataque o familiar fica fora de ação, mas por um PRD. (1PM) Você pode sentir as emoções do familiar durante uma cena de ação (CNA), sem limite de distância. (1PM)  Se o familiar receber um efeito benéfico (como ao beber uma poção de cura), o portador também recebe os mesmos benefícios, independentemente da distância. (1PM) Escolha um Atributo, enquanto estiver com o familiar, você recebe +1 nela por uma CNA.
+2PT As Vantagens do familiar aumentam para 2PT. O portador pode utilizar as Vantagens do familiar gastando o dobro de PM, desde que o familiar esteja JNT. (2PM) Você pode ver e ouvir o que o familiar está vendo e ouvindo, além de se comunicar telepaticamente com ele, sem limite de distância, por uma CNA.
+3PT  As Vantagens do familiar aumentam para 3PT. (3PM) O familiar pode usar qualquer poder do portador, sem limite de distância, desde que o poder tenha sido previamente preparado com o contato direto entre o portador e o familiar.
+FORMA ESPECIAL
+Seu corpo possui uma constituição única, como elasticidade, transformação em metal ou pedra, alteração de tamanho, ou permite acessar uma forma mais poderosa.
+1PT (1PM) Ao adquirir a Forma Especial, defina 2PT que você receberá em Atributos ou como Vantagens. Ativá-la não consome turno e você não pode alterar o bônus ou Vantagens adquiridas. A forma dura uma CNA e, após isso, você recebe -1 em todos os testes até o fim da missão. Os redutores acumulam com cada uso subsequente. Você pode possuir várias formas, cada uma com sua própria configuração, e os redutores de formas diferentes também se acumulam.
+2PT (+2PM) A forma adquire 2PT adicionais (ainda fixos e pré-definidos). (2PM) Ao ativar a forma, você pode recuperar 10PV livremente.
+3PT (+3PM) A forma adquire mais 2PT (ainda fixos e pré-definidos). (+3PM) Ao ativar a forma, você pode recuperar +15PV livremente. (3PM) Ao ativar a forma, você pode anular -2 de redutor de exaustão acumulado por uso anterior da forma. (3PM) Você pode realocar os PT da Forma Especial, redistribuindo-os em um novo padrão temporário que dura uma CNA. Por exemplo: Se sua forma oferece +2 em F, H e A, pode pagar 3PM para alterar para +3 em H e PDF até o fim da CNA.
+FORTALECER
+Você é capaz de amplificar temporariamente o potencial de combate, seu ou de aliados.
+1PT Concede +1 em FA ou FD para você ou um aliado JNT, 1x por combate, em uma ACT, por 1 ataque ou defesa. (1PM) Escolha 1 Atributo na compra. Pode aumentar em +1 o Atributo de um aliado JNT (ou sua), até o fim da CNA. Aumentar R não concede PV ou PM adicionais retroativos.
+2PT Bônus em FA/FD aumenta para +2. Escolhe mais dois Atributos para afetar, mas ainda pode aumentar apenas uma por turno. Bônus de Atributos pode ser aumentado até +2 por Atributo.
+3PT Bônus em FA/FD aumenta para +3. Pode escolher qualquer Atributo para afetar, ainda limitado a uma por turno. Bônus de Atributos pode ser aumentado até +3 por Atributo. (+3PM) Pode aumentar Atributos de um aliado em alcance PRT.
+FÚRIA
+Você é capaz de sobrecarregar seu corpo para entrar em um estado de frenesi durante a batalha.
+1PT Fúria Vingativa! Ao atacar um personagem que o tenha atingido no turno anterior, você recebe +1 na FA. (1PM) Entra em Fúria, recebendo +1 em FA, FD, e em testes de F e R. Durante a Fúria, sua mente se torna turva: você não pode realizar esquivas (sempre recebe Dano de Impacto), usar PDR, ou qualquer poder que consuma PM, exceto a própria Fúria. A Fúria só termina quando você ou seu oponente são derrotados ou caso o oponente fuja. Após a Fúria, você fica imediatamente esgotado, sofrendo -1 em FA e FD por uma CNA.
+2PT Você se torna imune ao medo enquanto estiver em Fúria. (2PM) Pode ativar uma Fúria mais intensa, com um bônus de +2 (os outros efeitos permanecem inalterados). (2PM) Pode eliminar a fadiga ou encerrar voluntariamente sua Fúria. (1PM/FA+1) Quando usar a Fúria Vingativa, pode manter o bônus até o fim da CNA e contra qualquer alvo, recebendo ataques sucessivos podendo aumentar a Fúria Vingativa até FA+3.
+3PT Durante a Fúria, você se torna imune a controle ou influência, seja natural ou proveniente de PDR. (3PM) Pode ativar uma Fúria ainda mais poderosa, com um bônus de +3 (os outros efeitos permanecem inalterados). (+3PM) Pode tornar sua Fúria mais controlada, permitindo o uso de poderes que consomem PM. O custo extra em PM é consumido cada vez que se usa um poder não permitido pela Fúria.
+GENIALIDADE
+Você é um gênio. 
+1PT Recebe +1 em testes de PRC, mesmo que não tenha a PRC necessária para o teste. Pode realizar feitos além do nível tecnológico do cenário (como criar um motor a vapor em um mundo medieval ou consertar uma nave interestelar na era comum).
+2PT Escolha uma PRC que possua; você ganha +2 ao testá-la. (2PM) Pode receber +2 em qualquer tipo de teste, mesmo que não seja relacionado a uma PRC.
+3PT Escolha uma segunda PRC que possua; você ganha +2 extra ao testá-la. (3PM) Ao analisar a situação com calma em um MOV, você ganha 1d bônus em um teste ou em uma rolagem de FA ou FD.
+ILUSÃO
+Você é capaz de criar imagens que enganam a mente, tornando-as indistinguíveis da realidade. As ilusões criadas precisam ser mantidas por CNA.
+1PT Pode manifestar luzes simples para iluminar áreas JNT, criar formas variadas e efeitos especiais inofensivos. (1PM) Pode criar imagens estáticas PRT do tamanho de um gato, um livro ou menor. (+1PM) Pode dar movimento superficial a uma ilusão, como um arbusto com folhas balançando ao vento, desde que não saia do lugar.
+2PT Cria imagens de objetos pequenos e estáticos que cabem na mão, como um cubo ou moeda. A ilusão não se move por conta própria, não emite odor nem som, mas você pode manipulá-la, abrindo mão de seu turno. (2PM) Pode criar imagens estáticas PRT do tamanho de uma pessoa ou menor. (+2PM) Pode gerar sons e odores, como de animais, objetos ou pessoas, que podem emanar de outras ilusões.
+3PT Manipula as pequenas imagens da PSV de 2PT usando apenas seu MOV. (3PM) Pode criar imagens estáticas LNG do tamanho de um elefante ou menor. (+3PM) Pode dar movimento a qualquer de suas ilusões. (+3PM) Pode dobrar o tamanho de uma ilusão.
+IMORTAL
+Por algum motivo, você não pode permanecer morto. Embora você possa ser derrotado e até morrer, sempre retorna à vida.
+Você não ganha Pontos de Experiência numa aventura em que tenha morrido, mesmo que tenha derrotado adversários antes (ou depois) de sua morte.
+1PT Retornar da morte pode levar dias, semanas ou até meses. No jogo, se você morrer durante uma missão, só poderá retornar após o término dela. Se for reduzido a exatamente 0 PV ou ficar "Inconsciente" no Teste de Morte, você mantém sua consciência. Recebe 1d de bônus contra Incapacitação. (1PM) Pode realizar uma ACT normalmente, mesmo com 0 PV ou "Inconsciente".
+2PT Você retorna da morte logo após o combate ou assim que a situação de perigo termina, mas com 1PV. Se a sua morte não foi causada por motivos maléficos, mesquinhos ou desonrosos, você não perde os Pontos de Experiência que teria ganho até o momento da morte, mas sofre um redutor de -1 Ponto de Experiência por morte (mínimo de 1 Ponto de Experiência). Se estiver "Muito Fraco", mantém a consciência. O bônus contra Incapacitação aumenta para +2d. (2PM) Pode realizar uma ACT normalmente, mesmo estando "Muito Fraco".
+3PT Se estiver "Quase Morto", mantém a consciência e se torna imune à Incapacitação. (3PM) Pode agir por 1 turno como se tivesse 1PV, mesmo estando "Quase Morto". (3PM) Após ficar com 0 PV, você pode entrar em um estado de combate automático e inconsciente, tornando-se imune a efeitos mentais e caindo apenas se receber um ataque e falhar no Teste de Morte com um 6. Nesse estado, não é possível recuperar PV. Após o combate, se ainda estiver "de pé", você morre automaticamente e só poderá retornar após um PRD.
+INIMIGO
+Você é altamente treinado para combater um tipo específico de criatura, conhecendo bem suas habilidades e fraquezas. Escolha uma das seguintes ancestralidades:
+Autômatos:  Seres artificiais criados por meios científicos ou místicos, como robôs, golens, ciborgues, reploids, etc.
+Feras: Criaturas semelhantes aos animais do nosso mundo. Inclui seres sem idioma próprio e sem poderes sobrenaturais, como grifos.
+Humanos: Pessoas comuns, como seus vizinhos ou sua tia Gertrudes! Seres com qualidades, aparência e inteligência humanas (como elfos, anões, gnomos, halflings, etc.), mesmo que sejam chamados de semi-humanos, são tratados como humanos para efeitos de regras.
+Humanoides: Seres semelhantes aos humanos, mas com inteligência, poderes e aparência incomuns, como aliens, centauros, trogloditas, minotauros, medusas, etc.
+Inumanos: Monstros e aberrações nascidos dos pesadelos, geralmente monstruosos e violentos. Qualquer ser que não se encaixe nas outras ancestralidades será considerado inumano. Seres místicos mais agressivos ou monstruosos, como quimeras, wyverns, beholders, cubos gelatinosos, também se enquadram aqui.
+Místicos: Criaturas com inteligência e aparência variadas e exóticas, geralmente oriundas de lendas, contos de fadas, ou relacionadas ao PDR do cenário. Alguns místicos possuem subcategorias: Feéricos: Fadas, dríades, ninfas, faunos, sereias, sátiros, etc. Draconianos: Dragões, hipodracos, pseudodragões, dragonetes, etc. Planares: Elementais, gênios, celestiais, infernais, etc.
+Mortos-Vivos: Criaturas que retornaram à vida após a morte, por motivos sombrios, como zumbis, fantasmas, esqueletos, vampiros, etc.
+Especial: Em alguns cenários, variações de um único grupo de seres podem ser permitidas como inimigos. Por exemplo: elfos (elfos comuns, meio-elfos, elfos negros, elfos das florestas, elfos das montanhas, elfos dos céus, elfos sanguinários, elfos do deserto, elfos aquáticos, elfos com três pares de orelhas, etc.). Em outros cenários, também é possível escolher profissões (como guerreiros, arqueiros ou bárbaros) ou status sociais (como nobreza ou clero) como inimigos.
+O mestre pode proibir essa Vantagem em cenários onde uma ancestralidade seja muito comum, ou permitir que ela seja adquirida por 0PT em situações onde a criatura em questão seja extremamente rara.
+1PT Recebe H+2 em testes envolvendo seu inimigo, incluindo FA e FD. (1PM) Pode aplicar -3 na R do seu inimigo quando utiliza poderes que exigem testar esse Atributo.
+2PT Ao estudar um personagem por uma CNA, ganha 1d bônus em FA e FD contra esse alvo até o fim da próxima CNA. Se estudar o alvo por um PRD, o bônus dura por um PRD. Quando reduz sua presa a 0 PV, pode optar por deixá-la Muito Fraca ou Inconsciente, sem que seja necessário fazer Testes de Morte. Recebe Chance de Crítico +1 contra seu inimigo. (2PM) Pode comprar 1d bônus em qualquer rolagem contra o inimigo. (2PM) Detecta a presença de inimigos quando PRT, mesmo através de paredes, disfarces ou invisibilidade. Ao explorar com cautela, amplia o alcance para LNG, mas ainda dentro do local onde se encontra (masmorra, cidade, bosque, etc).
+3PT Contra seu inimigo, ignora qualquer Armadura Extra que ele possua. Se ele tiver Invulnerável, ela passa a funcionar como Armadura Extra. Obtém um sucesso automático em testes relacionados ou contra seu inimigo uma vez por sessão. A Chance de Crítico contra seu inimigo aumenta para +2. (3PM) Ao desferir o golpe final em um inimigo, pode optar por destruí-lo imediatamente (resultado 6 em um Teste de Morte), mesmo que ele tenha Imortalidade ou Regeneração. (3PM) Pode aumentar em 1 o Multiplicador de Crítico contra um inimigo, ao obter um crítico.
+INTANGIBILIDADE
+Seu corpo pode se tornar imaterial, fazendo com que você fique translúcido como um fantasma.
+1PT (1PM) Você se torna intangível por um turno. Enquanto intangível, você só é afetado por ataques e efeitos místicos, incorpóreos ou realizados por xamãs, podendo atravessar barreiras e obstáculos físicos. Enquanto nessa forma, você sofre o estado de Asfixia. Se você se materializar dentro de uma matéria sólida, perde seu valor de R em PV e é "expelido" para o espaço vazio mais próximo. Se essa matéria for outro personagem, este também perde o valor dele de R em PV. Você não pode usar F) ou PDF para interagir com o mundo físico, mas ainda pode usar PDR. Ao longo de uma cena CNA, você afunda lentamente no chão e, ao final, estará debaixo da terra, sendo obrigado a cancelar o poder para ser expulso (tomando dano). Se ficar inconsciente por qualquer motivo, o efeito é cancelado. Intangibilidade não atravessa locais protegidos com PDR.
+2PT Você não sofre Asfixia enquanto intangível. Não recebe dano ao se materializar dentro de qualquer matéria, exceto se a matéria for um ser vivo. (+2PM) Pode estender a duração da intangibilidade fora de combate para uma CNA, precisando de uma CNA de descanso para poder usar novamente.
+3PT Você não afunda mais enquanto está intangível, como se pudesse levitar. (3PM) Quando intangível, pode materializar parte do corpo dentro de outro ser, causando dano igual ao seu valor de A, sem que o alvo possa rolar FD. Esse poder não faz com que você se torne tangível e pode ser usado para quebrar objetos sólidos não místicos. (+3PM) Pode estender a duração da intangibilidade até o fim do combate.
+INVISIBILIDADE
+Você pode ficar invisível. 
+1PT (1PM) Fora de combate, recebe 1d de bônus em testes de Furtividade. Em combate, seus oponentes sofrem de Debilitação Visual (Cego) ao tentar atacá-lo. A invisibilidade dura um turno e cessa imediatamente se você atacar ou sofrer dano.
+2PT (+2PM) A invisibilidade dura uma CNA ou combate. Personagens com sentidos especiais não são considerados cegos, mas você tem direito a testar R contra efeitos que tentem detectar sua invisibilidade. A invisibilidade termina se você sofrer dano, e quando ataca exige custo adicional de 2PM para mantê-la ativa por ataque.
+3PT (+3PM) Você não pode ser detectado de nenhuma forma, apenas com PDR. Só pode ativar esse poder se não estiver sendo observado. Ao receber dano pode testar R para que a invisibilidade não seja cancelada. Ainda exige custo adicional em PM para manter ativa por ataque.
+LIGAÇÃO NATURAL
+Você tem uma conexão especial com outro ser. Ambos precisam possuir esta Vantagem, mas o valor de cada uma não precisa ser o mesmo.
+1PT Quando estão no mesmo campo visual, vocês podem se comunicar sem precisar usar qualquer sinal aparente. Quando estão distantes, podem sentir as emoções um do outro e sempre sabem a direção e uma distância aproximada (PRT, LNG, FDA) onde o outro está. (1PM) Quando PRT, pode compartilhar um efeito benéfico com o aliado, com exceção de efeitos de itens consumíveis. (1PM) Fornece +2 em um teste do aliado caso esteja JNT a ele.
+2PT Quando JNT, você pode permitir que seu aliado utilize seus PM. (2PM) Pode optar por receber parte do dano que seu aliado sofreu, dividindo-o igualmente entre vocês (arredondando para cima), como se fossem Parceiros, mas separados. Apenas aquele que não recebeu o ataque pode optar por compartilhar o dano. (2PM) Pode fornecer 1d bônus em um teste do aliado caso esteja JNT a ele.
+3PT (3PM) Agora também podem compartilhar efeitos benéficos de itens consumíveis. (3PM) Pode fornecer 1d bônus em um teste do aliado estando PRT dele. (3PM) Caso o aliado esteja ao menos PRT e falhe num teste, você pode refazer a jogada por ele.
+MÁCULA
+Você possui a capacidade, possivelmente sobrenatural, de infligir um efeito negativo com base em uma Desvantagem.
+Escolha uma Desvantagem. O valor negativo dessa Desvantagem determina o custo em PT necessário para adquirir a mácula. O custo em PM para usar a mácula também equivale ao valor em PT da Desvantagem. Por exemplo, a mácula de uma Desvantagem com valor de -2 custa 2PT para compra e 2PM para ativação.
+Você pode criar uma mácula que combine mais de uma Desvantagem, desde que o custo total não ultrapasse 3PT. Para cada Desvantagem adicional, o custo final de ativação aumenta em 1PM.
+Utilizar a mácula requer uma ACT, e o alvo tem direito a um teste de RxH para tentar resistir ao efeito. Se bem-sucedido, o efeito da mácula dura por uma CNA.
+Caso a Desvantagem necessite de ativação com uma condição, você pode gastar 1PM para forçar essa ativação. Cada falha na ativação acarreta no aumento do custo em +1PM por tentativa seguida.
+MANOBRAS ESPECIAIS
+Você desenvolver manobras de combate únicas, baseadas em um estilo próprio de luta.
+(Texto truncated in scratchpad but known from user message)
+M A N O B R A S   E S P E C I A I S . . . ( r e s t a n t e   d o   t e x t o ) . . .  
+ 

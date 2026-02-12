@@ -16,6 +16,8 @@ import kotlinx.coroutines.launch
 import com.galeria.defensores.data.TableRepository
 import com.galeria.defensores.data.RuleSystemRepository
 import com.galeria.defensores.models.RuleSystem
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 
 class CharacterViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -33,14 +35,20 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
     val rollEvent: LiveData<com.galeria.defensores.utils.Event<RollResult>> = _rollEvent
 
     // Rule System
-    private var currentRuleSystem: RuleSystem = RuleSystem() // Default to base
+    private val _ruleSystem = MutableLiveData<RuleSystem>(RuleSystem()) // Default
+    val ruleSystem: LiveData<RuleSystem> = _ruleSystem
+    
+    // Helper property for internal access, derived from LiveData value or separate tracking
+    // We can just use _ruleSystem.value!! since we initialized it.
+    private val currentRuleSystem: RuleSystem
+        get() = _ruleSystem.value!!
 
     fun getAttributeName(key: String): String {
         return currentRuleSystem.attributes.find { it.key == key }?.name ?: key.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
     }
     
     fun getDerivedStatName(key: String): String {
-         return currentRuleSystem.derivedStats.find { it.key == key }?.name ?: key.uppercase()
+         return currentRuleSystem.resources.find { it.key == key }?.name ?: key.uppercase()
     }
 
     // Settings
@@ -67,14 +75,37 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
             
             // Now load Rule System based on Table
             val effectiveTableId = if (loadedChar.tableId.isNotEmpty()) loadedChar.tableId else tableId
-            if (!effectiveTableId.isNullOrEmpty()) {
+            val systemToLoad = if (!effectiveTableId.isNullOrEmpty()) {
                 val table = TableRepository.getTable(effectiveTableId)
                 if (table != null) {
-                    currentRuleSystem = RuleSystemRepository.getSystemOrDefault(table.ruleSystemId)
+                    RuleSystemRepository.getSystemOrDefault(table.ruleSystemId)
+                } else {
+                    RuleSystemRepository.getSystemOrDefault(null)
                 }
             } else {
-                currentRuleSystem = RuleSystemRepository.getSystemOrDefault(null) // Base
+                RuleSystemRepository.getSystemOrDefault(null) // Base
             }
+            android.util.Log.d("SystemDebug", "Loaded RuleSystem: ${systemToLoad.id} (${systemToLoad.name})")
+            _ruleSystem.value = systemToLoad
+
+            // Load advantages/disadvantages/skills/damage types for this system
+            com.galeria.defensores.data.AdvantagesRepository.loadSystem(systemToLoad)
+            com.galeria.defensores.data.DisadvantagesRepository.loadSystem(systemToLoad)
+            com.galeria.defensores.data.SkillsRepository.loadSystem(systemToLoad)
+            loadDamageTypes(effectiveTableId)
+
+            // Sync legacy fields to dynamic maps if empty (Migration)
+             if (loadedChar!!.attributeValues.isEmpty()) {
+                loadedChar.attributeValues["forca"] = loadedChar.forca
+                loadedChar.attributeValues["habilidade"] = loadedChar.habilidade
+                loadedChar.attributeValues["resistencia"] = loadedChar.resistencia
+                loadedChar.attributeValues["armadura"] = loadedChar.armadura
+                loadedChar.attributeValues["poderFogo"] = loadedChar.poderFogo
+            }
+            // Ensure resource values are synced
+            // We use standard keys "pv" and "pm"
+             loadedChar.resourceValues["pv"] = loadedChar.currentPv
+             loadedChar.resourceValues["pm"] = loadedChar.currentPm
 
             _character.value = loadedChar!!
         }
@@ -90,11 +121,17 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
 
     /**
      * Update an attribute (forca, habilidade, resistencia, armadura, poderFogo).
+     * Now also updates the dynamic attributeValues map.
      * When resistencia changes, also update current PV and PM to the new maximums.
      */
     fun updateAttribute(attribute: String, value: Int) {
         val currentChar = _character.value ?: return
         val newValue = value.coerceIn(0, 99)
+        
+        // Update dynamic map
+        currentChar.attributeValues[attribute] = newValue
+        
+        // Sync with legacy fields for now
         when (attribute) {
             "forca" -> currentChar.forca = newValue
             "habilidade" -> currentChar.habilidade = newValue
@@ -144,6 +181,120 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         }
         _character.value = currentChar
         saveCharacter()
+    }
+
+    /**
+     * Update any resource (including custom ones) by a specific value.
+     */
+    /**
+     * Update any resource (including custom ones) by a delta value.
+     */
+    fun updateResource(key: String, delta: Int) {
+        // Check if it's a legacy resource first
+        if (key.equals("pv", ignoreCase = true)) {
+            updateStatus("pv", delta)
+            return
+        }
+        if (key.equals("pm", ignoreCase = true)) {
+            updateStatus("pm", delta)
+            return
+        }
+
+        val currentChar = _character.value ?: return
+
+        // Custom Resource Logic
+        val deficiency = currentRuleSystem.resources.find { it.key == key }
+        val max = if (deficiency != null) calculateResourceMax(deficiency, currentChar) else 999
+        
+        // Get current value, default to max if not set (or 0? Defaulting to max seems safer for initial state)
+        val current = currentChar.resourceValues[key] ?: max
+        
+        // Update generic map
+        currentChar.resourceValues[key] = (current + delta).coerceIn(0, max)
+        
+        _character.value = currentChar
+        saveCharacter()
+    }
+
+    /**
+     * Calculates the maximum value for a given resource based on its formula.
+     * key: Attribute keys (F, H, R, A, PdF) or numbers.
+     * Supported operators: +, -, *, /
+     */
+    fun calculateResourceMax(res: com.galeria.defensores.models.ResourceDefinition, char: com.galeria.defensores.models.Character): Int {
+        val formula = res.formula.trim().uppercase()
+        if (formula.isEmpty()) return 10 // Default fallback
+
+        // Simple parser capabilities:
+        // "R * 5", "H + 10", "10"
+        
+        // Replace known attributes with values (PDF must be first to avoid 'F' collision)
+        // Replace known attributes with values (PDF must be first to avoid 'F' collision)
+        var expression = formula
+            .replace("PDF", char.poderFogo.toString())
+            .replace("F", char.forca.toString())
+            .replace("H", char.habilidade.toString())
+            .replace("R", char.resistencia.toString())
+            .replace("A", char.armadura.toString())
+            //.replace("X", "*") // Moved to after dynamic attributes
+
+        // Dynamic Attributes
+        currentRuleSystem.attributes.forEach { attr ->
+            // Avoid replacing parts of other words if possible, but for simple algebra standard replace is usually okay
+            // Ideally we'd use regex with word boundaries, but keys might be short.
+            // Let's assume keys are unique enough or user knows what they are doing.
+            // Uppercase match
+            val key = attr.key.uppercase()
+            if (expression.contains(key)) {
+                val valAttr = char.attributeValues[attr.key] ?: 0
+                expression = expression.replace(key, valAttr.toString())
+            }
+        }
+        
+        // Replace X operator last
+        expression = expression.replace("X", "*")
+        
+        // Evaluate simple expression (very basic: A op B)
+        try {
+            // Check for multiplication
+            if (expression.contains("*")) {
+                val parts = expression.split("*")
+                if (parts.size >= 2) { // Handle cases like R*5 (take first two or fold?)
+                    // 3D&T usually R*5. Let's precise
+                    val a = parts[0].trim().toIntOrNull() ?: 0
+                    val b = parts[1].trim().toIntOrNull() ?: 0
+                    return a * b
+                }
+            } else if (expression.contains("+")) {
+                val parts = expression.split("+")
+                if (parts.size >= 2) {
+                    val a = parts[0].trim().toIntOrNull() ?: 0
+                    val b = parts[1].trim().toIntOrNull() ?: 0
+                    return a + b
+                }
+            } else if (expression.contains("-")) {
+                 val parts = expression.split("-")
+                 if (parts.size >= 2) {
+                     val a = parts[0].trim().toIntOrNull() ?: 0
+                     val b = parts[1].trim().toIntOrNull() ?: 0
+                     return a - b
+                 }
+            } else if (expression.contains("/")) {
+                  val parts = expression.split("/")
+                  if (parts.size >= 2) {
+                      val a = parts[0].trim().toIntOrNull() ?: 0
+                      val b = parts[1].trim().toIntOrNull() ?: 0
+                      if (b != 0) return a / b
+                  }
+            } else {
+                // Try direct number
+                return expression.trim().toIntOrNull() ?: 0
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FormulaError", "Failed to parse formula: $formula", e)
+        }
+        
+        return 0
     }
 
     fun updateName(name: String) {
@@ -222,7 +373,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
             currentChar.damageTypeForca = type
         }
         _character.value = currentChar
-        saveCharacter()
+        persistCharacter()
     }
 
     fun addCustomDamageType(type: String) {
@@ -253,6 +404,225 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                 loadDamageTypes(tableId) // Reload
             }
         }
+    }
+
+    // --- Rule System Editing (Attributes) ---
+    fun addAttributeDefinition(attr: com.galeria.defensores.models.AttributeDefinition) {
+        val currentSystem = _ruleSystem.value ?: return
+        android.util.Log.d("SystemDebug", "Adding attribute '${attr.name}' to system ID: ${currentSystem.id}")
+        
+        val newAttributes = currentSystem.attributes.toMutableList()
+        newAttributes.add(attr)
+        
+        // Use copy to ensure LiveData triggers update
+        val newSystem = currentSystem.copy(attributes = newAttributes)
+        
+        saveRuleSystem(newSystem)
+    }
+
+    private fun saveRuleSystem(system: com.galeria.defensores.models.RuleSystem) {
+        _ruleSystem.value = system
+        viewModelScope.launch {
+            withContext(NonCancellable) {
+                android.util.Log.d("SystemDebug", "Saving system ID: ${system.id} with ${system.attributes.size} attributes")
+                // In offline mode, we allow editing the base system directly
+                if (system.id == "3det_alpha_base" || system.isBaseSystem) {
+                    android.util.Log.d("SystemDebug", "Overwriting Base System configuration for Offline Mode.")
+                }
+                com.galeria.defensores.data.RuleSystemRepository.saveSystem(system)
+            }
+        }
+    }
+
+    fun exportSystemJson(): String {
+        return try {
+            val gson = com.google.gson.GsonBuilder().setPrettyPrinting().create()
+            gson.toJson(_ruleSystem.value ?: com.galeria.defensores.models.RuleSystem())
+        } catch (e: Exception) {
+            android.util.Log.e("SystemExport", "Error exporting system", e)
+            "{ \"error\": \"Failed to export system\" }"
+        }
+    }
+
+    fun importSystemJson(json: String): Boolean {
+        return try {
+            val gson = com.google.gson.Gson()
+            val newSystem = gson.fromJson(json, com.galeria.defensores.models.RuleSystem::class.java)
+            
+            if (newSystem == null || (newSystem.attributes.isEmpty() && newSystem.resources.isEmpty())) {
+                android.util.Log.e("SystemImport", "Invalid system JSON or empty system")
+                return false
+            }
+
+            val current = _ruleSystem.value ?: com.galeria.defensores.models.RuleSystem()
+            // Retain original ID to avoid breaking references in existing characters if strict checks exist?
+            // Actually, if we import a system, we likely WANT it to define the rules.
+            // But if we change the ID, the Character's ruleSystemId pointer might become invalid 
+            // if we are not also updating the Character or Table.
+            // In our current offline flow, the Character loads the system from the Table, 
+            // or falls back to "null" (default).
+            // If we overwrite the CURRENT object in memory and save it, we are effectively editing the loaded system.
+            // If the loaded system was the "Default" one (which might be shared), 
+            // editing it affects ALL characters using the default. Use caution.
+            // For now, in Offline Single Player mode, this is acceptable feature behavior: "Edit the Rules".
+            
+            // We'll update the content but KEEP the ID if it's the Base System to ensuring we don't spawn infinite files?
+            // Actually, let's trust the user or the Import.
+            // If we import a system with a different ID, we should probably save it AS a new file 
+            // and Switch to it? Or just overwrite the fields of the current system?
+            // User request: "Importing a system will OVERWRITE the current system's definition."
+            // So we copy fields into the CURRENT ID.
+            
+            val updatedSystem = current.copy(
+                name = newSystem.name,
+                description = newSystem.description,
+                attributes = newSystem.attributes,
+                resources = newSystem.resources,
+                diceConfig = newSystem.diceConfig
+                // Keep ID, isBaseSystem to prevent breakage of current session
+            )
+            
+            saveRuleSystem(updatedSystem)
+            true
+        } catch (e: Exception) {
+            android.util.Log.e("SystemImport", "Error parsing JSON", e)
+            false
+        }
+    }
+
+    fun saveSystemAs(newName: String, onComplete: (Boolean) -> Unit) {
+        val current = _ruleSystem.value ?: return
+        
+        // Create a copy with a NEW ID
+        val newSystem = current.copy(
+            id = java.util.UUID.randomUUID().toString(),
+            name = newName,
+            isBaseSystem = false // modifications are never base
+        )
+        
+        viewModelScope.launch {
+            try {
+                com.galeria.defensores.data.RuleSystemRepository.saveSystem(newSystem)
+                onComplete(true)
+            } catch (e: Exception) {
+                android.util.Log.e("SystemSaveAs", "Error saving new system", e)
+                onComplete(false)
+            }
+        }
+    }
+
+
+    fun resetBaseSystem(onComplete: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            try {
+                com.galeria.defensores.data.RuleSystemRepository.resetBaseSystem()
+                // If current is base, reload it
+                val current = _ruleSystem.value
+                if (current?.id == "3det_alpha_base") {
+                    _ruleSystem.value = com.galeria.defensores.data.RuleSystemRepository.getSystem("3det_alpha_base")
+                }
+                onComplete(true)
+            } catch (e: Exception) {
+                android.util.Log.e("SystemReset", "Error resetting base system", e)
+                onComplete(false)
+            }
+        }
+    }
+
+    fun updateAttributeDefinition(attr: com.galeria.defensores.models.AttributeDefinition) {
+        val currentSystem = _ruleSystem.value ?: return
+        val newAttributes = currentSystem.attributes.toMutableList()
+        val index = newAttributes.indexOfFirst { it.id == attr.id }
+        
+        if (index != -1) {
+             val oldAttr = newAttributes[index]
+             val oldKey = oldAttr.key
+             val newKey = attr.key
+             
+             newAttributes[index] = attr
+             
+             // Cascading Update: If key changed, update formulas in resources
+             var newResources = currentSystem.resources.toMutableList()
+             if (oldKey != newKey) {
+                 var modifiedResources = false
+                 newResources = newResources.map { res ->
+                     // Simple replace. Ideally regex \bOLD\b but simple replace is consistent with our parser
+                     if (res.formula.contains(oldKey, ignoreCase = true)) {
+                         modifiedResources = true
+                         // Use regex to replace whole words only?
+                         // "INT" -> "INTE" should not replace "INTELIGENCIA" -> "INTELIGENCIAELIGENCIA"
+                         // But our attributes are simple keys.
+                         // Let's use simple replace for now to match current parser logic, 
+                         // or maybe regex with word boundaries for safety.
+                         // Regex: \bOLD\b with IGNORE_CASE
+                         val pattern = "(?i)\\b$oldKey\\b".toRegex()
+                         val newFormula = res.formula.replace(pattern, newKey)
+                         res.copy(formula = newFormula)
+                     } else {
+                         res
+                     }
+                 }.toMutableList()
+                 
+                 if (modifiedResources) {
+                     android.util.Log.d("SystemDebug", "Updated resource formulas due to attribute rename: $oldKey -> $newKey")
+                 }
+                 
+                 // Also migrate Character values!
+                 // If we strictly follow the rule that the system defines the key, we must update the character data.
+                 _character.value?.let { char ->
+                     if (char.attributeValues.containsKey(oldKey)) {
+                         val oldVal = char.attributeValues[oldKey] ?: 0
+                         char.attributeValues.remove(oldKey)
+                         char.attributeValues[newKey] = oldVal
+                         _character.value = char // Trigger update
+                         saveCharacter()
+                         android.util.Log.d("SystemDebug", "Migrated character attribute value: $oldKey -> $newKey = $oldVal")
+                     }
+                 }
+             }
+
+             val newSystem = currentSystem.copy(attributes = newAttributes, resources = newResources)
+             saveRuleSystem(newSystem)
+        }
+    }
+
+    fun removeAttributeDefinition(attr: com.galeria.defensores.models.AttributeDefinition) {
+        val currentSystem = _ruleSystem.value ?: return
+        val newAttributes = currentSystem.attributes.toMutableList()
+        newAttributes.removeAll { it.id == attr.id }
+        currentSystem.attributes = newAttributes
+        saveRuleSystem(currentSystem)
+        
+        // Also clean up character values? 
+        // For now, keep them as "orphans" which is safer than deleting data.
+    }
+
+    // --- Rule System Editing (Resources) ---
+    fun addResourceDefinition(res: com.galeria.defensores.models.ResourceDefinition) {
+        val currentSystem = _ruleSystem.value ?: return
+        val newList = currentSystem.resources.toMutableList()
+        newList.add(res)
+        currentSystem.resources = newList
+        saveRuleSystem(currentSystem)
+    }
+
+    fun updateResourceDefinition(res: com.galeria.defensores.models.ResourceDefinition) {
+        val currentSystem = _ruleSystem.value ?: return
+        val newList = currentSystem.resources.toMutableList()
+        val index = newList.indexOfFirst { it.id == res.id }
+        if (index != -1) {
+             newList[index] = res
+             currentSystem.resources = newList
+             saveRuleSystem(currentSystem)
+        }
+    }
+
+    fun removeResourceDefinition(res: com.galeria.defensores.models.ResourceDefinition) {
+        val currentSystem = _ruleSystem.value ?: return
+        val newList = currentSystem.resources.toMutableList()
+        newList.removeAll { it.id == res.id }
+        currentSystem.resources = newList
+        saveRuleSystem(currentSystem)
     }
 
     private val _virtualRollRequest = MutableLiveData<com.galeria.defensores.utils.Event<com.galeria.defensores.models.RollRequest>>()
@@ -1090,10 +1460,23 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    private fun persistCharacter() {
+        val currentChar = _character.value ?: null
+        if (currentChar != null) {
+             viewModelScope.launch {
+                 try {
+                     com.galeria.defensores.data.CharacterRepository.saveCharacter(currentChar)
+                 } catch (e: Exception) {
+                     android.util.Log.e("ViewModel", "Error saving character", e)
+                 }
+             }
+        }
+    }
+
     private fun updateAvatarUrl(url: String) {
         val currentChar = _character.value ?: return
         currentChar.imageUrl = url
         _character.postValue(currentChar) // Update UI immediately
-        saveCharacter() // Save big string to local file
+        persistCharacter() // Save big string to local file
     }
 }

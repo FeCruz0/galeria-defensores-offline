@@ -15,4 +15,9 @@
     
     <color name="notes_background">#FFFFFFFF</color>
     <color name="notes_text">#FF000000</color>
+    
+    <color name="gray_600">#4B5563</color>
+    <color name="purple_600">#7C3AED</color>
+    <color name="blue_600">#2563EB</color>
+    <color name="orange_600">#EA580C</color>
 </resources>

@@ -1,0 +1,103 @@
+ANIMAIS
+Sabe cuidar de animais e tratar seus ferimentos, evitar animais perigosos, e até domar animais selvagens. 
+	Animais te tratam como um deles. Consegue entender o que animais estão sentindo ou tentando “dizer” com facilidade (sem testes), sabe interpretar seus gestos e sons naturais, inclusive aprende rápido sobre animais desconhecidos (como de outro planeta). Também sabe fazer com que seja compreendido por eles.
+	Em mundos de fantasia, essa PRC também se aplica a monstros e outras criaturas fantásticas.
+Aliado Feral: Caso seja um mestre perito, recebe um Aliado de 1PT (ou 2PT caso seja mestre perito) que não pode usar ATV da Vantagem aliado.
+Combate Montado: Ao combater enquanto numa montaria qualquer, recebe o bônus da PRC na FA ou FD.
+Doma: Pode fazer com que uma Fera perca a motivação de batalha por uma CNA.
+Empatia Silvestre: Tem afinidade com criaturas da floresta sendo capaz de entender seus gestos e como “respondê-los”. Pode disputar HxR para que uma Fera adquira Afeição a você por um turno (1PT) ou uma CNA (2PT).
+Ração: Prepara o melhor tipo de refeição para animais. Uma ração recupera 1PV (1PT) ou 5PV (2PT) de um ser do tipo fera uma vez por dia. Dura três dias, toma uma CNA de preparo e exige material equivalente a 1 moeda.
+Tratamento: Sabe alimentar e cuidar de animais. Pode também perceber se um animal está doente. Pode-se usar os efeitos de Medicina em seres do kit Fera.
+Treinamento: Sabe treinar animais domésticos para fazer truques simples, como sentar e atacar. Pode testar H para fornecer uma utilização de uma Vantagem ou PRC sua para uma fera domesticada. Você paga o custo em PM da Vantagem caso precise. Só se pode treinar uma fera por PRD, cada fera pode receber um poder.
+ARTES
+Você tem sensibilidade e talento para as artes. Sabe cantar, dançar, desenhar, pintar, fazer esculturas, tocar instrumentos musicais e outros.
+	Possui domínio sobre arte escrita (poesias, romances, cartas de amor), arte visual ((desenhar com precisão, tirar fotografias das mais belas e conhece as melhores técnicas de gravação e edição de vídeo), artes cênicas (atuação e representação ao público ou em estúdio, possui treinamento em canto, dramaturgia, dança, mímica, comédia, ópera e outros), artes plásticas (escultura em pedra, madeira ou cerâmica, origami, papercraft, ou mesmo pintura), 
+Culinária: Você tem a habilidade para o preparo de uma refeição agradável, a partir da matéria prima, como também preparar um animal recém-abatido para o cozimento. Pode fazer com que personagens descansando em local desconfortável recuperem PV como se estivessem em local confortável.
+Encantar: Pode com uma disputa de HxR provocar Afeição ou Fúria em um alvo que presencie sua arte. Também pode utilizar a manobra Ajuda enquanto PRT.
+Instrumentos Musicais: Você sabe tocar uma quantidade de tipo de instrumento igual ao seu valor de H. Escolha entre instrumentos de corda (musicais que utilizam cordas, como violinos, violões, bandolins, guitarras), de percussão (baterias, tambores, xilofones, sinos), de sopro (flauta doce, siringe, saxofone, trompete) ou de tecla (piano, órgão, acordeão, teclado).
+	Caso possua a PRC, sabe tocar todos os instrumentos.
+Joalheria: Trabalho de identificar, polir e criar joias e pedras preciosas. Aumenta em até 60% o valor de uma jóia ou ornamento (role 1d para definir o aumento). 
+Prestidigitação: Você pode fazer truques com pequenos objetos, fazendo sumir moedas, lenços e cartas de baralho como se fosse mágica. Pode esconder um objeto qualquer em seu corpo, em um amigo ou qualquer lugar do cenário, mesmo sob olhares curiosos.
+Trabalho Artístico: Garante 1 moeda (1PT) ou 1d+1 moedas (2PT) no fim da sessão caso o personagem tenha realizado algum ofício artístico.
+Ventriloquismo: Você é capaz de projetar sua voz a uma pequena distância dentro do cenário.
+ATLETISMO
+Prática de vários tipos de esportes, e conhecimento de suas regras.
+	Possui conhecimento mediano de caça e pesca, como também sabe dirigir alguns veículos, mas geralmente vinculados às modalidades esportivas.
+Acrobacia: Pode equilibrar-se em pequenas superfícies, andar sobre cordas, fazer malabarismo e cambalhotas, etc. Pode testar Acrobacia para receber dano mínimo de quedas (por exemplo, 3 em 3d).
+Alpinismo: Você sabe escalar montanhas, subir em muros altos, árvores e até edifícios. Pode testar H para escalar em velocidade normal.
+Corrida: Você é um corredor de curta e longa distância. Pode testar H para receber um MOV extra no seu turno, se falhar tem seu MOV reduzido à metade.
+Natação: Você sabe... nadar. Prende sua respiração duas vezes mais que o normal. Com um teste de H pode nadar com velocidade normal.
+Salto: Você foi treinado para fazer o melhor uso possível de seu físico em saltos. Possui altura e distância de salto dobrados. Pode imitar os efeitos da Qualidade Especial: Quase Vôo com testes de H.
+CIÊNCIAS
+Você tem grandes conhecimentos sobre ciências em geral, incluindo as mais obscuras.
+	Algumas das áreas que você conhece são: biologia (anatomia humana, anatomia animal, evolucionismo, genética,  paleontologia, entre outros), direito (leis diversas (locais, regionais, etc), direitos humanos, direitos animais, moral, política, criminalidade, entre outros), engenharias (automação, engenharia civil, engenharia sanitária, mecânica, metalurgia  e outras), humanas (arqueologia, criminologia, cultura popular, filosofia, história, psicologia, sociologia, teologia, entre outras), linguística (alfabetos, símbolos, glifos, criptografia, línguas mortas, lexicografia; lógica (cálculo, expressão quantitativa, predições precisas e métodos rigorosos de testar hipóteses, como física, computação, eletrônica, matemática, geometria, etc), naturalismo (botânica, geografia, ecologia, geologia, toxicologia, zoologia, entre outras), química
+Análise Comportamental: Em um turno analisando um personagem pode testar H para descobrir algo (Vantagens, Desvantagens ou PRC, quanto possível) de um personagem.
+Análise Estrutural: Pode analisar uma estrutura em uma CNA e conhecer suas fraquezas, sabendo a melhor forma de invadi-la ou condená-la. Pode em um PRD elaborar um planejamento de instalação de um sistema elétrico, hídrico ou similar em uma estrutura ou local.
+Artigo Científico: Garante (para fins financeiros) 1d moedas (1PT) ou 2d+1 moedas (2PT) entre missões, caso o personagem tenha realizado algum estudo científico, o que toma 1 PRD de trabalho.
+Cartografia: Compreende a análise dimensional de ambientes, construções e terrenos para elaboração de mapas complexos. Pode fazer um mapa de um local que tenha visitado durante uma CNA (quanto mais tempo, maior o detalhe do mapa).
+Herbologia: Pode em um PRD encontrar uma planta medicinal que cure 1PV (1PT) ou 3PV (2PT), anule por uma CNA efeitos de um STN ou uma planta tóxica que cause perda de 1PV (1PT) ou 3PV (2PT) ao ser ingerida ou utilizada como veneno em arma ou uma planta que cause um STN variado por uma CNA. Um dia após colhidas, as plantas murcham e perdem efeito.
+Idiomas: Domina diversos idiomas conhecidos ou tipo de linguagem (pode ser combinado com o mestre na criação da ficha). Para linguagens mais raras ou fora do BG do personagem, deve testar H para compreensão parcial, passível de erros. Braille, código morse, linguagem de sinais, sinais de fumaça e similares são considerados “idiomas”.
+Planejamento: Elabore um plano em uma CNA, personagens que sigam seu plano de acordo (incluindo você) recebem +2 (1PT) ou 1d bônus (2PT) em rolagens (até FA e FD).
+Química: Pode alterar a composição de certos materiais, líquidos e construir fórmulas químicas caso tenha os meios necessários. Caso possua um laboratório à disposição, pode em um PRD criar um item consumível de 1PT ou 2PT (conforme PT da PRC), porém o item se desfaz em 1 PRD.
+COMBATE
+Você possui treinamento em algum estilo de luta, arma ou ação de combate.
+Combate Armado: Possui treinamento especial de combate com Tipo de Dano, representando sua técnica com uma arma. Escolha um Tipo de Dano por 1PT pode gastar 1PM para aumentar Multiplicador de Crítico +1, por 2PT possui Multiplicador de Crítico +1 automático.
+Combate Avançado: Recebe o bônus de PRC em FA ou FD (escolha uma antes de cada ação ou combine com o mestre para deixar predefinido). Além disso, pode escolher um Tipo de Dano adicional para cada PT da PRC tanto para F quanto PDF.
+Combate Defensivo: Escolha um Tipo de Dano que possua, ao receber um ataque do Tipo de Dano escolhido, recebe o bônus da PRC na FD.
+INTUIÇÃO
+Você tem o que é necessário para se tornar um policial, detetive ou agente secreto, e conhece técnicas de investigação.
+	Sabe seguir pegadas, procurar digitais, usar disfarces, decifrar códigos secretos, destrancar fechaduras, desarmar armadilhas, encontrar coisas escondidas, achar passagens ocultas, notar detalhes minuciosos, identificar falsificações, descobrir mentiras ou mesmo notar quando uma pessoa está disfarçada ou se fazendo passar por outra pessoa.
+Dedução: Coletando informações elementares você chega a conclusões precisas. Uma vez por sessão, caso tenha as informações necessárias para chegar a uma conclusão, resolver um mistério ou desvendar um segredo você o faz automaticamente (o mestre revela para você).
+LADINAGEM
+Você tem tudo que precisa para se tornar um grande ladrão ou espião, mas talvez esteja longe de sê-lo.
+	Sabe como forçar portas e abrir fechaduras trancadas, ou danificá-las. Consegue se soltar de cordas, algemas e atilhos semelhantes. Cria cópias de cartas, documentos, obras de arte e outros objetos. Sabe muito sobre o que acontece nas ruas e como coletar informações das pessoas pelas cidades. Consegue ler lábios.
+Despistar: Sabe apagar seus rastros, aumentando a dificuldade de qualquer um que tente te rastrear. Testando a PRC, consegue fugir de uma batalha sem perda de Pontos de Experiência.
+Disfarce: Consegue se fazer parecer com outra pessoa ou apenas ocultar a própria aparência. Consegue imitar Metamorfose ou Aparência Inofensiva de 1PT por uma CNA.
+Furtividade: Sabe se esconder e também mover-se em silêncio. Pode emular Invisibilidade de PT conforme a da PRC, mas depende de elementos de cenário para isso, caso seja descoberto dificilmente poderá usá-la novamente na mesma CNA e, diferente da Vantagem, ainda é suscetível a sentidos especiais, como olfato ou audição aguçados.
+Punga: Você sabe bater carteiras. Pode roubar um item pequeno das mãos ou bolsos de um alvo, mesmo que em combate, com uma disputa de Ladinagem x Intuição, se o alvo falhar no teste com um 5 ou 6, nem percebe que foi furtado.
+MEDICINA
+Você é um médico, no mínimo estudou para isso. Quando alguém precisa de cuidados médicos, você pode providenciar.
+	Sabe dizer que tipo de doença um paciente tem, como curá-la, e também pode fazer cirurgias. Sabe examinar cadáveres e supor assim a causa de suas mortes.
+	Também possui vasto conhecimento de biologia humana e de animais, podendo utilizar toda a PRC de Medicina em feras em geral.
+Cirurgia: Trata doenças e ferimentos internos. Pode eliminar um redutor de Atributo, equivalente ao bônus da PRC, com uma CNA de tratamento ou eliminar o dobro disso com um PRD de tratamento. Cirurgia só pode ser aplicada uma vez por dia.
+Diagnose: Sabe dizer se uma pessoa está doente, reconhecer a doença e determinar a maneira de curá-la. Também reconhece o resultado do Teste de Morte de um personagem caído.
+Farmacologia: Conhece diversas drogas e medicamentos, até para venenos e doenças, além de saber como prepará-los. Caso possua um laboratório à disposição, pode em um PRD criar um item consumível de cura de 1PT ou 2PT (conforme PT da PRC), porém o item se desfaz em 1 PRD.
+Primeiros Socorros: Sabe cuidar de ferimentos, fraturas, deter sangramentos e outras coisas que se deve fazer – ou não fazer – para salvar uma vida. Pode ajudar na recuperação de personagem que estejam com zero PV. Veja em “Testes de Morte”. Pode emular a Vantagem Cura de 1PT ou 2PT (conforme PT da PRC), mas apenas uma vez por dia, por personagem.
+Psiquiatria: Sabe lidar com traumas e doenças mentais. Quando um personagem insano falha em seu teste para resistir à loucura, você pode fornecer uma nova tentativa.
+Ressuscitação: Consegue em um PRD de tratamento, trazer um personagem que tenha morrido no último turno, de volta a vida, mas no estado de Quase Morto. O atendimento tem que ser imediato, se mais um turno passar o caso se torna impossível. O teste possui 1d redutor caso não hajam instrumentos necessários para o feito.
+Tratamento: Sabe como tratar uma doença ou envenenamento (que tenha sido diagnosticado) da melhor forma possível, caso tenha os medicamentos necessários para tal. Com um turno pode anular e impedir os avanços de STN por uma CNA (1PT) ou por um PRD (2PT).
+OCULTISMO
+Você entende das artes sobrenaturais e ocultas do mundo, ciências que não podem ser explicadas pelas leis humanas.
+	Conhece sobre as criaturas de ancestralidade youkai do mundo, cujos poderes, natureza e vivência tem relação com o PDR do cenário.
+	Possui grande conhecimento dos mitos do cenário. Conhece um pouco da verdade que permeia o PDR do cenário, mas não seus segredos mais profundos.
+	Entende como funciona PDR em geral e consegue identificar que tipo de PDR um personagem usa.
+Detectar Poder: Com treino você desenvolveu a capacidade de perceber fontes de um PDR. Pode simular o Sentido Especial: Detecção (PDR) em um turno, mas com teste.
+Poder Furtivo: Pode testar para usar seu PDR sem componentes verbais ou gestuais, não comprometendo sua furtividade, caso esteja despercebido.
+Poderes Menores: Consegue, em um turno, reproduzir alguns efeitos de PDR de 1PT e alguns outros efeitos pequenos, com um teste bem sucedido de H, o que não elimina o gasto de PM. Falha no teste acarreta em perda de turno (mas não há perda em PM).
+Rituais: Sabe preparar rituais extensos que conseguem simular PDR de 2PT (com uma CNA de preparo) ou PDR de 3PT (com um PRD de preparo). Uma falha ao testar H significa que algo do ritual deu errado e precisa refazer tudo novamente (tomando uma nova CNA ou PRD).
+PERSUASÃO
+Sabe obter favores por meios diversos, através de truques, engôdos ou ameaças.
+	Sabe manipular massas, fazendo com que um grande número de pessoas siga uma ou mais de suas ideias e te apoie numa causa.
+	Sabe ser polido e tratar as pessoas com cortesia. Sabe usar perguntas habilidosas e pressão emocional para obter a informação que deseja.
+Barganha: Sabe como comprar pelos melhores preços e como vender por preços mais caros. Ao comprar um item ou serviço, reduz seu custo em proporção ao bônus da PRC. Também pode ser usado para ajudar companheiros em suas compras. Nada pode valer menos de 1 moeda.
+Hipnose: Pode afetar a mente de uma pessoa e torná-la mais fácil de manipular. Inflige o bônus da PRC como redutor contra efeitos de sugestão ou controle mental.
+Intimidação: Convence as pessoas usando ameaças e coação. Pode fazer com que um alvo receba redutor em FA e FD, em proporção a bônus da PRC, apenas contra você até o final de um combate. Também pode causar medo.
+Lábia: Similar à intimidação, mas usa bajulação e conversa mole em vez de ameaças. Pode fazer com que um alvo receba Afeição por você por uma CNA (1PT) ou um PRD (2PT).
+Sedução: Seduzindo alguém por uma CNA, pode fazer com que um alvo adquira Devoção à você por uma CNA (1PT) ou PRD (2PT). A sedução funciona apenas uma vez por PRD.
+SOBREVIVÊNCIA
+Consegue sobreviver em lugares selvagens. Sabe caçar, pescar, seguir pistas e encontrar comida e abrigo para você e seus amigos.
+	Pode encontrar locais que podem servir de abrigo, também pode usar elementos da natureza para construir um. Consegue fazer uma fogueira com itens precários.
+	Consegue pescar sem vara ou caçar com arapucas e lanças feitas com materiais do ambiente. Sabe limpar e preparar a caça ou pesca.
+	Sabe onde encontrar água, identificar risco de contaminação e formas de purificá-la.
+	Possui métodos para suportar condições climáticas diversas como tempestades, nevascas ou o calor do deserto.
+	Sabe encontrar ervas, raízes, frutas e leguminosas naturais. Como colhê-las sem desperdício e quais são ou estão boas para consumo.
+	Identifica sua atual posição se guiando pelas estrelas, direção do vento, um mapa, coordenadas  ou similar. Consegue descobrir o melhor caminho para chegar onde precisa.
+	Sabe seguir pistas e pegadas. Consegue, em alguns casos, localizar um alvo que utilize invisibilidade de 1PT ou 2PT (conforme PT da PRC).
+TECNOLOGIAS
+Esta é uma PRC que pode variar sua utilidade ou estética conforme a ambientação. Em cenários primitivos, representa o conhecimento de criar ferramentas básicas de pedra, mecanismos de corda simples e dobradiças. Em cenários medievais domina balões de ar quente, mecanismos de engrenagem, corda mecânica, metalurgia (forja de armas e armaduras) e talvez máquinas de vapor. Em cenários contemporâneos, engloba mecanismos elétricos, placas de circuito integrado e programação. Em cenários futuristas, lida com virtualização, realidade aumentada, robótica, implantes e similares.
+	Você é bom com máquinas, mecanismos e veículos diversos (aéreos, terrestres, aquáticos, pesados, militares, de construção ou mesmo mechas). Sabe operar, pilotar, dirigir, construir e consertar qualquer coisa se tiver as peças certas. Mesmo máquinas que nunca viu antes ou de origem e funcionamento diferenciado rapidamente são dominadas.
+Bugigangas: Sabe criar apetrechos simples com utilidades diversas. Tome um turno para fazer uma “bugiganga”. Você cria um EQP comum de 1PT ou 2PT (conforme PT da PRC) que possui um único uso. O mestre define quando você pode criar uma bugiganga, quantos pode criar e de que tipo. Caso falhe no teste de criação, desperdiçará os componentes usados.
+Criar: Sabe construir aparatos, dispositivos e instrumentos tecnológicos variados. Em um PRD consegue construir um EQP comum de 1PT ou 2PT, ou uma arma de +1 ou +2 (conforme PT da PRC) que dura um CNA e não pode ser reparado. É preciso ter materiais e ferramentas mínimas para construção do EQP e o mestre define quando é possível.
+Mecanismos: Constroi, ativa e desativa pequenos mecanismos, como armadilhas, explosivos e aparelhos de detecção. Em um PRD (1PT) ou uma CNA (2PT) cria um aparato que emula uma Vantagem de 1PT, similar a um item consumível, uma vez utilizado o mecanismo se esgota. Todo mecanismo possui um único meio de ativação.
+Reparar: Sabe consertar aparatos, dispositivos e instrumentos tecnológicos variados. Ao consertar construtos pode emular a Cura de 1PT ou 2PT (conforme PT da PRC), mas apenas uma vez por dia por construto.
+	Consegue consertar um EQP comum em uma CNA caso esteja num local de trabalho apropriado ou consertá-lo em um PRD, em qualquer lugar, caso tenha ferramentas mínimas necessárias.

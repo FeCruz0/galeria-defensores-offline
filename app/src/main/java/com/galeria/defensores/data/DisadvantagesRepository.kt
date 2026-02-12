@@ -20,6 +20,27 @@ object DisadvantagesRepository {
         }
     }
 
+    fun loadSystem(system: com.galeria.defensores.models.RuleSystem) {
+        _disadvantages.clear()
+        if (system.id == "3det_alpha_base" || system.isBaseSystem && system.disadvantages.isEmpty()) {
+            _disadvantages.addAll(DisadvantagesData.defaultDisadvantages)
+        } else {
+             if (system.disadvantages.isNotEmpty()) {
+                 val mapped = system.disadvantages.map { item ->
+                     AdvantageItem(
+                         id = item.id,
+                         name = item.name,
+                         description = item.description,
+                         cost = item.cost
+                     )
+                 }
+                 _disadvantages.addAll(mapped)
+             } else {
+                 _disadvantages.addAll(DisadvantagesData.defaultDisadvantages)
+             }
+        }
+    }
+
     fun removeDisadvantage(disadvantage: AdvantageItem) {
         _disadvantages.removeIf { it.id == disadvantage.id }
     }

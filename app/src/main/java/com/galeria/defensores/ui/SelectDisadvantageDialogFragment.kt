@@ -61,7 +61,8 @@ class SelectDisadvantageDialogFragment(
                         }
                         .setNegativeButton("Não", null)
                         .show()
-                }
+                },
+                showDescription = true
             )
             recyclerView.adapter = adapter
         }

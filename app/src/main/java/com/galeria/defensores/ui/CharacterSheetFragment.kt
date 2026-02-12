@@ -75,11 +75,52 @@ class CharacterSheetFragment : Fragment() {
         }
     }
 
+    private val systemExportLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        if (uri != null) {
+            val json = viewModel.exportSystemJson()
+            lifecycleScope.launch {
+                 try {
+                     requireContext().contentResolver.openOutputStream(uri)?.use { output ->
+                         output.write(json.toByteArray())
+                     }
+                     Toast.makeText(context, "Sistema exportado com sucesso!", Toast.LENGTH_SHORT).show()
+                 } catch (e: Exception) {
+                     e.printStackTrace()
+                     Toast.makeText(context, "Erro ao exportar sistema: ${e.message}", Toast.LENGTH_SHORT).show()
+                 }
+            }
+        }
+    }
+
+    private val systemImportLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            lifecycleScope.launch {
+                try {
+                    val json = requireContext().contentResolver.openInputStream(uri)?.use { input ->
+                        input.bufferedReader().readText()
+                    }
+                    if (json != null) {
+                        if (viewModel.importSystemJson(json)) {
+                            Toast.makeText(context, "Sistema importado com sucesso!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "Erro ao importar sistema. Conteúdo inválido.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(context, "Erro ao ler arquivo: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
     private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: android.net.Uri? ->
         uri?.let {
             startCrop(it)
         }
     }
+
+
 
     private fun startCrop(uri: android.net.Uri) {
         val destinationFileName = "cropped_avatar_${System.currentTimeMillis()}.jpg"
@@ -132,6 +173,11 @@ class CharacterSheetFragment : Fragment() {
 
     }
 
+    private lateinit var attributesAdapter: AttributesAdapter
+    private lateinit var resourcesAdapter: ResourcesAdapter
+
+    private var isCurrentMaster = false
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -141,6 +187,139 @@ class CharacterSheetFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // Attributes Container
+        val attributesContainer = view.findViewById<android.widget.LinearLayout>(R.id.container_attributes)
+
+        fun renderAttributes(ruleSystem: com.galeria.defensores.models.RuleSystem, char: com.galeria.defensores.models.Character) {
+             val inflater = android.view.LayoutInflater.from(context)
+             
+             // Check if we can reuse the existing views
+             // Assumption: The order of attributes in ruleSystem is stable.
+             // If size differs, rebuild. If keys differ, rebuild.
+             
+             val needsRebuild = if (attributesContainer.childCount != ruleSystem.attributes.size) {
+                 true
+             } else {
+                 // Check if keys match
+                 var mismatch = false
+                 ruleSystem.attributes.forEachIndexed { index, attr ->
+                     val view = attributesContainer.getChildAt(index)
+                     if (view.tag != attr.key) { // Use Key as Tag
+                         mismatch = true
+                     }
+                 }
+                 mismatch
+             }
+
+             if (needsRebuild) {
+                 attributesContainer.removeAllViews()
+                 ruleSystem.attributes.forEach { attr ->
+                     val itemView = inflater.inflate(R.layout.view_attribute_input, attributesContainer, false)
+                     itemView.tag = attr.key // Set Tag for reuse check
+                     
+                     // Initial Setup of Listeners (invariant parts)
+                     val label = itemView.findViewById<TextView>(R.id.attribute_label)
+                     val input = itemView.findViewById<EditText>(R.id.attribute_input)
+                     val btnMinus = itemView.findViewById<Button>(R.id.btn_minus)
+                     val btnPlus = itemView.findViewById<Button>(R.id.btn_plus)
+                     val icon = itemView.findViewById<ImageView>(R.id.attribute_icon)
+                     
+                     // Listeners
+                     btnMinus.setOnClickListener {
+                         input.clearFocus() // Clear focus to prevent conflict
+                         val currentVal = input.text.toString().toIntOrNull() ?: 0
+                         val newValue = currentVal - 1
+                         viewModel.updateAttribute(attr.key, newValue)
+                     }
+                     
+                     btnPlus.setOnClickListener {
+                         input.clearFocus()
+                         val currentVal = input.text.toString().toIntOrNull() ?: 0
+                         val newValue = currentVal + 1
+                         viewModel.updateAttribute(attr.key, newValue)
+                     }
+                     
+                     // Focus Listener to save on blur
+                     input.setOnFocusChangeListener { _, hasFocus ->
+                        if (!hasFocus) {
+                            val quantity = input.text.toString().toIntOrNull() ?: 0
+                            val oldVal = char.attributeValues[attr.key] ?: 0
+                            if (quantity != oldVal) {
+                                viewModel.updateAttribute(attr.key, quantity)
+                            }
+                        }
+                     }
+                     
+                     itemView.setOnLongClickListener {
+                         DialogEditAttributeDefinition(attr, 
+                              onSave = { updated -> viewModel.updateAttributeDefinition(updated) },
+                              onDelete = { deleted -> viewModel.removeAttributeDefinition(deleted) }
+                          ).show(parentFragmentManager, "EditAttribute")
+                         true
+                     }
+                     
+                     attributesContainer.addView(itemView)
+                 }
+             }
+             
+             // Update Values (Binding) - Runs for both new and reused views
+             ruleSystem.attributes.forEachIndexed { index, attr ->
+                 val itemView = attributesContainer.getChildAt(index)
+                 val label = itemView.findViewById<TextView>(R.id.attribute_label)
+                 val input = itemView.findViewById<EditText>(R.id.attribute_input)
+                 val icon = itemView.findViewById<ImageView>(R.id.attribute_icon)
+                 
+                 val safeName = attr.name ?: "UNNAMED"
+                 label.text = safeName.uppercase()
+                 
+                 // Color Logic
+                 try {
+                    val colorStr = if (!attr.color.isNullOrEmpty()) attr.color else "#000000"
+                    val parsedColor = android.graphics.Color.parseColor(colorStr)
+                    label.setTextColor(parsedColor)
+                    icon.setColorFilter(parsedColor)
+                    input.setTextColor(android.graphics.Color.BLACK)
+                 } catch (e: Exception) {
+                    label.setTextColor(android.graphics.Color.BLACK)
+                    icon.setColorFilter(android.graphics.Color.BLACK)
+                    input.setTextColor(android.graphics.Color.BLACK)
+                 }
+                 
+                 val value = char.attributeValues[attr.key] ?: 0
+                 
+                 // Update text ONLY if content changed AND it doesn't have focus (or we want to force update?)
+                 // If user is typing, we shouldn't overwrite unless it's a remote/external change.
+                 // But for simplified local logic:
+                 if (input.text.toString() != value.toString()) {
+                    if (!input.hasFocus()) {
+                        input.setText(value.toString())
+                    }
+                 }
+             }
+        }
+        
+        // Setup RecyclerViews
+        val recyclerResources = view.findViewById<RecyclerView>(R.id.recycler_resources)
+        
+        recyclerResources.layoutManager = LinearLayoutManager(context)
+        
+        resourcesAdapter = ResourcesAdapter(emptyList(), emptyMap(), emptyMap(),
+             onValueChange = { key, delta ->
+                viewModel.updateResource(key, delta)
+             },
+             onResourceLongClick = { res ->
+                 if (isCurrentMaster) {
+                     DialogEditResourceDefinition(res, 
+                         onSave = { updated -> viewModel.updateResourceDefinition(updated) },
+                         onDelete = { deleted -> viewModel.removeResourceDefinition(deleted) }
+                     ).show(parentFragmentManager, "EditResource")
+                 }
+             }
+        )
+        
+        
+        recyclerResources.adapter = resourcesAdapter
 
         // Bind UI
         nameEdit = view.findViewById(R.id.edit_char_name)
@@ -152,6 +331,45 @@ class CharacterSheetFragment : Fragment() {
 
         val avatarImage = view.findViewById<ImageView>(R.id.img_character_avatar)
         val editAvatarIcon = view.findViewById<ImageView>(R.id.img_edit_avatar_icon)
+
+        view.findViewById<View>(R.id.btn_system_options).setOnClickListener {
+            Toast.makeText(context, "Botão Opções Clicado", Toast.LENGTH_SHORT).show()
+            val dialog = DialogSystemOptions(
+                onSaveAsClick = {
+                     DialogSaveSystem { newName ->
+                         viewModel.saveSystemAs(newName) { success ->
+                             if (success) {
+                                 Toast.makeText(context, "Sistema salvo como '$newName'!", Toast.LENGTH_SHORT).show()
+                             } else {
+                                 Toast.makeText(context, "Erro ao salvar sistema.", Toast.LENGTH_SHORT).show()
+                             }
+                         }
+                     }.show(parentFragmentManager, "SaveSystem")
+                },
+                onExportClick = {
+                    val sysName = viewModel.ruleSystem.value?.name ?: "sistema"
+                    val safeName = sysName.replace("[^a-zA-Z0-9.-]".toRegex(), "_")
+                    systemExportLauncher.launch("system_${safeName}.json")
+                },
+                onImportClick = {
+                    systemImportLauncher.launch(arrayOf("application/json", "application/octet-stream"))
+                },
+                onResetClick = {
+                    androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setTitle("Restaurar Sistema Padrão?")
+                        .setMessage("Isso irá reverter o sistema '3DeT Alpha' para as regras originais. \n\nCUIDADO: Se você editou o sistema padrão sem salvar como cópia, suas alterações serão perdidas.")
+                        .setPositiveButton("Restaurar") { _, _ ->
+                            viewModel.resetBaseSystem { success ->
+                                if (success) Toast.makeText(context, "Sistema restaurado!", Toast.LENGTH_SHORT).show()
+                                else Toast.makeText(context, "Erro ao restaurar.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        .setNegativeButton("Cancelar", null)
+                        .show()
+                }
+            )
+            dialog.show(parentFragmentManager, "SystemOptions")
+        }
 
         val btnBack = view.findViewById<android.widget.ImageButton>(R.id.btn_reset)
 
@@ -169,16 +387,7 @@ class CharacterSheetFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        // Setup Attribute Labels and Inputs
-        setupAttributeInput(view.findViewById(R.id.attr_forca), "Força", 0, "#EF4444", "forca") // Red
-        setupAttributeInput(view.findViewById(R.id.attr_habilidade), "Habilidade", 0, "#3B82F6", "habilidade") // Blue
-        setupAttributeInput(view.findViewById(R.id.attr_resistencia), "Resistência", 0, "#10B981", "resistencia") // Green
-        setupAttributeInput(view.findViewById(R.id.attr_armadura), "Armadura", 0, "#6B7280", "armadura") // Gray
-        setupAttributeInput(view.findViewById(R.id.attr_pdf), "Poder de Fogo", 0, "#8B5CF6", "poderFogo") // Purple
 
-        // Setup Status Labels
-        setupStatusManager(view.findViewById(R.id.status_pv), "Pontos de Vida", 0, "#EF4444", "pv")
-        setupStatusManager(view.findViewById(R.id.status_pm), "Pontos de Magia", 0, "#3B82F6", "pm")
 
         // Observe Data
         viewModel.loadCharacter(characterId, tableId)
@@ -216,23 +425,46 @@ class CharacterSheetFragment : Fragment() {
             viewModel.finalizeVirtualRoll(diceValues)
         }
 
+        fun updateAdapters(char: com.galeria.defensores.models.Character, ruleSystem: com.galeria.defensores.models.RuleSystem) {
+             // Attributes - Manual Render
+             renderAttributes(ruleSystem, char)
+             
+             // Resources - Dynamic Calculation
+             val maxValues = mutableMapOf<String, Int>()
+             val currentResourceValues = mutableMapOf<String, Int>()
+             
+             ruleSystem.resources.forEach { res ->
+                 // Calculate Max
+                 val max = viewModel.calculateResourceMax(res, char)
+                 maxValues[res.key] = max
+                 
+                 // Get Current
+                 val current = if (res.key == "pv") char.currentPv 
+                               else if (res.key == "pm") char.currentPm
+                               else char.resourceValues[res.key] ?: max // Default to full if not found
+                 
+                 currentResourceValues[res.key] = current
+             }
+             
+             resourcesAdapter.updateData(ruleSystem.resources, currentResourceValues, maxValues)
+        }
+
+        viewModel.ruleSystem.observe(viewLifecycleOwner) { ruleSystem ->
+            val char = viewModel.character.value ?: return@observe
+            updateAdapters(char, ruleSystem)
+        }
+
         viewModel.character.observe(viewLifecycleOwner) { char ->
             if (char == null) return@observe
 
-            
             if (!nameEdit.hasFocus()) {
                 nameEdit.setText(char.name)
             }
 
             // Restore lost Data Binding
-            updateAttributeValue(view.findViewById(R.id.attr_forca), char.forca)
-            updateAttributeValue(view.findViewById(R.id.attr_habilidade), char.habilidade)
-            updateAttributeValue(view.findViewById(R.id.attr_resistencia), char.resistencia)
-            updateAttributeValue(view.findViewById(R.id.attr_armadura), char.armadura)
-            updateAttributeValue(view.findViewById(R.id.attr_pdf), char.poderFogo)
-
-            updateStatusValue(view.findViewById(R.id.status_pv), char.currentPv, char.getMaxPv())
-            updateStatusValue(view.findViewById(R.id.status_pm), char.currentPm, char.getMaxPm())
+            // Update Adapters
+            val ruleSystem = viewModel.ruleSystem.value ?: com.galeria.defensores.models.RuleSystem()
+            updateAdapters(char, ruleSystem)
 
             // Handle Permissions
             var canEdit = false
@@ -245,18 +477,37 @@ class CharacterSheetFragment : Fragment() {
                 
                 // Fallback to character's tableId if argument is null
                 val effectiveTableId = tableId ?: char.tableId
-                val table = if (effectiveTableId.isNotEmpty()) com.galeria.defensores.data.TableRepository.getTable(effectiveTableId) else null
+                // Offline Mode: Single User has full permissions
+                val isMaster = true
+                isCurrentMaster = true 
+                val isOwner = true
+                canEdit = true
                 
-                val isMaster = table?.masterId == currentUserId || table?.masterId == "mock-master-id"
-                val isOwner = char.ownerId == currentUserId
-                canEdit = isMaster || isOwner
-                val canEditScale = isMaster // Strictly Master unless not in table? Requirement: "apenas o mestre".
-                // If not in a table, isOwner could edit? Let's assume yes if tableId is empty.
-                val effectivelyCanEditScale = if (char.tableId.isEmpty()) isOwner else isMaster
+                // Scale Editing: Always allowed
+                val effectivelyCanEditScale = true
                 
                 // Load Damage Types if not already associated (or just refresh)
                 if (char.tableId.isNotEmpty()) {
                     viewModel.loadDamageTypes(char.tableId)
+                }
+                
+                // Add Buttons Logic
+                val btnAddAttribute = view.findViewById<Button>(R.id.btn_add_attribute)
+                val btnAddResource = view.findViewById<Button>(R.id.btn_add_resource)
+                
+                btnAddAttribute.visibility = if (isMaster) View.VISIBLE else View.GONE
+                btnAddResource.visibility = if (isMaster) View.VISIBLE else View.GONE
+                
+                btnAddAttribute.setOnClickListener {
+                     DialogEditAttributeDefinition(null, { newAttr ->
+                         viewModel.addAttributeDefinition(newAttr)
+                     }).show(parentFragmentManager, "AddAttribute")
+                }
+                
+                btnAddResource.setOnClickListener {
+                     DialogEditResourceDefinition(null, { newRes ->
+                         viewModel.addResourceDefinition(newRes)
+                     }).show(parentFragmentManager, "AddResource")
                 }
 
                 // Enable/Disable Editing based on permissions
@@ -300,9 +551,7 @@ class CharacterSheetFragment : Fragment() {
                 spinnerForca.isEnabled = canEdit
                 spinnerPdf.isEnabled = canEdit
 
-                // Enable/Disable Status Editing
-                updateStatusPermissions(view.findViewById(R.id.status_pv), canEdit)
-                updateStatusPermissions(view.findViewById(R.id.status_pm), canEdit)
+
 
                 // Scale Logic
                 val scaleText = view.findViewById<TextView>(R.id.text_scale)
@@ -418,14 +667,20 @@ class CharacterSheetFragment : Fragment() {
                 val controls = listOf(btnMinusSaved, btnPlusSaved, btnMinusXp, btnPlusXp)
                 controls.forEach { it.visibility = if (canEdit) View.VISIBLE else View.INVISIBLE }
 
+                // Observer for Unique Advantages to keep local list updated
+                viewModel.availableUniqueAdvantages.observe(viewLifecycleOwner) { uas ->
+                    // Just update a local reference or the adapter if we had one here (we don't, it's for the dialog)
+                    // We can access viewModel.availableUniqueAdvantages.value directly in the click listener,
+                    // but since LiveData value can be null, we rely on the ViewModel state.
+                }
+
                 btnSelectUA.setOnClickListener {
-                    viewModel.availableUniqueAdvantages.observe(viewLifecycleOwner) { uas ->
-                        // Prevent multiple dialogs if called rapidly or multiple updates
-                        // Ideally we check if dialog is added.
-                         if (parentFragmentManager.findFragmentByTag("SelectUADialog") == null) {
+                    val uas = viewModel.availableUniqueAdvantages.value ?: emptyList()
+                    if (uas.isNotEmpty()) {
+                        if (parentFragmentManager.findFragmentByTag("SelectUADialog") == null) {
                              val dialog = SelectUniqueAdvantageDialogFragment(
                                  availableUAs = uas,
-                                 canManage = isMaster, // Only master can manage custom UAs
+                                 canManage = isMaster, 
                                  onSelect = { selectedUA ->
                                      viewModel.setUniqueAdvantage(selectedUA)
                                  },
@@ -440,7 +695,10 @@ class CharacterSheetFragment : Fragment() {
                                  }
                              )
                              dialog.show(parentFragmentManager, "SelectUADialog")
-                         }
+                        }
+                    } else {
+                        // Maybe trigger load if empty? But it should be loaded by character observer.
+                        Toast.makeText(requireContext(), "Carregando vantagens...", Toast.LENGTH_SHORT).show()
                     }
                 }
 
@@ -515,24 +773,12 @@ class CharacterSheetFragment : Fragment() {
                 
                 // Hidden Checkbox (Master Only)
 
-                // Enable/Disable Attribute Inputs
-                val attributeContainers = listOf(
-                    view.findViewById<View>(R.id.attr_forca),
-                    view.findViewById<View>(R.id.attr_habilidade),
-                    view.findViewById<View>(R.id.attr_resistencia),
-                    view.findViewById<View>(R.id.attr_armadura),
-                    view.findViewById<View>(R.id.attr_pdf)
-                )
-                
-                attributeContainers.forEach { container ->
-                    container.findViewById<EditText>(R.id.attribute_input).isEnabled = canEdit
-                    container.findViewById<Button>(R.id.btn_minus).isEnabled = canEdit
-                    container.findViewById<Button>(R.id.btn_plus).isEnabled = canEdit
-                }
+
                 
                 // Delete Button Visibility
-                val canDelete = currentUserId != null && (isOwner || isMaster)
-                android.util.Log.d("SheetDebug", "Delete Visibility: User=$currentUserId, Owner=${char.ownerId}, Master=${table?.masterId} -> canDelete=$canDelete")
+                // Delete Button Visibility
+                val canDelete = true
+                android.util.Log.d("SheetDebug", "Delete Visibility: Offline Mode -> canDelete=$canDelete")
                 view.findViewById<Button>(R.id.btn_delete_character).visibility = if (canDelete) View.VISIBLE else View.GONE
                 
                 // --- MOVED ADAPTER LOGIC INSIDE LAUNCH SCOPE ---
@@ -607,25 +853,6 @@ class CharacterSheetFragment : Fragment() {
                     editDialog.show(parentFragmentManager, "EditSpecDialog")
                 })
                 specsRecycler.adapter = specsAdapter
-    
-                // Update Spells List
-                val spellsRecycler = view.findViewById<RecyclerView>(R.id.recycler_spells)
-                spellsRecycler.layoutManager = LinearLayoutManager(context)
-                val spellsAdapter = SpellsAdapter(spells = char.magias, onSpellClick = { selectedSpell ->
-                     if (canEdit) {
-                         val editDialog = EditSpellDialogFragment(
-                             spell = selectedSpell,
-                             onSave = { updatedSpell ->
-                                 viewModel.updateSpell(updatedSpell)
-                             },
-                             onDelete = { spellToDelete ->
-                                 viewModel.removeSpell(spellToDelete)
-                             }
-                         )
-                         editDialog.show(parentFragmentManager, "EditSpellDialog")
-                     }
-                })
-                spellsRecycler.adapter = spellsAdapter
     
                 // Update Inventory List
                 val invRecycler = view.findViewById<RecyclerView>(R.id.recycler_inventory)
@@ -806,6 +1033,51 @@ class CharacterSheetFragment : Fragment() {
         // We do this in the observer, but let's set it GONE initially to avoid flicker
         btnDelete.visibility = View.GONE
 
+        // --- ATTRIBUTES & RESOURCES BUTTONS (OFFLINE MODE) ---
+        // Ensuring these are visible and functional
+        val btnAddAttr = view.findViewById<Button>(R.id.btn_add_attribute)
+        val btnAddRes = view.findViewById<Button>(R.id.btn_add_resource)
+        
+        // Protection: formatting visibility based on system
+        viewModel.ruleSystem.observe(viewLifecycleOwner) { sys ->
+            val isBase = sys.id == "3det_alpha_base" || sys.isBaseSystem
+            val canEditSystem = !isBase
+            
+            if (canEditSystem) {
+                btnAddAttr.visibility = View.VISIBLE
+                btnAddRes.visibility = View.VISIBLE
+            } else {
+                btnAddAttr.visibility = View.GONE
+                btnAddRes.visibility = View.GONE
+            }
+        }
+
+        btnAddAttr.setOnClickListener {
+             // Extra check
+             val sys = viewModel.ruleSystem.value
+             if (sys != null && (sys.id == "3det_alpha_base" || sys.isBaseSystem)) {
+                 Toast.makeText(context, "Não é possível editar o Sistema Base. Use 'Salvar como' primeiro.", Toast.LENGTH_LONG).show()
+                 return@setOnClickListener
+             }
+
+             DialogEditAttributeDefinition(null, { newAttr ->
+                 viewModel.addAttributeDefinition(newAttr)
+             }).show(parentFragmentManager, "AddAttribute")
+        }
+
+        btnAddRes.setOnClickListener {
+             val sys = viewModel.ruleSystem.value
+             if (sys != null && (sys.id == "3det_alpha_base" || sys.isBaseSystem)) {
+                 Toast.makeText(context, "Não é possível editar o Sistema Base. Use 'Salvar como' primeiro.", Toast.LENGTH_LONG).show()
+                 return@setOnClickListener
+             }
+             
+             DialogEditResourceDefinition(null, { newRes ->
+                 viewModel.addResourceDefinition(newRes)
+             }).show(parentFragmentManager, "AddResource")
+        }
+
+
         // Custom Rolls Setup
         val customRollsRecycler = view.findViewById<RecyclerView>(R.id.recycler_custom_rolls)
         val btnAddCustomRoll = view.findViewById<Button>(R.id.btn_add_custom_roll)
@@ -914,110 +1186,6 @@ class CharacterSheetFragment : Fragment() {
         }
     }
 
-    private fun setupAttributeInput(view: View, label: String, iconRes: Int, colorHex: String, attrKey: String) {
-        val labelView = view.findViewById<TextView>(R.id.attribute_label)
-        val iconView = view.findViewById<ImageView>(R.id.attribute_icon)
-        val inputView = view.findViewById<EditText>(R.id.attribute_input)
 
-        labelView.text = label
-        // iconView.setImageResource(iconRes) // Need to add icons or use defaults
-        iconView.setColorFilter(Color.parseColor(colorHex))
-        labelView.setTextColor(Color.parseColor(colorHex))
-
-        inputView.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                if (inputView.hasFocus()) {
-                    val value = s.toString().toIntOrNull() ?: 0
-                    viewModel.updateAttribute(attrKey, value)
-                }
-            }
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
-
-        view.findViewById<Button>(R.id.btn_minus).setOnClickListener {
-            val currentValue = inputView.text.toString().toIntOrNull() ?: 0
-            if (currentValue > 0) {
-                viewModel.updateAttribute(attrKey, currentValue - 1)
-                inputView.setText((currentValue - 1).toString())
-            }
-        }
-
-        view.findViewById<Button>(R.id.btn_plus).setOnClickListener {
-            val currentValue = inputView.text.toString().toIntOrNull() ?: 0
-            if (currentValue < 99) {
-                viewModel.updateAttribute(attrKey, currentValue + 1)
-                inputView.setText((currentValue + 1).toString())
-            }
-        }
-    }
-    
-    private fun updateAttributeValue(view: View, value: Int) {
-        val inputView = view.findViewById<EditText>(R.id.attribute_input)
-        if (!inputView.hasFocus()) {
-            inputView.setText(value.toString())
-        }
-    }
-
-    private fun setupStatusManager(view: View, label: String, iconRes: Int, colorHex: String, typeKey: String) {
-        val labelView = view.findViewById<TextView>(R.id.status_label)
-        val iconView = view.findViewById<ImageView>(R.id.status_icon)
-        val barView = view.findViewById<ProgressBar>(R.id.status_bar)
-        val valueView = view.findViewById<TextView>(R.id.status_value)
-        
-        labelView.text = label
-        // iconView.setImageResource(iconRes)
-        iconView.setColorFilter(Color.parseColor(colorHex))
-        labelView.setTextColor(Color.parseColor(colorHex))
-        
-        barView.progressTintList = ColorStateList.valueOf(Color.parseColor(colorHex))
-
-        view.findViewById<Button>(R.id.btn_minus_5).setOnClickListener { viewModel.updateStatus(typeKey, -5) }
-        view.findViewById<Button>(R.id.btn_minus_1).setOnClickListener { viewModel.updateStatus(typeKey, -1) }
-        view.findViewById<Button>(R.id.btn_plus_1).setOnClickListener { viewModel.updateStatus(typeKey, 1) }
-        view.findViewById<Button>(R.id.btn_plus_5).setOnClickListener { viewModel.updateStatus(typeKey, 5) }
-
-        // Direct Edit Listener
-        valueView.setOnClickListener {
-            val context = view.context
-            val input = EditText(context)
-            input.inputType = android.text.InputType.TYPE_CLASS_NUMBER
-            input.setText(valueView.text.toString().split(" / ")[0]) // Get current value
-
-            androidx.appcompat.app.AlertDialog.Builder(context)
-                .setTitle("Editar $label")
-                .setView(input)
-                .setPositiveButton("OK") { _, _ ->
-                    val newValue = input.text.toString().toIntOrNull()
-                    if (newValue != null) {
-                        viewModel.setStatus(typeKey, newValue)
-                    }
-                }
-                .setNegativeButton("Cancelar", null)
-                .show()
-        }
-    }
-
-    private fun updateStatusPermissions(view: View, canEdit: Boolean) {
-        val buttons = listOf<Button>(
-            view.findViewById(R.id.btn_minus_5),
-            view.findViewById(R.id.btn_minus_1),
-            view.findViewById(R.id.btn_plus_1),
-            view.findViewById(R.id.btn_plus_5)
-        )
-        buttons.forEach { it.isEnabled = canEdit }
-        
-        val valueView = view.findViewById<TextView>(R.id.status_value)
-        valueView.isEnabled = canEdit
-    }
-
-    private fun updateStatusValue(view: View, current: Int, max: Int) {
-        val valueView = view.findViewById<TextView>(R.id.status_value)
-        val barView = view.findViewById<ProgressBar>(R.id.status_bar)
-        
-        valueView.text = "$current / $max"
-        barView.max = max
-        barView.progress = current
-    }
 
 }

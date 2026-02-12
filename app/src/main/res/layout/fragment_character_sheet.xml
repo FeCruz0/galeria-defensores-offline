@@ -30,6 +30,15 @@
                 android:textStyle="bold" />
 
             <ImageButton
+                android:id="@+id/btn_system_options"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_preferences"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="#FFFFFF"
+                android:layout_marginEnd="8dp" />
+
+            <ImageButton
                 android:id="@+id/btn_reset"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -279,46 +288,28 @@
                 android:layout_marginBottom="16dp"
                 android:visibility="gone" />
 
-            <!-- Attributes -->
-            <!-- Attributes & Damage Types -->
-            <!-- Force Row -->
+            <!-- Attributes & Resources Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false"
-                android:layout_marginBottom="8dp">
-                <include layout="@layout/view_attribute_input"
-                    android:id="@+id/attr_forca"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp" />
-                
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="4dp"
-                    android:background="@drawable/bg_rounded_border"
-                    android:padding="8dp"
-                    android:gravity="center">
-                    
-                    <LinearLayout
+                android:orientation="vertical"
+                android:layout_marginBottom="16dp">
+
+                <!-- Damage Type Management (Moved here for visibility) -->
+                 <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="TIPO DE DANO"
+                            android:text="TIPOS DE DANO (F/PdF)"
                             android:textSize="10sp"
                             android:textStyle="bold"
                             android:textColor="#888888" />
-                        
                          <ImageButton
                             android:id="@+id/btn_manage_damage_types"
                             android:layout_width="24dp"
@@ -326,123 +317,58 @@
                             android:src="@android:drawable/ic_menu_preferences"
                             android:background="?attr/selectableItemBackgroundBorderless"
                             android:tint="@color/text_primary"
-                            android:visibility="gone"
                             android:contentDescription="Gerenciar" />
-                    </LinearLayout>
-
-                    <Spinner
-                        android:id="@+id/spinner_damage_forca"
+                 </LinearLayout>
+                 
+                 <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp" 
-                        android:spinnerMode="dropdown"/>
-                </LinearLayout>
-            </LinearLayout>
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <Spinner
+                            android:id="@+id/spinner_damage_forca"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:spinnerMode="dropdown"/>
+                        <Space android:layout_width="8dp" android:layout_height="match_parent"/>
+                         <Spinner
+                            android:id="@+id/spinner_damage_pdf"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:spinnerMode="dropdown"/>
+                 </LinearLayout>
 
-            <!-- Habilidade Row -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false"
-                android:layout_marginBottom="8dp">
-                <include layout="@layout/view_attribute_input"
-                    android:id="@+id/attr_habilidade"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp" />
-                <View
-                     android:layout_width="0dp"
-                     android:layout_height="match_parent"
-                     android:layout_weight="1"
-                     android:layout_marginStart="4dp" />
-            </LinearLayout>
-
-            <!-- Resistencia Row -->
-            <!-- Resistencia Row + PV -->
-             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false"
-                android:layout_marginBottom="8dp">
-                <include layout="@layout/view_attribute_input"
-                    android:id="@+id/attr_resistencia"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp" />
-                
-                <include layout="@layout/view_status_compact"
-                    android:id="@+id/status_pv"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp" />
-            </LinearLayout>
-
-            <!-- Armadura Row + PM -->
-             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false"
-                android:layout_marginBottom="8dp">
-                <include layout="@layout/view_attribute_input"
-                    android:id="@+id/attr_armadura"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp" />
-
-                <include layout="@layout/view_status_compact"
-                    android:id="@+id/status_pm"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp" />
-            </LinearLayout>
-
-            <!-- PdF Row -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false"
-                android:layout_marginBottom="16dp">
-                <include layout="@layout/view_attribute_input"
-                    android:id="@+id/attr_pdf"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp" />
-                
                 <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
+                    android:id="@+id/container_attributes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginStart="4dp"
-                    android:background="@drawable/bg_rounded_border"
-                    android:padding="8dp"
-                    android:gravity="center">
-                    
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="TIPO DE DANO"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:textColor="#888888" />
+                    android:paddingBottom="8dp" />
 
-                    <Spinner
-                        android:id="@+id/spinner_damage_pdf"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp" 
-                        android:spinnerMode="dropdown"/>
-                </LinearLayout>
+                <Button
+                    android:id="@+id/btn_add_attribute"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Novo Atributo"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:visibility="gone" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_resources"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:layout_marginTop="8dp" />
+
+                <Button
+                    android:id="@+id/btn_add_resource"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Novo Recurso"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:visibility="gone" />
             </LinearLayout>
 
 
@@ -779,31 +705,9 @@
             android:text="Adicionar Item"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
-        <!-- Buffs / Debuffs -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="BUFFS / DEBUFFS"
-            android:textColor="@color/text_primary"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="8dp" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_buffs"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"
-            android:layout_marginBottom="8dp" />
 
-        <Button
-            android:id="@+id/btn_add_buff"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Adicionar Buff/Debuff"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
 
         <!-- Anotações -->
         <TextView
