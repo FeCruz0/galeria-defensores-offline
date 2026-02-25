@@ -1,37 +1,218 @@
 package com.galeria.defensores.data
 
 import com.galeria.defensores.models.AdvantageItem
+import com.galeria.defensores.models.ModifierOption
 
 object DisadvantagesData {
     val defaultDisadvantages = listOf(
-        AdvantageItem(name = "Ambiente Especial", cost = "-1 ponto", description = "O personagem depende de um ambiente específico para viver (ex: água, escuridão, etc.). Fora dele, não recupera PVs e PMs, e só pode fazer um teste de R a cada 1d horas para permanecer ativo."),
-        AdvantageItem(name = "Assombrado", cost = "-2 pontos", description = "O personagem é perseguido por um fantasma ou má sorte. Sempre que estiver em combate, deve fazer um teste de R (dificuldade 15). Se falhar, sofre -1 em todas as suas características."),
-        AdvantageItem(name = "Bateria", cost = "-1 ponto", description = "O personagem tem uma reserva limitada de energia. Seus PMs são reduzidos (o máximo de PMs é 10 + R). Precisa de 1 hora de recarga para recuperar 1d PMs."),
-        AdvantageItem(name = "Código de Honra", cost = "-1 ponto (cada)", description = "O personagem deve seguir regras morais estritas. Se violar o Código, fica Perto da Morte (PVs caem a 0) e perde o direito de usar qualquer poder de Vantagem/Magia até se redimir."),
-        AdvantageItem(name = "Deficiência Física: Audição Ruim", cost = "0 pontos", description = "Penalidade de H-1 em testes que envolvam audição."),
-        AdvantageItem(name = "Deficiência Física: Surdo", cost = "-1 ponto", description = "Penalidade de H-2 em testes que envolvam audição."),
-        AdvantageItem(name = "Deficiência Física: Cego", cost = "-2 pontos", description = "Penalidade de H-2 em combate (exceto com Radar)."),
-        AdvantageItem(name = "Deficiência Física: Visão Ruim", cost = "0 pontos", description = "Penalidade de H-1 em testes que envolvam visão."),
-        AdvantageItem(name = "Deficiência Física: Mudo", cost = "-1 ponto", description = "Não pode falar, impedindo o uso de magias que exijam palavras (se tiver)."),
-        AdvantageItem(name = "Deficiência Física: Sem Faro", cost = "0 pontos", description = "Penalidade de H-1 em testes que envolvam olfato."),
-        AdvantageItem(name = "Dependência", cost = "-2 pontos", description = "O personagem precisa consumir algo (ex: sangue, carne, poção) pelo menos uma vez por dia. Caso contrário, perde 1 PV por hora até ser atendido ou morrer."),
-        AdvantageItem(name = "Devoção", cost = "-1 ponto", description = "O personagem é dedicado a uma missão/ideia. Se desviar dela, sofre uma penalidade de -1 em todas as Características (F, H, R, A, PdF) até retornar à sua missão."),
-        AdvantageItem(name = "Fetiche", cost = "-1 ponto", description = "O personagem precisa de um objeto em mãos para usar magias. Se perdê-lo, dobra o custo em PMs de todas as suas magias."),
-        AdvantageItem(name = "Fúria", cost = "-1 ponto", description = "Ao sofrer dano ou ser provocado, deve fazer um teste de R (dificuldade 10) ou entrar em Fúria. Em Fúria, só pode atacar o agressor, sofrendo H-1 em sua Força de Defesa."),
-        AdvantageItem(name = "Inculto", cost = "-1 ponto", description = "O personagem é incapaz de ler, escrever ou se comunicar de forma complexa. Sofre H-2 em todos os testes de Perícias que envolvam comunicação ou conhecimento."),
-        AdvantageItem(name = "Insano", cost = "0 a -3 pontos", description = "O personagem sofre de um distúrbio mental (Cleptomaníaco, Fobia, Histérico, etc.). A penalidade varia, mas geralmente impõe testes de R para evitar o efeito do distúrbio."),
-        AdvantageItem(name = "Interferência", cost = "0 pontos", description = "O personagem prejudica aparelhos eletrônicos próximos (raio de 3m). Sofre H-1 para usar Perícias ou aparelhos tecnológicos."),
-        AdvantageItem(name = "Interferência Mágica", cost = "0 pontos", description = "O personagem dificulta magias na área (raio de 3m). Magias lançadas na área dobram o custo em PMs ou sofrem H-1 no ataque."),
-        AdvantageItem(name = "Má Fama", cost = "-1 ponto", description = "O personagem é infame. Sofre uma penalidade de -1 em testes de H para interação social."),
-        AdvantageItem(name = "Maldição", cost = "-1 ou -2 pontos", description = "O personagem é afetado por um azar ou efeito negativo contínuo (ex: ser transformado em animal)."),
-        AdvantageItem(name = "Modelo Especial", cost = "-1 ponto", description = "O corpo do personagem não é humanoide padrão (ex: tem asas, é um robô gigante). Não pode usar equipamentos ou veículos feitos para humanos."),
-        AdvantageItem(name = "Monstruoso", cost = "-1 ponto", description = "Aparência repulsiva/aterrorizante. Sofre -1 em testes de H para interação social (exceto Intimidação)."),
-        AdvantageItem(name = "Munição Limitada", cost = "-1 ponto", description = "A arma principal de PdF tem munição limitada. Se o dado de PdF for 1, a munição acaba, e você não pode mais usar PdF até recarregar."),
-        AdvantageItem(name = "Poder Vergonhoso", cost = "-1 ponto", description = "A magia do personagem exige gestos ou falas constrangedoras. Se não puder fazer, a magia falha."),
-        AdvantageItem(name = "Poder Vingativo", cost = "-1 ponto", description = "Sempre que usar qualquer Vantagem ou Magia que custe PMs, deve fazer um teste de R. Se falhar, sofre dano por Força de Ataque (F.A.) igual ao custo em PMs do poder ativado."),
-        AdvantageItem(name = "Ponto Fraco", cost = "-1 ponto", description = "Existe uma falha conhecida na técnica do personagem. O oponente pode gastar 1 PM para ter H+1 na Força de Ataque contra você."),
-        AdvantageItem(name = "Protegido Indefeso", cost = "-1 ponto (cada)", description = "O personagem deve proteger alguém. Se o protegido estiver em perigo de vida, o personagem sofre H-1 em todos os testes."),
-        AdvantageItem(name = "Restrição de Poder", cost = "-1 a -3 pontos", description = "Os poderes do personagem falham ou dobram de custo em PM em uma condição específica (ex: luz do dia, água, sob um tipo de magia)."),
-        AdvantageItem(name = "Vulnerabilidade", cost = "Especial", description = "A Armadura (A) do personagem é reduzida a 0 contra um tipo de dano específico (ex: Vulnerabilidade: Fogo, Vulnerabilidade: Magia).")
+        AdvantageItem(name = "Ambiente Especial", cost = "-1 a -2 pontos", description = "Depende de um ambiente específico para manter sua força vital."),
+        AdvantageItem(name = "Assombrado", cost = "-1 a -2 pontos", description = "Perseguido por uma presença constante que impõe redutores em combate."),
+        AdvantageItem(name = "Bateria", cost = "-1 ponto", description = "Depende de energia para funcionar; sofre redutores ao esgotar a carga."),
+
+        // ─── COMPLEXO (Modular) ────────────────────────────────────────────────
+        AdvantageItem(
+            name = "Complexo",
+            cost = "-1 a -2 pontos",
+            description = "Traços de personalidade que dificultam a convivência. Escolha um ou mais Complexos.",
+            isModular = true,
+            baseCostPt = -1,
+            modifiers = listOf(
+                ModifierOption("cx_amnesia",        "Amnésia",                  0, "Não lembra nada do passado"),
+                ModifierOption("cx_antissocial",    "Antissocial",              0, "-1 em testes na presença de desconhecidos"),
+                ModifierOption("cx_atrapalhado",    "Atrapalhado",              0, "-1 em Perícias; dobra tempo para agir sem redutor"),
+                ModifierOption("cx_consumista",     "Consumista",               0, "Perde 1 moeda sempre que chega em uma cidade"),
+                ModifierOption("cx_culpa",          "Complexo de Culpa",        0, "-1 em testes por 2d Cenas ao se sentir culpado"),
+                ModifierOption("cx_covarde",        "Covarde",                  0, "-1 na FD"),
+                ModifierOption("cx_curioso",        "Curioso",                  0, "Testa R ao ver algo inesperado ou tentador"),
+                ModifierOption("cx_desorientado",   "Desorientado",             0, "Testa H em estresse; falha = indefeso por 1 turno"),
+                ModifierOption("cx_diurno",         "Diurno",                   0, "-1 em todos os testes à noite"),
+                ModifierOption("cx_ganancioso",     "Ganancioso",               0, "Testa R para não aceitar ofertas vantajosas"),
+                ModifierOption("cx_gatilho",        "Gatilho",                  0, "Certo estímulo causa Atordoamento por 1 turno"),
+                ModifierOption("cx_gregario",       "Gregário",                 0, "-1 em testes quando Fora do Alcance de aliados"),
+                ModifierOption("cx_memoria",        "Memória Recente",          0, "Não lembra nada ocorrido há mais de uma Cena"),
+                ModifierOption("cx_novato",         "Novato",                   0, "Testa H para usar Poder; -1 em Ocultismo"),
+                ModifierOption("cx_preguicoso",     "Preguiçoso",               0, "Gasta PM para entrar em combate"),
+                ModifierOption("cx_sanguinario",    "Sanguinário",              0, "Deve matar oponentes derrotados ou sofrer -1"),
+                ModifierOption("cx_tapado",         "Tapado",                   0, "Testa R em situações de bom senso"),
+                ModifierOption("cx_trauma",         "Trauma",                   0, "Paralisa ao rever o gatilho traumático"),
+                ModifierOption("cx_viciado",        "Viciado",                  0, "Sem o vício: -1 em testes por PRD")
+            )
+        ),
+
+        // ─── CÓDIGO (Modular) ──────────────────────────────────────────────────
+        AdvantageItem(
+            name = "Código",
+            cost = "-1 ponto (cada)",
+            description = "Princípios rígidos de conduta. Violar um Código custa 1 PD.",
+            isModular = true,
+            baseCostPt = -1,
+            modifiers = listOf(
+                ModifierOption("co_abstinencia",    "Abstinência",      0, "Jamais consumir carne, álcool ou atos carnais"),
+                ModifierOption("co_cacador",        "Caçador",          0, "Jamais matar fêmeas grávidas; sempre escolher a presa mais perigosa"),
+                ModifierOption("co_cavalheiro",     "Cavalheiro",       0, "Nunca atacar mulheres; sempre atendê-las"),
+                ModifierOption("co_combate",        "Combate",          0, "Nunca atacar inimigos indefesos ou em menor número"),
+                ModifierOption("co_derrota",        "Derrota",          0, "Nunca aceitar rendição"),
+                ModifierOption("co_desafio",        "Desafio",          0, "Jamais recusar desafios"),
+                ModifierOption("co_gratidao",       "Gratidão",         0, "Deve servir quem lhe salvou a vida"),
+                ModifierOption("co_guerra",         "Guerra",           0, "Jamais recuar ou se curar com magia"),
+                ModifierOption("co_herois",         "Heróis",           0, "Jamais mentir ou quebrar promessas"),
+                ModifierOption("co_hierarquia",     "Hierarquia",       0, "Jamais desobedecer autoridades reconhecidas"),
+                ModifierOption("co_honestidade",    "Honestidade",      0, "Jamais mentir, roubar ou trapacear"),
+                ModifierOption("co_mascara",        "Máscara",          0, "Sempre cobrir o rosto; nunca revelar identidade"),
+                ModifierOption("co_ninja",          "Ninja",            0, "Jamais abandonar uma missão"),
+                ModifierOption("co_pacifista",      "Pacifista",        0, "Nunca inicia combate; só causa dano não letal"),
+                ModifierOption("co_protetor",       "Protetor",         0, "Jamais prejudicar membros de uma ancestralidade"),
+                ModifierOption("co_rebeldia",       "Rebeldia",         0, "Jamais aceitar ordens sem questionar"),
+                ModifierOption("co_redencao",       "Redenção",         0, "Jamais atacar primeiro; aceitar rendição"),
+                ModifierOption("co_samaritano",     "Samaritano",       0, "Jamais ferir nenhum ser vivo"),
+                ModifierOption("co_selva",          "Selva",            0, "Jamais usar objetos de metal; nunca atacar animais"),
+                ModifierOption("co_trapaceiro",     "Trapaceiro",       0, "Jamais recusar oportunidade de enganar alguém")
+            )
+        ),
+
+        AdvantageItem(name = "Corpo Artificial", cost = "-1 a -2 pontos", description = "Corpo inorgânico; imune a doenças mas só recupera PV mecanicamente."),
+
+        // ─── DEBILITAÇÃO (Modular) ─────────────────────────────────────────────
+        AdvantageItem(
+            name = "Debilitação",
+            cost = "-1 a -3 pontos",
+            description = "Limitação física ou sensorial. Escolha a debilitação e sua gravidade.",
+            isModular = true,
+            baseCostPt = -1,
+            modifiers = listOf(
+                ModifierOption("db_audicao",     "Audição Ruim (H)",     0, "Redutor em percepção auditiva"),
+                ModifierOption("db_surdez",      "Surdez (H)",           0, "-3; não realiza testes de som"),
+                ModifierOption("db_desmembrado", "Desmembrado (H)",      0, "Ausência de membro com penalidade variável"),
+                ModifierOption("db_fragilidade", "Fragilidade (A)",      0, "Vulnerável a dano; redutor no turno seguinte"),
+                ModifierOption("db_hemofilia",   "Hemofilia (R)",        0, "Sangramento contínuo ao receber dano"),
+                ModifierOption("db_locomocao",   "Locomoção (H)",        0, "Dificuldade de movimento; sob Lentidão sem auxílio"),
+                ModifierOption("db_visao_ruim",  "Visão Ruim (H)",       0, "-1 a -2 em percepção visual"),
+                ModifierOption("db_cegueira",    "Cegueira (H)",         0, "-3; pode ser reduzido para -2 com Radar"),
+                ModifierOption("db_mudez",       "Mudez (H)",            0, "Incapaz de comunicação verbal"),
+                ModifierOption("db_grave",       "Nível Grave (+1PT)",   0, "Eleva o custo e o efeito da debilitação")
+            )
+        ),
+
+        AdvantageItem(name = "Dependência", cost = "-1 a -2 pontos", description = "Precisa consumir algo raro diariamente."),
+        AdvantageItem(name = "Devoção", cost = "-1 a -2 pontos", description = "Obcecado por missão; sofre redutor agindo contrariamente."),
+        AdvantageItem(name = "Fetiche", cost = "-1 a -2 pontos", description = "Precisa de objeto para canalizar poderes."),
+        AdvantageItem(name = "Fraqueza", cost = "-1 a -3 pontos", description = "Perde PVs e PMs em determinada condição."),
+        AdvantageItem(name = "Furioso", cost = "-1 ponto", description = "Em certa condição pode entrar em fúria incontrolável."),
+        AdvantageItem(name = "Inaptidão", cost = "-2 a -3 pontos", description = "Incapaz de interagir com o sistema de Poder do cenário."),
+        AdvantageItem(name = "Inculto", cost = "-1 ponto", description = "Dificuldades de comunicação; -1d em testes externos."),
+
+        // ─── INSANO (Modular) ──────────────────────────────────────────────────
+        AdvantageItem(
+            name = "Insano",
+            cost = "-2 a -3 pontos",
+            description = "Distúrbio mental grave. -2 em testes sociais ao ser descoberto.",
+            isModular = true,
+            baseCostPt = -2,
+            modifiers = listOf(
+                ModifierOption("ins_ansioso",       "Ansioso",              0, "Ao entrar em combate, chance de Medo por 1 Cena"),
+                ModifierOption("ins_cleptomaniaco", "Cleptomaníaco",        0, "Testa R para não roubar; nunca devolve"),
+                ModifierOption("ins_compulsivo",    "Compulsivo",           0, "Deve realizar ação específica a cada hora"),
+                ModifierOption("ins_depressivo",    "Depressivo",           0, "1/6 de chance de perder a Ação por apatia"),
+                ModifierOption("ins_fobia_suave",   "Fobia Suave",          0, "Medo paralisante de algo 25% do tempo"),
+                ModifierOption("ins_histerico",     "Histérico",            0, "Crises emocionais em situações de estresse"),
+                ModifierOption("ins_insonia",       "Insônia",              0, "Só dorme em falha; acorda cansado"),
+                ModifierOption("ins_mentiroso",     "Mentiroso",            0, "Nunca diz a verdade (pode testar R)"),
+                ModifierOption("ins_narcoleptico",  "Narcoléptico",         0, "1/6 de chance de dormir involuntariamente"),
+                ModifierOption("ins_paranoico",     "Paranoico",            0, "Não confia em ninguém; recusa ajuda"),
+                ModifierOption("ins_sadico",        "Sádico",               0, "Precisa causar dor diariamente"),
+                ModifierOption("ins_fobia_grave",   "Fobia Grave",          0, "Medo paralisante de algo 50% do tempo"),
+                ModifierOption("ins_homicida",      "Homicida",             0, "Deve matar alguém da própria espécie a cada 1d dias"),
+                ModifierOption("ins_megalomaniaco", "Megalomaníaco",        0, "Acredita ser invencível; jamais recua"),
+                ModifierOption("ins_suicida",       "Suicida",              0, "Busca a morte ativamente"),
+                ModifierOption("ins_multipla",      "Múltipla Personalidade", 0, "Duas fichas distintas que alternam controle"),
+                ModifierOption("ins_grave",         "Insanidade Grave (+1PT)", 0, "Classifica esta insanidade como Grave")
+            )
+        ),
+
+        AdvantageItem(name = "Má Fama", cost = "-1 a -2 pontos", description = "Infame; -1 em testes sociais."),
+
+        // ─── MALDIÇÃO (Modular) ────────────────────────────────────────────────
+        AdvantageItem(
+            name = "Maldição",
+            cost = "-1 ponto",
+            description = "Sofre uma maldição persistente. Escolha o tipo e a gravidade.",
+            isModular = true,
+            baseCostPt = -1,
+            modifiers = listOf(
+                ModifierOption("mal_barulho",    "Barulho Incômodo",         0, "Presença acompanhada por som irritante"),
+                ModifierOption("mal_chuva",      "Chuva Ambulante",          0, "Nuvem de chuva te segue"),
+                ModifierOption("mal_genero",     "Gênero Invertido",         0, "Transformado na versão do gênero oposto"),
+                ModifierOption("mal_sombra",     "Sombra Maldita",           0, "Sem sombra ou sombra com vontade própria"),
+                ModifierOption("mal_agua",       "Água Corrente",            0, "Incapaz de atravessar cursos d'água corrente"),
+                ModifierOption("mal_azarado",    "Atrasado",                 0, "Iniciativa-2 por atraso inevitável"),
+                ModifierOption("mal_fedido",     "Fedido",                   0, "-2 em testes sociais; todos testam R para permanecer"),
+                ModifierOption("mal_maoR",       "Mão Rebelde",              0, "Mão tem vontade própria; H-1 em tensão"),
+                ModifierOption("mal_marcaM",     "Marca do Mentiroso",       0, "Sinal visível ao mentir"),
+                ModifierOption("mal_pestilencia","Pestilência",              0, "Seres próximos adoecem"),
+                ModifierOption("mal_caos",       "Caos Invertido",           0, "Acertos contam como falhas em testes"),
+                ModifierOption("mal_herege",     "Herege",                   0, "Efeitos sobrenaturais hostis diários"),
+                ModifierOption("mal_pesadelos",  "Pesadelos",                0, "Perde PV ao dormir; não recupera PV com descanso"),
+                ModifierOption("mal_karma",      "Karma",                    0, "Todo mal retorna com efeito idêntico"),
+                ModifierOption("mal_recuperImp", "Recuperação Impossível",   0, "Impossível recuperar PV ou PM")
+            )
+        ),
+
+        AdvantageItem(name = "Modelo Especial", cost = "-2 pontos", description = "Corpo anormal; não usa equipamentos padrão."),
+        AdvantageItem(name = "Monstruoso", cost = "-1 a -2 pontos", description = "Aparência repulsiva; -1 em testes sociais."),
+        AdvantageItem(name = "Munição Limitada", cost = "-1 ponto", description = "Munição limitada; sem reabastecimento não pode usar PdF."),
+
+        // ─── PODER DEFEITUOSO (Modular) ────────────────────────────────────────
+        AdvantageItem(
+            name = "Poder Defeituoso",
+            cost = "-1 ponto",
+            description = "Poderes instáveis ou com falhas. Escolha um defeito.",
+            isModular = true,
+            baseCostPt = -1,
+            modifiers = listOf(
+                ModifierOption("pd_agradavel",     "Agradável",        0, "Efeitos visuais alegres; +1 em A e R dos adversários"),
+                ModifierOption("pd_constrangedor", "Constrangedor",    0, "Exige frases ridículas e gestos; FA-2"),
+                ModifierOption("pd_descontrolado", "Descontrolado",    0, "1x/combate: poder aleatório sem gasto de PM"),
+                ModifierOption("pd_desgastante",   "Desgastante",      0, "Todos os poderes custam +1PM"),
+                ModifierOption("pd_exaustivo",     "Exaustivo",        0, "Perde a Ação no turno seguinte ao usar poder"),
+                ModifierOption("pd_falho",         "Falho",            0, "1/6 de chance de falha ao usar poder"),
+                ModifierOption("pd_impreciso",     "Impreciso",        0, "Não afeta alvos com H igual ou maior"),
+                ModifierOption("pd_limitado",      "Limitado",         0, "Cada Vantagem só usada 3x por PRD"),
+                ModifierOption("pd_morte",         "Perto da Morte",   0, "Só usa poderes com PV ≤ 1/4"),
+                ModifierOption("pd_repetitivo",    "Repetitivo",       0, "Deve repetir o poder nas próximas 2 Ações"),
+                ModifierOption("pd_seletivo",      "Seletivo",         0, "Poder afeta apenas seres de uma ancestralidade"),
+                ModifierOption("pd_vingativo",     "Vingativo",        0, "Perde 1PV ao usar qualquer poder")
+            )
+        ),
+
+        AdvantageItem(name = "Ponto Fraco", cost = "-1 ponto", description = "Fraqueza tática explorável; oponentes recebem +1 H e +2 FA."),
+        AdvantageItem(name = "Protegido Indefeso", cost = "-1 a -2 pontos", description = "Deve defender alguém; penalidades quando em perigo."),
+        AdvantageItem(name = "Restrição", cost = "-1 a -3 pontos", description = "Custo de PM dobrado em certas condições."),
+        AdvantageItem(name = "Rival", cost = "-1 ponto", description = "Rival com mesmo PT aparece ao menos uma vez por sessão."),
+
+        // ─── VULNERÁVEL (Modular) ──────────────────────────────────────────────
+        AdvantageItem(
+            name = "Vulnerável",
+            cost = "-1 a -3 pontos",
+            description = "Dano dobrado de um tipo específico (após FD). Energias: -1PT | Físicos: -2PT | Gerais: -3PT.",
+            isModular = true,
+            baseCostPt = 0,
+            modifiers = listOf(
+                ModifierOption("vul_acido",     "Ácido (-1PT)",         -1, "Dano de Ácido dobrado"),
+                ModifierOption("vul_eletrico",  "Elétrico (-1PT)",      -1, "Dano Elétrico dobrado"),
+                ModifierOption("vul_fogo",      "Fogo (-1PT)",          -1, "Dano de Fogo dobrado"),
+                ModifierOption("vul_frio",      "Frio (-1PT)",          -1, "Dano de Frio dobrado"),
+                ModifierOption("vul_luz",       "Luz (-1PT)",           -1, "Dano de Luz dobrado"),
+                ModifierOption("vul_psiquico",  "Psíquico (-1PT)",      -1, "Dano Psíquico dobrado"),
+                ModifierOption("vul_quimico",   "Químico (-1PT)",       -1, "Dano Químico dobrado"),
+                ModifierOption("vul_sonico",    "Sônico (-1PT)",        -1, "Dano Sônico dobrado"),
+                ModifierOption("vul_trevas",    "Trevas (-1PT)",        -1, "Dano de Trevas dobrado"),
+                ModifierOption("vul_veneno",    "Veneno (-1PT)",        -1, "Dano de Veneno dobrado"),
+                ModifierOption("vul_lacerante", "Lacerante (-2PT)",     -2, "Dano Lacerante dobrado"),
+                ModifierOption("vul_contusao",  "Contusão (-2PT)",      -2, "Dano por Contusão dobrado"),
+                ModifierOption("vul_f",         "F - Força (-3PT)",     -3, "Ataques de Força dobrados"),
+                ModifierOption("vul_pdf",       "PDF (-3PT)",           -3, "Ataques de PdF dobrados"),
+                ModifierOption("vul_poder",     "Poder (-3PT)",         -3, "Dano de Poder dobrado")
+            )
+        )
     )
 }

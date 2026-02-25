@@ -589,16 +589,46 @@ class CharacterSheetFragment : Fragment() {
                 if (char.uniqueAdvantage != null) {
                     uaCard.visibility = View.VISIBLE
                     val ua = char.uniqueAdvantage!!
+
+                    // Mostra somente o nome no card (custo e grupo ficam ocultos)
                     uaCard.findViewById<TextView>(R.id.text_ua_name).text = ua.name
-                    uaCard.findViewById<TextView>(R.id.text_ua_group).text = ua.group
-                    uaCard.findViewById<TextView>(R.id.text_ua_cost).text = "${ua.cost} pts"
+                    uaCard.findViewById<TextView>(R.id.text_ua_group).visibility = View.GONE
+                    uaCard.findViewById<TextView>(R.id.text_ua_cost).visibility = View.GONE
+
                     val benefitsText = uaCard.findViewById<TextView>(R.id.text_ua_benefits)
-                    benefitsText.visibility = View.VISIBLE
-                    benefitsText.text = "Benefícios: ${ua.benefits}\nFraquezas: ${ua.weaknesses}"
-                    
-                    // Allow clicking current UA to change/view
+                    val fullText = buildString {
+                        if (ua.benefits.isNotBlank()) {
+                            append("Benefícios:\n")
+                            append(ua.benefits.trim())
+                        }
+                        if (ua.weaknesses.isNotBlank()) {
+                            if (isNotEmpty()) append("\n\n")
+                            append("Penalidades:\n")
+                            append(ua.weaknesses.trim())
+                        }
+                    }
+                    if (fullText.isNotBlank()) {
+                        benefitsText.text = fullText
+                        benefitsText.lineSpacingMultiplier = 1.2f
+                        benefitsText.visibility = View.VISIBLE
+                    } else {
+                        benefitsText.visibility = View.GONE
+                    }
+
+                    // Clicar no card abre o dialog de edição
                     uaCard.setOnClickListener {
-                        if (canEdit) btnSelectUA.performClick()
+                        if (canEdit) {
+                            val editDialog = EditUniqueAdvantageDialogFragment(
+                                ua = ua,
+                                onSave = { updatedUA ->
+                                    viewModel.setUniqueAdvantage(updatedUA)
+                                },
+                                onDelete = { _ ->
+                                    viewModel.setUniqueAdvantage(null)
+                                }
+                            )
+                            editDialog.show(parentFragmentManager, "EditUADialog")
+                        }
                     }
                 } else {
                     uaCard.visibility = View.GONE

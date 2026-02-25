@@ -1,5 +1,9 @@
 package com.galeria.defensores.ui
 
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.AbsoluteSizeSpan
+import android.text.style.LeadingMarginSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +15,12 @@ import com.galeria.defensores.models.UniqueAdvantage
 class UniqueAdvantagesAdapter(
     private var uas: List<UniqueAdvantage>,
     private val onSelect: (UniqueAdvantage) -> Unit,
-    private val onEdit: ((UniqueAdvantage) -> Unit)? = null
+    private val onEdit: ((UniqueAdvantage) -> Unit)? = null,
+    /**
+     * Quando `true` (modo lista de seleção): exibe custo, grupo e descrição completa.
+     * Quando `false` (modo ficha): exibe apenas o nome — custo/grupo/benefits ficam ocultos.
+     */
+    private val showDetails: Boolean = true
 ) : RecyclerView.Adapter<UniqueAdvantagesAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -30,18 +39,45 @@ class UniqueAdvantagesAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val ua = uas[position]
         holder.nameText.text = ua.name
-        holder.costText.text = "${ua.cost} pts"
-        holder.groupText.text = ua.group
-        
-        // Show benefits preview
-        holder.benefitsText.text = ua.benefits
-        holder.benefitsText.visibility = View.VISIBLE
+
+        if (showDetails) {
+            // Modo lista de seleção: exibe custo, grupo e descrição completa
+            holder.costText.text = "${ua.cost} pts"
+            holder.costText.visibility = View.VISIBLE
+
+            holder.groupText.text = ua.group
+            holder.groupText.visibility = View.VISIBLE
+
+            // Monta o texto completo sem emojis, com espaçamento de parágrafo
+            val fullText = buildString {
+                if (ua.benefits.isNotBlank()) {
+                    append("Benefícios:\n")
+                    append(ua.benefits.trim())
+                }
+                if (ua.weaknesses.isNotBlank()) {
+                    if (isNotEmpty()) append("\n\n")
+                    append("Penalidades:\n")
+                    append(ua.weaknesses.trim())
+                }
+            }
+            if (fullText.isNotBlank()) {
+                holder.benefitsText.text = fullText
+                holder.benefitsText.lineSpacingMultiplier = 1.2f
+                holder.benefitsText.visibility = View.VISIBLE
+            } else {
+                holder.benefitsText.visibility = View.GONE
+            }
+        } else {
+            // Modo ficha: apenas o nome é exibido
+            holder.costText.visibility = View.GONE
+            holder.groupText.visibility = View.GONE
+            holder.benefitsText.visibility = View.GONE
+        }
 
         holder.itemView.setOnClickListener {
             onSelect(ua)
         }
 
-        // Long click to edit (if Master)
         if (onEdit != null) {
             holder.itemView.setOnLongClickListener {
                 onEdit.invoke(ua)
@@ -51,7 +87,7 @@ class UniqueAdvantagesAdapter(
     }
 
     override fun getItemCount() = uas.size
-    
+
     fun updateList(newList: List<UniqueAdvantage>) {
         uas = newList
         notifyDataSetChanged()

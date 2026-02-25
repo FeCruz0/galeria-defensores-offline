@@ -36,9 +36,10 @@
                 android:layout_height="wrap_content"
                 android:text="0 pts"
                 android:textColor="#3B82F6"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
         </LinearLayout>
-        
+
         <TextView
             android:id="@+id/text_ua_group"
             android:layout_width="match_parent"
@@ -46,7 +47,8 @@
             android:text="Humanos"
             android:textSize="12sp"
             android:textColor="#9CA3AF"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginBottom="4dp"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/text_ua_benefits"

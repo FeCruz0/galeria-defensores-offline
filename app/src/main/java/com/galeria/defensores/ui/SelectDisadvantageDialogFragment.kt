@@ -48,6 +48,7 @@ class SelectDisadvantageDialogFragment(
             val adapter = AdvantagesAdapter(
                 items = DisadvantagesRepository.getAllDisadvantages(),
                 onItemClick = { selectedItem ->
+                    // Itens não-modulares: seleciona e fecha imediatamente
                     onDisadvantageSelected(selectedItem)
                     dismiss()
                 },
@@ -62,7 +63,12 @@ class SelectDisadvantageDialogFragment(
                         .setNegativeButton("Não", null)
                         .show()
                 },
-                showDescription = true
+                showDescription = true,
+                // Callback para itens modulares
+                onModularItemConfirmed = { confirmedItem ->
+                    onDisadvantageSelected(confirmedItem)
+                    dismiss()
+                }
             )
             recyclerView.adapter = adapter
         }

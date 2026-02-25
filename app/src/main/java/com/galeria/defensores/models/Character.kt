@@ -71,12 +71,33 @@ data class Character(
     
 }
 
+data class ModifierOption(
+    val id: String = "",
+    val name: String = "",
+    val costPt: Int = 1,        // custo adicional em pontos deste modificador
+    val description: String = ""
+)
+
 data class AdvantageItem(
     val id: String = UUID.randomUUID().toString(),
     val name: String = "",
     val description: String = "",
-    val cost: String = ""
-)
+    val cost: String = "",
+    // Campos de Vantagem Modular
+    val isModular: Boolean = false,
+    val modifiers: List<ModifierOption> = emptyList(),       // modificadores disponíveis (catálogo)
+    val selectedModifiers: List<String> = emptyList(),       // IDs dos modificadores escolhidos (ficha)
+    val baseCostPt: Int = 0                                  // custo base em pontos (para vantagens modulares)
+) {
+    /** Custo total em pontos = base + soma dos modificadores selecionados */
+    fun computedCostPt(): Int {
+        if (!isModular) return cost.toIntOrNull() ?: 0
+        val selectedCost = modifiers
+            .filter { it.id in selectedModifiers }
+            .sumOf { it.costPt }
+        return baseCostPt + selectedCost
+    }
+}
 
 data class SimpleItem(
     val id: String = UUID.randomUUID().toString(),
