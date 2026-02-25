@@ -19,6 +19,7 @@ class AdvantagesAdapter(
         val name: TextView = view.findViewById(R.id.text_advantage_name)
         val cost: TextView = view.findViewById(R.id.text_advantage_cost)
         val description: TextView = view.findViewById(R.id.text_advantage_description)
+        val scrollDescription: View = view.findViewById(R.id.scroll_advantage_description)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -31,12 +32,12 @@ class AdvantagesAdapter(
         val item = items[position]
         holder.name.text = item.name
         holder.cost.text = item.cost
-        holder.description.text = item.description
+        holder.description.text = item.description.replace("\n", "\n\n")
 
         if (showDescription && item.description.isNotEmpty()) {
-            holder.description.visibility = View.VISIBLE
+            holder.scrollDescription.visibility = View.VISIBLE
         } else {
-            holder.description.visibility = View.GONE
+            holder.scrollDescription.visibility = View.GONE
         }
         
         // Hide delete button if it exists in XML but we don't use it anymore

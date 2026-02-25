@@ -40,7 +40,8 @@ class EditAdvantageDialogFragment(
         if (advantage != null) {
             editName.setText(advantage.name)
             editCost.setText(advantage.cost)
-            editDesc.setText(advantage.description)
+            // Show paragraph spacing in read-only mode
+            editDesc.setText(advantage.description.replace("\n", "\n\n"))
             titleView.text = "Detalhes"
             
             // Read-Only Mode Initially
@@ -66,9 +67,11 @@ class EditAdvantageDialogFragment(
         }
 
         btnEdit.setOnClickListener {
-             editName.isEnabled = true
+            editName.isEnabled = true
             editCost.isEnabled = true
             editDesc.isEnabled = true
+            // Restore original text (without doubled paragraph spacing) before editing
+            editDesc.setText(advantage?.description ?: "")
             btnSave.visibility = View.VISIBLE
             btnEdit.visibility = View.GONE
             if (onDelete != null) btnRemove.visibility = View.VISIBLE

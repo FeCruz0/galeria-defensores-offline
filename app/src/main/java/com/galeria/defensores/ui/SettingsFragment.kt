@@ -116,7 +116,6 @@ class SettingsFragment : Fragment() {
             importAllLauncher.launch(arrayOf("application/zip"))
         }
 
-        view.findViewById<View>(R.id.btn_logout).visibility = View.GONE
     }
 
     private val importAllLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->

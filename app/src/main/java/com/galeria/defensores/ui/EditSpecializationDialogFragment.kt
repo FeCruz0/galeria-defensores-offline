@@ -44,7 +44,7 @@ class EditSpecializationDialogFragment(
         if (specialization != null) {
             editName.setText(specialization.name)
             editCost.setText(specialization.cost)
-            editDesc.setText(specialization.description)
+            editDesc.setText(specialization.description.replace("\n", "\n\n"))
             titleView.text = "Editar Especialização"
         } else {
             titleView.text = "Nova Especialização"

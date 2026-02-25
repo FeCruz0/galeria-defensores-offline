@@ -1,6 +1,5 @@
 package com.galeria.defensores.ui
 
-import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -22,7 +21,11 @@ class EditUniqueAdvantageDialogFragment(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.dialog_edit_unique_advantage, container, false)
+        return inflater.inflate(R.layout.dialog_edit_unique_advantage, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         val titleText: TextView = view.findViewById(R.id.text_dialog_title)
         val nameEdit: EditText = view.findViewById(R.id.edit_ua_name)
@@ -34,23 +37,60 @@ class EditUniqueAdvantageDialogFragment(
         val cancelButton: Button = view.findViewById(R.id.btn_cancel)
         val deleteButton: Button = view.findViewById(R.id.btn_delete)
 
+        // Try to find edit button (may not exist in older fragment managers, safe fallback)
+        val editButton: Button? = view.findViewById(R.id.btn_edit)
+
         if (ua != null) {
-            titleText.text = "Editar Vantagem Única"
+            // ── Read-only / Detalhes mode ──
+            titleText.text = "Detalhes"
             nameEdit.setText(ua.name)
             groupEdit.setText(ua.group)
             costEdit.setText(ua.cost.toString())
-            benefitsEdit.setText(ua.benefits)
-            weaknessesEdit.setText(ua.weaknesses)
-            
-            if (onDelete != null) {
-                deleteButton.visibility = View.VISIBLE
-                deleteButton.setOnClickListener {
-                    onDelete.invoke(ua)
-                    dismiss()
+            // Show paragraph spacing in read-only mode
+            benefitsEdit.setText(ua.benefits.replace("\n", "\n\n"))
+            weaknessesEdit.setText(ua.weaknesses.replace("\n", "\n\n"))
+
+            nameEdit.isEnabled = false
+            groupEdit.isEnabled = false
+            costEdit.isEnabled = false
+            benefitsEdit.isEnabled = false
+            weaknessesEdit.isEnabled = false
+
+            saveButton.visibility = View.GONE
+            deleteButton.visibility = View.GONE
+            editButton?.visibility = View.VISIBLE
+
+            editButton?.setOnClickListener {
+                // ── Switch to Edit mode ──
+                titleText.text = "Editar Vantagem Única"
+                nameEdit.isEnabled = true
+                groupEdit.isEnabled = true
+                costEdit.isEnabled = true
+                benefitsEdit.isEnabled = true
+                weaknessesEdit.isEnabled = true
+
+                // Restore original text (without doubled newlines) for editing
+                benefitsEdit.setText(ua.benefits)
+                weaknessesEdit.setText(ua.weaknesses)
+
+                saveButton.visibility = View.VISIBLE
+                editButton.visibility = View.GONE
+
+                if (onDelete != null) {
+                    deleteButton.visibility = View.VISIBLE
+                    deleteButton.setOnClickListener {
+                        onDelete.invoke(ua)
+                        dismiss()
+                    }
                 }
             }
+
         } else {
+            // ── Create mode ──
             titleText.text = "Nova Vantagem Única"
+            saveButton.visibility = View.VISIBLE
+            deleteButton.visibility = View.GONE
+            editButton?.visibility = View.GONE
         }
 
         saveButton.setOnClickListener {
@@ -60,28 +100,18 @@ class EditUniqueAdvantageDialogFragment(
             val benefits = benefitsEdit.text.toString()
             val weaknesses = weaknessesEdit.text.toString()
 
-            val costP = costStr.toIntOrNull()
-
             if (name.isEmpty()) {
                 nameEdit.error = "Nome é obrigatório"
                 return@setOnClickListener
             }
 
-            if (costP == null) {
-                costEdit.error = "Insira um número válido"
-                return@setOnClickListener
-            }
-
+            val costP = costStr.toIntOrNull() ?: 0
             val newUA = UniqueAdvantage(name, group, costP, benefits, weaknesses)
             onSave(newUA)
             dismiss()
         }
 
-        cancelButton.setOnClickListener {
-            dismiss()
-        }
-
-        return view
+        cancelButton.setOnClickListener { dismiss() }
     }
 
     override fun onStart() {

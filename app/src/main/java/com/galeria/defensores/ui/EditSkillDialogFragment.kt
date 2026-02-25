@@ -38,7 +38,7 @@ class EditSkillDialogFragment(
         if (skill != null) {
             editName.setText(skill.name)
             editCost.setText(skill.cost)
-            editDesc.setText(skill.description)
+            editDesc.setText(skill.description.replace("\n", "\n\n"))
             titleView.text = "Editar Perícia"
         } else {
             titleView.text = "Nova Perícia"

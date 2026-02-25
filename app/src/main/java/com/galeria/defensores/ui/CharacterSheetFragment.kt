@@ -590,15 +590,23 @@ class CharacterSheetFragment : Fragment() {
                     uaCard.visibility = View.VISIBLE
                     val ua = char.uniqueAdvantage!!
                     uaCard.findViewById<TextView>(R.id.text_ua_name).text = ua.name
-                    uaCard.findViewById<TextView>(R.id.text_ua_group).text = ua.group
-                    uaCard.findViewById<TextView>(R.id.text_ua_cost).text = "${ua.cost} pts"
-                    val benefitsText = uaCard.findViewById<TextView>(R.id.text_ua_benefits)
-                    benefitsText.visibility = View.VISIBLE
-                    benefitsText.text = "Benefícios: ${ua.benefits}\nFraquezas: ${ua.weaknesses}"
-                    
-                    // Allow clicking current UA to change/view
+                    // Hide cost, group, benefits from the sheet card — only name is shown
+                    uaCard.findViewById<View>(R.id.text_ua_group).visibility = View.GONE
+                    uaCard.findViewById<View>(R.id.text_ua_cost).visibility = View.GONE
+                    uaCard.findViewById<View>(R.id.text_ua_benefits).visibility = View.GONE
+
+                    // Click opens Details dialog (same pattern as other CRUDs)
                     uaCard.setOnClickListener {
-                        if (canEdit) btnSelectUA.performClick()
+                        val detailsDialog = EditUniqueAdvantageDialogFragment(
+                            ua = ua,
+                            onSave = { updatedUA ->
+                                viewModel.setUniqueAdvantage(updatedUA)
+                            },
+                            onDelete = if (canEdit) { _ ->
+                                viewModel.setUniqueAdvantage(null)
+                            } else null
+                        )
+                        detailsDialog.show(parentFragmentManager, "UADetailsDialog")
                     }
                 } else {
                     uaCard.visibility = View.GONE

@@ -50,15 +50,25 @@
                 app:tint="#EF4444" />
         </LinearLayout>
         
-        <TextView
-            android:id="@+id/text_advantage_description"
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Description..."
-            android:textSize="12sp"
-            android:textColor="@color/text_secondary"
             android:layout_marginTop="4dp"
-            android:visibility="gone" />
+            android:maxHeight="200dp"
+            android:fadeScrollbars="false"
+            android:visibility="gone"
+            android:id="@+id/scroll_advantage_description">
+
+            <TextView
+                android:id="@+id/text_advantage_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Description..."
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:maxLines="100" />
+
+        </ScrollView>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

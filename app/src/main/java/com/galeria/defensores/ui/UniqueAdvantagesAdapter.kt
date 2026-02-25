@@ -30,16 +30,26 @@ class UniqueAdvantagesAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val ua = uas[position]
         holder.nameText.text = ua.name
-        holder.costText.text = "${ua.cost} pts"
-        holder.groupText.text = ua.group
-        
-        // Show benefits preview
-        holder.benefitsText.text = ua.benefits
-        holder.benefitsText.visibility = View.VISIBLE
 
-        holder.itemView.setOnClickListener {
-            onSelect(ua)
+        // Show all fields in the selection list
+        holder.groupText.visibility = View.VISIBLE
+        holder.groupText.text = ua.group
+
+        holder.costText.visibility = View.VISIBLE
+        holder.costText.text = "${ua.cost} pts"
+
+        // Show full benefits + weaknesses with paragraph spacing
+        holder.benefitsText.visibility = View.VISIBLE
+        val fullDesc = buildString {
+            if (ua.benefits.isNotBlank()) append(ua.benefits.replace("\n", "\n\n"))
+            if (ua.weaknesses.isNotBlank()) {
+                if (isNotEmpty()) append("\n\n")
+                append(ua.weaknesses.replace("\n", "\n\n"))
+            }
         }
+        holder.benefitsText.text = fullDesc
+
+        holder.itemView.setOnClickListener { onSelect(ua) }
 
         // Long click to edit (if Master)
         if (onEdit != null) {
