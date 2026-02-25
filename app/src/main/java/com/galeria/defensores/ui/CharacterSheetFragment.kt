@@ -609,7 +609,7 @@ class CharacterSheetFragment : Fragment() {
                     }
                     if (fullText.isNotBlank()) {
                         benefitsText.text = fullText
-                        benefitsText.lineSpacingMultiplier = 1.2f
+                        benefitsText.setLineSpacing(0f, 1.2f)
                         benefitsText.visibility = View.VISIBLE
                     } else {
                         benefitsText.visibility = View.GONE

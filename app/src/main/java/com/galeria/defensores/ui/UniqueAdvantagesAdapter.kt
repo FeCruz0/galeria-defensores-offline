@@ -1,9 +1,8 @@
 package com.galeria.defensores.ui
 
-import android.text.SpannableString
+import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.AbsoluteSizeSpan
-import android.text.style.LeadingMarginSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -48,21 +47,28 @@ class UniqueAdvantagesAdapter(
             holder.groupText.text = ua.group
             holder.groupText.visibility = View.VISIBLE
 
-            // Monta o texto completo sem emojis, com espaçamento de parágrafo
-            val fullText = buildString {
-                if (ua.benefits.isNotBlank()) {
-                    append("Benefícios:\n")
-                    append(ua.benefits.trim())
-                }
-                if (ua.weaknesses.isNotBlank()) {
-                    if (isNotEmpty()) append("\n\n")
-                    append("Penalidades:\n")
-                    append(ua.weaknesses.trim())
-                }
+            // Monta o texto com espaçamento de parágrafo entre Benefícios e Penalidades
+            val ssb = SpannableStringBuilder()
+
+            if (ua.benefits.isNotBlank()) {
+                ssb.append("Benefícios:\n")
+                ssb.append(ua.benefits.trim())
             }
-            if (fullText.isNotBlank()) {
-                holder.benefitsText.text = fullText
-                holder.benefitsText.lineSpacingMultiplier = 1.2f
+
+            if (ua.weaknesses.isNotBlank()) {
+                if (ssb.isNotEmpty()) {
+                    // Espaço de parágrafo: linha em branco de tamanho reduzido (8sp)
+                    val start = ssb.length
+                    ssb.append("\n\n")
+                    // Reduz o tamanho da linha em branco para simular espaçamento de parágrafo
+                    ssb.setSpan(AbsoluteSizeSpan(8, true), start, ssb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+                ssb.append("Penalidades:\n")
+                ssb.append(ua.weaknesses.trim())
+            }
+
+            if (ssb.isNotEmpty()) {
+                holder.benefitsText.text = ssb
                 holder.benefitsText.visibility = View.VISIBLE
             } else {
                 holder.benefitsText.visibility = View.GONE
