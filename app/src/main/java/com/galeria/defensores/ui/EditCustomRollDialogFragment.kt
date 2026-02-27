@@ -72,6 +72,7 @@ class EditCustomRollDialogFragment(
         if (existingRoll != null) {
             editName.setText(existingRoll.name)
             editDesc.setText(existingRoll.description)
+            com.galeria.defensores.utils.TextFormatUtils.applyParagraphSpacingToEditable(editDesc.text!!)
             editGlobalMod.setText(existingRoll.globalModifier.toString())
             
             // Populate components
@@ -127,6 +128,15 @@ class EditCustomRollDialogFragment(
         }
         
         // ... (Dialog Builder with Save) ...
+        editDesc.addTextChangedListener(object : android.text.TextWatcher {
+            override fun afterTextChanged(s: android.text.Editable?) {
+                if (s != null && editDesc.hasFocus()) {
+                    com.galeria.defensores.utils.TextFormatUtils.applyParagraphSpacingToEditable(s)
+                }
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
         return AlertDialog.Builder(requireContext())
             // ...
             .setTitle(if (existingRoll != null) "Editar Rolagem" else "Nova Rolagem")

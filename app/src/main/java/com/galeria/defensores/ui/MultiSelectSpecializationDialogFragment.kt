@@ -134,7 +134,8 @@ class MultiSelectSpecializationDialogFragment(
             val item = items[position]
             holder.name.text = item.name
             holder.skills.text = item.cost // Using cost field for parent skills
-            holder.desc.text = item.description
+            holder.desc.text = com.galeria.defensores.utils.TextFormatUtils.formatParagraphSpacing(item.description)
+            holder.desc.setLineSpacing(0f, 1.2f)
             
             // Avoid triggering listener during binding
             holder.checkBox.setOnCheckedChangeListener(null)

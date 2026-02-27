@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.galeria.defensores.R
 import com.galeria.defensores.models.RollType
 import com.galeria.defensores.models.Spell
+import com.galeria.defensores.utils.TextFormatUtils
 
 import com.galeria.defensores.viewmodels.CharacterViewModel
 import androidx.activity.result.contract.ActivityResultContracts
@@ -596,19 +597,30 @@ class CharacterSheetFragment : Fragment() {
                     uaCard.findViewById<TextView>(R.id.text_ua_cost).visibility = View.GONE
 
                     val benefitsText = uaCard.findViewById<TextView>(R.id.text_ua_benefits)
-                    val fullText = buildString {
-                        if (ua.benefits.isNotBlank()) {
-                            append("Benefícios:\n")
-                            append(ua.benefits.trim())
-                        }
-                        if (ua.weaknesses.isNotBlank()) {
-                            if (isNotEmpty()) append("\n\n")
-                            append("Penalidades:\n")
-                            append(ua.weaknesses.trim())
-                        }
+                    val ssb = android.text.SpannableStringBuilder()
+
+                    if (ua.benefits.isNotBlank()) {
+                        ssb.append("Benefícios:\n")
+                        ssb.append(ua.benefits.trim())
                     }
-                    if (fullText.isNotBlank()) {
-                        benefitsText.text = fullText
+
+                    if (ua.weaknesses.isNotBlank()) {
+                        if (ssb.isNotEmpty()) {
+                            val start = ssb.length
+                            // \u00A0 is a non-breaking space, which forces the span to have visual height
+                            ssb.append("\n\u00A0\n")
+                            ssb.setSpan(android.text.style.AbsoluteSizeSpan(8, true), start + 1, start + 2, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        } else {
+                            ssb.append("Penalidades:\n")
+                        }
+                        if (ssb.isNotEmpty() && !ssb.endsWith("Penalidades:\n")) {
+                            ssb.append("Penalidades:\n")
+                        }
+                        ssb.append(ua.weaknesses.trim())
+                    }
+
+                    if (ssb.isNotEmpty()) {
+                        benefitsText.text = ssb
                         benefitsText.setLineSpacing(0f, 1.2f)
                         benefitsText.visibility = View.VISIBLE
                     } else {
@@ -902,10 +914,27 @@ class CharacterSheetFragment : Fragment() {
                     }
                 )
                 invRecycler.adapter = invAdapter
-    
 
-
-    
+                // Update Spells (Magias) List
+                val spellsRecycler = view.findViewById<RecyclerView>(R.id.recycler_spells)
+                spellsRecycler.layoutManager = LinearLayoutManager(context)
+                val spellsAdapter = SpellsAdapter(char.magias, onSpellClick = { selectedSpell ->
+                    val editDialog = EditSpellDialogFragment(
+                        spell = selectedSpell,
+                        onSave = { updatedSpell ->
+                            viewModel.updateSpell(updatedSpell)
+                        },
+                        onDelete = { spellToDelete ->
+                            viewModel.removeSpell(spellToDelete)
+                        }
+                    )
+                    editDialog.show(parentFragmentManager, "EditSpellDialog")
+                })
+                spellsRecycler.adapter = spellsAdapter
+                
+                // Toggle Button Visibility based on canEdit
+                view.findViewById<Button>(R.id.btn_add_spell).visibility = if (canEdit) View.VISIBLE else View.GONE
+                view.findViewById<Button>(R.id.btn_add_inventory).visibility = if (canEdit) View.VISIBLE else View.GONE
                 // Update Notes (Prevent overwriting if user is typing)
                 if (!view.findViewById<EditText>(R.id.edit_notes).hasFocus()) {
                      view.findViewById<EditText>(R.id.edit_notes).setText(androidx.core.text.HtmlCompat.fromHtml(char.anotacoes, androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY))
@@ -1002,6 +1031,16 @@ class CharacterSheetFragment : Fragment() {
 
         // Notes Saving Logic & Rich Text
         val notesEdit = view.findViewById<EditText>(R.id.edit_notes)
+        notesEdit.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if (s != null && notesEdit.hasFocus()) {
+                    TextFormatUtils.applyParagraphSpacingToEditable(s)
+                }
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
         notesEdit.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                  val html = androidx.core.text.HtmlCompat.toHtml(notesEdit.text as android.text.Spanned, androidx.core.text.HtmlCompat.TO_HTML_PARAGRAPH_LINES_CONSECUTIVE)

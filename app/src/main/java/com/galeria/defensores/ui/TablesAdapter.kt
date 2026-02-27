@@ -32,7 +32,8 @@ class TablesAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val table = tables[position]
         holder.name.text = table.name
-        holder.description.text = table.description
+        holder.description.text = com.galeria.defensores.utils.TextFormatUtils.formatParagraphSpacing(table.description)
+        holder.description.setLineSpacing(0f, 1.2f)
         
         // Always show options in offline/single-user mode
         holder.btnMore.visibility = View.VISIBLE

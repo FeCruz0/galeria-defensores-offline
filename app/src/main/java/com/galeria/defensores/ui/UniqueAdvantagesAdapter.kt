@@ -57,13 +57,15 @@ class UniqueAdvantagesAdapter(
 
             if (ua.weaknesses.isNotBlank()) {
                 if (ssb.isNotEmpty()) {
-                    // Espaço de parágrafo: linha em branco de tamanho reduzido (8sp)
+                    // Espaço de parágrafo: linha em branco de tamanho reduzido (8sp) numa non-breaking space
                     val start = ssb.length
-                    ssb.append("\n\n")
-                    // Reduz o tamanho da linha em branco para simular espaçamento de parágrafo
-                    ssb.setSpan(AbsoluteSizeSpan(8, true), start, ssb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    ssb.append("\n\u00A0\n")
+                    // Reduz o tamanho apenas do \u00A0 para simular espaçamento de parágrafo consistente
+                    ssb.setSpan(AbsoluteSizeSpan(8, true), start + 1, start + 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    ssb.append("Penalidades:\n")
+                } else {
+                    ssb.append("Penalidades:\n")
                 }
-                ssb.append("Penalidades:\n")
                 ssb.append(ua.weaknesses.trim())
             }
 

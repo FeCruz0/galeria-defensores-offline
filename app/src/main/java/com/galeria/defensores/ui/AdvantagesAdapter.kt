@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.galeria.defensores.R
 import com.galeria.defensores.models.AdvantageItem
+import com.galeria.defensores.utils.TextFormatUtils
 
 /**
  * Adapter para exibição de vantagens/desvantagens.
@@ -75,7 +76,8 @@ class AdvantagesAdapter(
         // ── Descrição (lista de seleção) ───────────────────────────────────
         if (showDescription && item.description.isNotEmpty()) {
             holder.description.visibility = View.VISIBLE
-            holder.description.text = item.description
+            holder.description.text = TextFormatUtils.formatParagraphSpacing(item.description)
+            holder.description.setLineSpacing(0f, 1.2f)
         } else {
             holder.description.visibility = View.GONE
         }

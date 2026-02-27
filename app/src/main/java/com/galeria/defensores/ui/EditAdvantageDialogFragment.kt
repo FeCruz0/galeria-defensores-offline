@@ -40,7 +40,7 @@ class EditAdvantageDialogFragment(
         if (advantage != null) {
             editName.setText(advantage.name)
             editCost.setText(advantage.cost)
-            editDesc.setText(advantage.description)
+            editDesc.setText(com.galeria.defensores.utils.TextFormatUtils.formatParagraphSpacing(advantage.description))
             titleView.text = "Detalhes"
             
             // Read-Only Mode Initially
@@ -60,6 +60,16 @@ class EditAdvantageDialogFragment(
             editDesc.isEnabled = true
              btnSave.visibility = View.VISIBLE
         }
+
+        editDesc.addTextChangedListener(object : android.text.TextWatcher {
+            override fun afterTextChanged(s: android.text.Editable?) {
+                if (s != null && editDesc.hasFocus()) {
+                    com.galeria.defensores.utils.TextFormatUtils.applyParagraphSpacingToEditable(s)
+                }
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
 
         if (onDelete == null) {
             btnRemove.visibility = View.GONE
@@ -89,7 +99,7 @@ class EditAdvantageDialogFragment(
         btnSave.setOnClickListener {
             val name = editName.text.toString()
             val costStr = editCost.text.toString()
-            val desc = editDesc.text.toString()
+            val desc = com.galeria.defensores.utils.TextFormatUtils.cleanParagraphSpacing(editDesc.text.toString())
 
             val costInt = costStr.toIntOrNull() // Validation only, we store string
             // Allow complex costs like "1-3" or "1pt" if the user wants, but currently logic checks int?

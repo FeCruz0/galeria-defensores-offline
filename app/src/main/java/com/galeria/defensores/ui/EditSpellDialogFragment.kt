@@ -39,21 +39,70 @@ class EditSpellDialogFragment(
         val editDesc = view.findViewById<TextInputEditText>(R.id.edit_spell_description)
         
         val btnRemove = view.findViewById<Button>(R.id.btn_remove_spell)
+        val btnSave = view.findViewById<View>(R.id.btn_save)
+        val btnEdit = view.findViewById<Button>(R.id.btn_edit)
         val titleView = view.findViewById<TextView>(R.id.dialog_title)
 
         if (spell != null) {
-            titleView.text = "Editar Magia"
+            titleView.text = "Detalhes"
             editName.setText(spell.name)
             editSchool.setText(spell.school)
             editRequirements.setText(spell.requirements)
             editCost.setText(spell.cost)
             editRange.setText(spell.range)
             editDuration.setText(spell.duration)
-            editDesc.setText(spell.description)
+            editDesc.setText(com.galeria.defensores.utils.TextFormatUtils.formatParagraphSpacing(spell.description))
+
+            editName.isEnabled = false
+            editSchool.isEnabled = false
+            editRequirements.isEnabled = false
+            editCost.isEnabled = false
+            editRange.isEnabled = false
+            editDuration.isEnabled = false
+            editDesc.isEnabled = false
+
+            btnSave.visibility = View.GONE
+            btnRemove.visibility = View.GONE
+            btnEdit.visibility = View.VISIBLE
         } else {
             titleView.text = "Nova Magia"
             btnRemove.visibility = View.GONE
+            btnEdit.visibility = View.GONE
+
+            editName.isEnabled = true
+            editSchool.isEnabled = true
+            editRequirements.isEnabled = true
+            editCost.isEnabled = true
+            editRange.isEnabled = true
+            editDuration.isEnabled = true
+            editDesc.isEnabled = true
+            btnSave.visibility = View.VISIBLE
         }
+
+        btnEdit.setOnClickListener {
+            editName.isEnabled = true
+            editSchool.isEnabled = true
+            editRequirements.isEnabled = true
+            editCost.isEnabled = true
+            editRange.isEnabled = true
+            editDuration.isEnabled = true
+            editDesc.isEnabled = true
+            
+            btnSave.visibility = View.VISIBLE
+            btnEdit.visibility = View.GONE
+            if (onDelete != null) btnRemove.visibility = View.VISIBLE
+            titleView.text = "Editar Magia"
+        }
+
+        editDesc.addTextChangedListener(object : android.text.TextWatcher {
+            override fun afterTextChanged(s: android.text.Editable?) {
+                if (s != null && editDesc.hasFocus()) {
+                    com.galeria.defensores.utils.TextFormatUtils.applyParagraphSpacingToEditable(s)
+                }
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
 
         if (onDelete == null) {
             btnRemove.visibility = View.GONE
@@ -80,7 +129,7 @@ class EditSpellDialogFragment(
                     cost = editCost.text.toString(),
                     range = editRange.text.toString(),
                     duration = editDuration.text.toString(),
-                    description = editDesc.text.toString()
+                    description = com.galeria.defensores.utils.TextFormatUtils.cleanParagraphSpacing(editDesc.text.toString())
                 ) ?: Spell(
                     id = UUID.randomUUID().toString(),
                     name = name,
@@ -89,7 +138,7 @@ class EditSpellDialogFragment(
                     cost = editCost.text.toString(),
                     range = editRange.text.toString(),
                     duration = editDuration.text.toString(),
-                    description = editDesc.text.toString()
+                    description = com.galeria.defensores.utils.TextFormatUtils.cleanParagraphSpacing(editDesc.text.toString())
                 )
                 onSave(newSpell)
                 dismiss()

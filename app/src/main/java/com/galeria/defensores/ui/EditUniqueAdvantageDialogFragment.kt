@@ -39,8 +39,8 @@ class EditUniqueAdvantageDialogFragment(
             nameEdit.setText(ua.name)
             groupEdit.setText(ua.group)
             costEdit.setText(ua.cost.toString())
-            benefitsEdit.setText(ua.benefits)
-            weaknessesEdit.setText(ua.weaknesses)
+            benefitsEdit.setText(com.galeria.defensores.utils.TextFormatUtils.formatParagraphSpacing(ua.benefits))
+            weaknessesEdit.setText(com.galeria.defensores.utils.TextFormatUtils.formatParagraphSpacing(ua.weaknesses))
             
             if (onDelete != null) {
                 deleteButton.visibility = View.VISIBLE
@@ -57,8 +57,8 @@ class EditUniqueAdvantageDialogFragment(
             val name = nameEdit.text.toString()
             val group = groupEdit.text.toString()
             val costStr = costEdit.text.toString()
-            val benefits = benefitsEdit.text.toString()
-            val weaknesses = weaknessesEdit.text.toString()
+            val benefits = com.galeria.defensores.utils.TextFormatUtils.cleanParagraphSpacing(benefitsEdit.text.toString())
+            val weaknesses = com.galeria.defensores.utils.TextFormatUtils.cleanParagraphSpacing(weaknessesEdit.text.toString())
 
             val costP = costStr.toIntOrNull()
 
