@@ -830,7 +830,7 @@ class CharacterSheetFragment : Fragment() {
                 val adapter = AdvantagesAdapter(items = char.vantagens, onItemClick = { selectedItem ->
                     // Open Edit Dialog with Remove option
                     val editDialog = EditAdvantageDialogFragment(
-                        advantage = selectedItem,
+                        incomingAdvantage = selectedItem,
                         onSave = { updatedItem ->
                             viewModel.updateAdvantage(updatedItem)
                         },
@@ -848,7 +848,7 @@ class CharacterSheetFragment : Fragment() {
                 val disAdapter = AdvantagesAdapter(items = char.desvantagens, onItemClick = { selectedItem ->
                     // Open Edit Dialog with Remove option
                     val editDialog = EditAdvantageDialogFragment(
-                        advantage = selectedItem,
+                        incomingAdvantage = selectedItem,
                         onSave = { updatedItem ->
                             viewModel.updateDisadvantage(updatedItem)
                         },

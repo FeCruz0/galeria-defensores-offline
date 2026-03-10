@@ -21,7 +21,7 @@ class SelectDisadvantageDialogFragment(
         super.onStart()
         dialog?.window?.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
+            ViewGroup.LayoutParams.MATCH_PARENT
         )
     }
 
@@ -81,7 +81,7 @@ class SelectDisadvantageDialogFragment(
         
         btnNew.setOnClickListener {
             val editDialog = EditAdvantageDialogFragment(
-                advantage = null,
+                incomingAdvantage = null,
                 onSave = { newDisadvantage ->
                     DisadvantagesRepository.addDisadvantage(newDisadvantage)
                     loadDisadvantages()

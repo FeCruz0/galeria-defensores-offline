@@ -32,9 +32,7 @@ class AdvantagesAdapter(
     /** Se não-nulo, ativa o modo seleção modular. Retorna o item com selectedModifiers preenchidos. */
     private val onModularItemConfirmed: ((AdvantageItem) -> Unit)? = null
 ) : RecyclerView.Adapter<AdvantagesAdapter.ViewHolder>() {
-
     private val pendingSelections = mutableMapOf<String, MutableSet<String>>()
-    private var expandedItemId: String? = null
 
     fun updateItems(newItems: List<AdvantageItem>) {
         items = newItems
@@ -65,9 +63,16 @@ class AdvantagesAdapter(
         // ── Custo exibido ──────────────────────────────────────────────────
         if (item.isModular) {
             val selectedIds = pendingSelections[item.id] ?: emptySet()
-            val computed = item.baseCostPt + item.modifiers
-                .filter { it.id in selectedIds }
-                .sumOf { it.costPt }
+            val computed = if (item.name.equals("MANOBRAS ESPECIAIS", ignoreCase = true) || 
+                               item.name.equals("QUALIDADES ESPECIAIS", ignoreCase = true) ||
+                               item.name.equals("SENTIDOS ESPECIAIS", ignoreCase = true) ||
+                               item.name.equals("STATUS NEGATIVOS", ignoreCase = true)) {
+                item.baseCostPt + Math.ceil(selectedIds.size / 3.0).toInt()
+            } else {
+                item.baseCostPt + item.modifiers
+                    .filter { it.id in selectedIds }
+                    .sumOf { it.costPt }
+            }
             holder.cost.text = if (computed != 0) "$computed PT" else item.cost
         } else {
             holder.cost.text = item.cost
@@ -95,35 +100,27 @@ class AdvantagesAdapter(
 
         // ── Modo modular (lista de seleção) ────────────────────────────────
         val isSelectionMode = onModularItemConfirmed != null
-        val isExpanded = expandedItemId == item.id
 
         if (isSelectionMode && item.isModular) {
-            if (isExpanded) {
-                holder.containerModifiers.visibility = View.VISIBLE
-                holder.containerFooter.visibility = View.VISIBLE
-                buildCheckboxes(holder, item)
-            } else {
-                holder.containerModifiers.visibility = View.GONE
-                holder.containerFooter.visibility = View.GONE
-                holder.containerModifiers.removeAllViews()
-            }
+            holder.containerModifiers.visibility = View.VISIBLE
+            holder.containerFooter.visibility = View.VISIBLE
+            buildCheckboxes(holder, item)
         } else {
             holder.containerModifiers.visibility = View.GONE
             holder.containerFooter.visibility = View.GONE
+            holder.containerModifiers.removeAllViews()
         }
 
         holder.itemView.findViewById<View>(R.id.btn_delete_item)?.visibility = View.GONE
 
         // ── Clique ────────────────────────────────────────────────────────
         holder.itemView.setOnClickListener {
+            val currentPos = holder.bindingAdapterPosition
+            if (currentPos == RecyclerView.NO_POSITION) return@setOnClickListener
+
             if (isSelectionMode && item.isModular) {
-                val prev = expandedItemId
-                expandedItemId = if (isExpanded) null else item.id
-                if (prev != null) {
-                    val prevIdx = items.indexOfFirst { it.id == prev }
-                    if (prevIdx >= 0) notifyItemChanged(prevIdx)
-                }
-                notifyItemChanged(position)
+                // Item modular no modo de seleção não faz nada ao clicar na linha
+                // O usuário deve interagir com os checkboxes e o botão adicionar
             } else {
                 onItemClick(item)
             }
@@ -144,19 +141,31 @@ class AdvantagesAdapter(
         val selected = pendingSelections.getOrPut(item.id) { mutableSetOf() }
 
         fun refreshCost() {
-            val total = item.baseCostPt + item.modifiers
-                .filter { it.id in selected }
-                .sumOf { it.costPt }
+            val total = if (item.name.equals("MANOBRAS ESPECIAIS", ignoreCase = true) || 
+                            item.name.equals("QUALIDADES ESPECIAIS", ignoreCase = true) ||
+                            item.name.equals("SENTIDOS ESPECIAIS", ignoreCase = true) ||
+                            item.name.equals("STATUS NEGATIVOS", ignoreCase = true)) {
+                item.baseCostPt + Math.ceil(selected.size / 3.0).toInt()
+            } else {
+                item.baseCostPt + item.modifiers
+                    .filter { it.id in selected }
+                    .sumOf { it.costPt }
+            }
             holder.computedCost.text = if (total >= 0) "$total PT" else "$total PT (desconto)"
         }
         refreshCost()
 
         for (mod in item.modifiers) {
             val cb = CheckBox(ctx)
-            cb.text = when {
-                mod.costPt > 0 -> "${mod.name}  (+${mod.costPt}PT)"
-                mod.costPt < 0 -> "${mod.name}  (${mod.costPt}PT)"
-                else -> mod.name
+            cb.setPadding(0, 16, 0, 16) // Added padding top and bottom (in pixels)
+            cb.text = if (mod.description.isNotEmpty()) {
+                "${mod.name}: ${mod.description}"
+            } else {
+                when {
+                    mod.costPt > 0 -> "${mod.name}  (+${mod.costPt}PT)"
+                    mod.costPt < 0 -> "${mod.name}  (${mod.costPt}PT)"
+                    else -> mod.name
+                }
             }
             cb.isChecked = mod.id in selected
             cb.setOnCheckedChangeListener { _, checked ->
@@ -178,7 +187,6 @@ class AdvantagesAdapter(
             )
             onModularItemConfirmed?.invoke(confirmed)
             pendingSelections.remove(item.id)
-            expandedItemId = null
             notifyItemChanged(items.indexOf(item))
         }
     }

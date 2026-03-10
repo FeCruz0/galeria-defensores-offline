@@ -92,6 +92,16 @@ data class AdvantageItem(
     /** Custo total em pontos = base + soma dos modificadores selecionados */
     fun computedCostPt(): Int {
         if (!isModular) return cost.toIntOrNull() ?: 0
+        
+        // Regra específica para Manobras Especiais, Qualidades Especiais, Sentidos Especiais e Status Negativos: 1PT a cada 3 opções
+        if (name.equals("MANOBRAS ESPECIAIS", ignoreCase = true) || 
+            name.equals("QUALIDADES ESPECIAIS", ignoreCase = true) ||
+            name.equals("SENTIDOS ESPECIAIS", ignoreCase = true) ||
+            name.equals("STATUS NEGATIVOS", ignoreCase = true)) {
+            val count = selectedModifiers.size
+            return baseCostPt + Math.ceil(count / 3.0).toInt()
+        }
+        
         val selectedCost = modifiers
             .filter { it.id in selectedModifiers }
             .sumOf { it.costPt }

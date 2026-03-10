@@ -27,11 +27,29 @@ object DisadvantagesRepository {
         } else {
              if (system.disadvantages.isNotEmpty()) {
                  val mapped = system.disadvantages.map { item ->
+                     var isMod = item.isModular
+                     var basePt = item.baseCostPt
+                     var mods = item.modifiers ?: emptyList()
+
+                     if (!isMod) {
+                         // Attempt to upgrade from default disadvantages (legacy JSON)
+                         val defaultMatch = DisadvantagesData.defaultDisadvantages.find { it.name.equals(item.name, ignoreCase = true) }
+                         if (defaultMatch != null && defaultMatch.isModular) {
+                             isMod = true
+                             basePt = defaultMatch.baseCostPt
+                             mods = defaultMatch.modifiers
+                         }
+                     }
+
                      AdvantageItem(
                          id = item.id,
                          name = item.name,
                          description = item.description,
-                         cost = item.cost
+                         cost = item.cost,
+                         isModular = isMod,
+                         baseCostPt = basePt,
+                         modifiers = mods,
+                         selectedModifiers = item.selectedModifiers ?: emptyList()
                      )
                  }
                  _disadvantages.addAll(mapped)

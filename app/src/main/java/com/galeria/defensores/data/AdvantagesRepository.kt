@@ -29,12 +29,39 @@ object AdvantagesRepository {
              // We might want to MERGE with defaults if the system says so, but usually it replaces.
              // For Gaiden, it replaces.
              if (system.advantages.isNotEmpty()) {
+                 val gaidenAdvantages = GaidenData.createSystem().advantages
                  val mapped = system.advantages.map { item ->
+                     var isMod = item.isModular
+                     var basePt = item.baseCostPt
+                     var mods = item.modifiers ?: emptyList()
+
+                     if (!isMod) {
+                         // Attempt to upgrade from default advantages (legacy JSON)
+                         val defaultMatch = AdvantagesData.defaultAdvantages.find { it.name.trim().equals(item.name.trim(), ignoreCase = true) }
+                         if (defaultMatch != null && defaultMatch.isModular) {
+                             isMod = true
+                             basePt = defaultMatch.baseCostPt
+                             mods = defaultMatch.modifiers
+                         } else {
+                             // Attempt to upgrade from GaidenData
+                             val gaidenMatch = gaidenAdvantages.find { it.name.trim().equals(item.name.trim(), ignoreCase = true) }
+                             if (gaidenMatch != null && gaidenMatch.isModular) {
+                                 isMod = true
+                                 basePt = gaidenMatch.baseCostPt
+                                 mods = gaidenMatch.modifiers
+                             }
+                         }
+                     }
+
                      AdvantageItem(
                          id = item.id,
                          name = item.name,
                          description = item.description,
-                         cost = item.cost
+                         cost = item.cost,
+                         isModular = isMod,
+                         baseCostPt = basePt,
+                         modifiers = mods,
+                         selectedModifiers = item.selectedModifiers ?: emptyList()
                      )
                  }
                  _advantages.addAll(mapped)

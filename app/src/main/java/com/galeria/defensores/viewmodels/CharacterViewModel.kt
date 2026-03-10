@@ -107,6 +107,38 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
              loadedChar.resourceValues["pv"] = loadedChar.currentPv
              loadedChar.resourceValues["pm"] = loadedChar.currentPm
 
+             // Upgrade legacy advantages on the sheet to Modular if they match
+             loadedChar.vantagens = loadedChar.vantagens.map { adv ->
+                 if (!adv.isModular) {
+                     val defaultMatch = com.galeria.defensores.data.AdvantagesData.defaultAdvantages.find { it.name.trim().equals(adv.name.trim(), ignoreCase = true) }
+                     if (defaultMatch != null && defaultMatch.isModular) {
+                         adv.copy(isModular = true, baseCostPt = defaultMatch.baseCostPt, modifiers = defaultMatch.modifiers)
+                     } else {
+                         val gaidenMatch = com.galeria.defensores.data.GaidenData.createSystem().advantages.find { it.name.trim().equals(adv.name.trim(), ignoreCase = true) }
+                         if (gaidenMatch != null && gaidenMatch.isModular) {
+                             adv.copy(isModular = true, baseCostPt = gaidenMatch.baseCostPt, modifiers = gaidenMatch.modifiers)
+                         } else {
+                             adv
+                         }
+                     }
+                 } else {
+                     adv
+                 }
+             }.toMutableList()
+
+             loadedChar.desvantagens = loadedChar.desvantagens.map { disadv ->
+                 if (!disadv.isModular) {
+                     val defaultMatch = com.galeria.defensores.data.DisadvantagesData.defaultDisadvantages.find { it.name.trim().equals(disadv.name.trim(), ignoreCase = true) }
+                     if (defaultMatch != null && defaultMatch.isModular) {
+                         disadv.copy(isModular = true, baseCostPt = defaultMatch.baseCostPt, modifiers = defaultMatch.modifiers)
+                     } else {
+                         disadv
+                     }
+                 } else {
+                     disadv
+                 }
+             }.toMutableList()
+
             _character.value = loadedChar!!
         }
     }

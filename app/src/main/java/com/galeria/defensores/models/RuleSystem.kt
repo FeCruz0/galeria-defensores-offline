@@ -21,7 +21,11 @@ data class ItemDefinition(
     var name: String,
     var description: String,
     var cost: String = "1", // e.g. "1pt", "-1pt", "1-2pt"
-    var type: String = "General" // Optional tag
+    var type: String = "General", // Optional tag
+    val isModular: Boolean = false,
+    val modifiers: List<ModifierOption> = emptyList(),
+    val selectedModifiers: List<String> = emptyList(),
+    val baseCostPt: Int = 0
 )
 
 data class AttributeDefinition(

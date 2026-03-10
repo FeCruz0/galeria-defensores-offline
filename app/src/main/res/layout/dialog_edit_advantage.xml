@@ -63,6 +63,63 @@
                     android:textColor="@color/text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Base Cost Input for Modular -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/edit_modular_base_cost_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:hint="Custo Base (PT)"
+                android:visibility="gone"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_modular_base_cost"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:textColor="@color/text_primary" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/tv_total_cost_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Custo Total: 0 PT"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="12dp"
+                android:textColor="@color/text_primary"
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tipo de Vantagem"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp"
+                android:textColor="@color/text_secondary" />
+
+            <RadioGroup
+                android:id="@+id/rg_advantage_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+                <RadioButton
+                    android:id="@+id/rb_type_common"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Comum"
+                    android:checked="true" />
+                <RadioButton
+                    android:id="@+id/rb_type_modular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Modular" />
+            </RadioGroup>
+
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -79,6 +136,38 @@
                     android:gravity="top"
                     android:textColor="@color/text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Modifiers Container para Vantagens Modulares -->
+            <LinearLayout
+                android:id="@+id/edit_container_modifiers_wrapper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Opções / Modificadores"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"
+                    android:textColor="@color/text_secondary" />
+
+                <LinearLayout
+                    android:id="@+id/edit_container_modifiers"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <Button
+                    android:id="@+id/btn_add_modifier"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+ Adicionar Opção"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_gravity="start"
+                    android:layout_marginBottom="16dp" />
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
