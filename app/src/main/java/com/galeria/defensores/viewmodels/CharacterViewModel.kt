@@ -43,6 +43,12 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
     private val currentRuleSystem: RuleSystem
         get() = _ruleSystem.value!!
 
+    // Domain Layer (Use Cases)
+    private val getResourceMaxUseCase = com.galeria.defensores.domain.usecases.GetResourceMaxUseCase()
+    private val calculateStandardRollUseCase = com.galeria.defensores.domain.usecases.CalculateStandardRollUseCase()
+    private val calculateCustomRollUseCase = com.galeria.defensores.domain.usecases.CalculateCustomRollUseCase()
+    private val loadCharacterUseCase = com.galeria.defensores.domain.usecases.LoadCharacterUseCase()
+
     fun getAttributeName(key: String): String {
         return currentRuleSystem.attributes.find { it.key == key }?.name ?: key.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
     }
@@ -58,88 +64,29 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             android.util.Log.d("CharacterDebug", "Loading character: id=$id, tableId=$tableId")
             
-            // Load Character first
-            var loadedChar: Character? = null
-            if (id != null) {
-                loadedChar = CharacterRepository.getCharacter(id)
-            }
-            
-            if (loadedChar == null) {
-                android.util.Log.d("CharacterDebug", "Creating default character fallback")
-                val currentUser = com.galeria.defensores.data.SessionManager.currentUser
-                loadedChar = Character(
-                    tableId = tableId ?: "",
-                    ownerId = currentUser?.id ?: ""
-                )
-            }
-            
-            // Now load Rule System based on Table
-            val effectiveTableId = if (loadedChar.tableId.isNotEmpty()) loadedChar.tableId else tableId
-            val systemToLoad = if (!effectiveTableId.isNullOrEmpty()) {
-                val table = TableRepository.getTable(effectiveTableId)
-                if (table != null) {
-                    RuleSystemRepository.getSystemOrDefault(table.ruleSystemId)
-                } else {
-                    RuleSystemRepository.getSystemOrDefault(null)
+            when (val result = loadCharacterUseCase(id, tableId)) {
+                is com.galeria.defensores.domain.usecases.CharacterResult.Success -> {
+                    val systemToLoad = result.ruleSystem
+                    val loadedChar = result.character
+                    
+                    android.util.Log.d("SystemDebug", "Loaded RuleSystem: ${systemToLoad.id} (${systemToLoad.name})")
+                    _ruleSystem.value = systemToLoad
+
+                    val effectiveTableId = if (loadedChar.tableId.isNotEmpty()) loadedChar.tableId else tableId
+                    loadDamageTypes(effectiveTableId)
+
+                    _character.value = loadedChar
                 }
-            } else {
-                RuleSystemRepository.getSystemOrDefault(null) // Base
+                is com.galeria.defensores.domain.usecases.CharacterResult.Error -> {
+                    android.util.Log.e("CharacterDebug", "Error loading character", result.throwable)
+                    // Create minimal fallback character if error occurs to avoid crashing UI
+                    val currentUser = com.galeria.defensores.data.SessionManager.currentUser
+                    _character.value = Character(
+                        tableId = tableId ?: "",
+                        ownerId = currentUser?.id ?: ""
+                    )
+                }
             }
-            android.util.Log.d("SystemDebug", "Loaded RuleSystem: ${systemToLoad.id} (${systemToLoad.name})")
-            _ruleSystem.value = systemToLoad
-
-            // Load advantages/disadvantages/skills/damage types for this system
-            com.galeria.defensores.data.AdvantagesRepository.loadSystem(systemToLoad)
-            com.galeria.defensores.data.DisadvantagesRepository.loadSystem(systemToLoad)
-            com.galeria.defensores.data.SkillsRepository.loadSystem(systemToLoad)
-            loadDamageTypes(effectiveTableId)
-
-            // Sync legacy fields to dynamic maps if empty (Migration)
-             if (loadedChar!!.attributeValues.isEmpty()) {
-                loadedChar.attributeValues["forca"] = loadedChar.forca
-                loadedChar.attributeValues["habilidade"] = loadedChar.habilidade
-                loadedChar.attributeValues["resistencia"] = loadedChar.resistencia
-                loadedChar.attributeValues["armadura"] = loadedChar.armadura
-                loadedChar.attributeValues["poderFogo"] = loadedChar.poderFogo
-            }
-            // Ensure resource values are synced
-            // We use standard keys "pv" and "pm"
-             loadedChar.resourceValues["pv"] = loadedChar.currentPv
-             loadedChar.resourceValues["pm"] = loadedChar.currentPm
-
-             // Upgrade legacy advantages on the sheet to Modular if they match
-             loadedChar.vantagens = loadedChar.vantagens.map { adv ->
-                 if (!adv.isModular) {
-                     val defaultMatch = com.galeria.defensores.data.AdvantagesData.defaultAdvantages.find { it.name.trim().equals(adv.name.trim(), ignoreCase = true) }
-                     if (defaultMatch != null && defaultMatch.isModular) {
-                         adv.copy(isModular = true, baseCostPt = defaultMatch.baseCostPt, modifiers = defaultMatch.modifiers)
-                     } else {
-                         val gaidenMatch = com.galeria.defensores.data.GaidenData.createSystem().advantages.find { it.name.trim().equals(adv.name.trim(), ignoreCase = true) }
-                         if (gaidenMatch != null && gaidenMatch.isModular) {
-                             adv.copy(isModular = true, baseCostPt = gaidenMatch.baseCostPt, modifiers = gaidenMatch.modifiers)
-                         } else {
-                             adv
-                         }
-                     }
-                 } else {
-                     adv
-                 }
-             }.toMutableList()
-
-             loadedChar.desvantagens = loadedChar.desvantagens.map { disadv ->
-                 if (!disadv.isModular) {
-                     val defaultMatch = com.galeria.defensores.data.DisadvantagesData.defaultDisadvantages.find { it.name.trim().equals(disadv.name.trim(), ignoreCase = true) }
-                     if (defaultMatch != null && defaultMatch.isModular) {
-                         disadv.copy(isModular = true, baseCostPt = defaultMatch.baseCostPt, modifiers = defaultMatch.modifiers)
-                     } else {
-                         disadv
-                     }
-                 } else {
-                     disadv
-                 }
-             }.toMutableList()
-
-            _character.value = loadedChar!!
         }
     }
 
@@ -254,80 +201,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
      * Supported operators: +, -, *, /
      */
     fun calculateResourceMax(res: com.galeria.defensores.models.ResourceDefinition, char: com.galeria.defensores.models.Character): Int {
-        val formula = res.formula.trim().uppercase()
-        if (formula.isEmpty()) return 10 // Default fallback
-
-        // Simple parser capabilities:
-        // "R * 5", "H + 10", "10"
-        
-        // Replace known attributes with values (PDF must be first to avoid 'F' collision)
-        // Replace known attributes with values (PDF must be first to avoid 'F' collision)
-        var expression = formula
-            .replace("PDF", char.poderFogo.toString())
-            .replace("F", char.forca.toString())
-            .replace("H", char.habilidade.toString())
-            .replace("R", char.resistencia.toString())
-            .replace("A", char.armadura.toString())
-            //.replace("X", "*") // Moved to after dynamic attributes
-
-        // Dynamic Attributes
-        currentRuleSystem.attributes.forEach { attr ->
-            // Avoid replacing parts of other words if possible, but for simple algebra standard replace is usually okay
-            // Ideally we'd use regex with word boundaries, but keys might be short.
-            // Let's assume keys are unique enough or user knows what they are doing.
-            // Uppercase match
-            val key = attr.key.uppercase()
-            if (expression.contains(key)) {
-                val valAttr = char.attributeValues[attr.key] ?: 0
-                expression = expression.replace(key, valAttr.toString())
-            }
-        }
-        
-        // Replace X operator last
-        expression = expression.replace("X", "*")
-        
-        // Evaluate simple expression (very basic: A op B)
-        var result = 0
-        try {
-            // Check for multiplication
-            if (expression.contains("*")) {
-                val parts = expression.split("*")
-                if (parts.size >= 2) { // Handle cases like R*5 (take first two or fold?)
-                    // 3D&T usually R*5. Let's precise
-                    val a = parts[0].trim().toIntOrNull() ?: 0
-                    val b = parts[1].trim().toIntOrNull() ?: 0
-                    result = a * b
-                }
-            } else if (expression.contains("+")) {
-                val parts = expression.split("+")
-                if (parts.size >= 2) {
-                    val a = parts[0].trim().toIntOrNull() ?: 0
-                    val b = parts[1].trim().toIntOrNull() ?: 0
-                    result = a + b
-                }
-            } else if (expression.contains("-")) {
-                 val parts = expression.split("-")
-                 if (parts.size >= 2) {
-                     val a = parts[0].trim().toIntOrNull() ?: 0
-                     val b = parts[1].trim().toIntOrNull() ?: 0
-                     result = a - b
-                 }
-            } else if (expression.contains("/")) {
-                  val parts = expression.split("/")
-                  if (parts.size >= 2) {
-                      val a = parts[0].trim().toIntOrNull() ?: 0
-                      val b = parts[1].trim().toIntOrNull() ?: 0
-                      if (b != 0) result = a / b
-                  }
-            } else {
-                // Try direct number
-                result = expression.trim().toIntOrNull() ?: 0
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("FormulaError", "Failed to parse formula: $formula", e)
-        }
-        
-        return result.coerceAtLeast(1)
+        return getResourceMaxUseCase(res, char, currentRuleSystem)
     }
 
     fun updateName(name: String) {
@@ -675,7 +549,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         }
 
         val result = if (request.type == com.galeria.defensores.models.RollRequestType.CUSTOM && request.customRoll != null) {
-            calculateCustomRollResult(char, request.customRoll, request.diceOverride ?: diceValues)
+            calculateCustomRollUseCase(char, request.customRoll, request.diceOverride ?: diceValues)
         } else {
             // Standard Roll
             val dieVal = (request.diceOverride ?: diceValues).firstOrNull() ?: 1
@@ -689,14 +563,14 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                 else -> com.galeria.defensores.models.RollType.ATTRIBUTE
             }
 
-            calculateStandardRollResult(
+            calculateStandardRollUseCase(
                 char, 
                 rollType, 
                 request.bonus, 
                 request.attributeValue, 
                 request.skillValue, 
                 dieVal
-            )
+            ) { getAttributeName(it) }
         }
 
         _lastRoll.value = result
@@ -845,7 +719,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                 }
             }
 
-            val result = calculateStandardRollResult(char, type, bonus, attrVal, char.habilidade, null)
+            val result = calculateStandardRollUseCase(char, type, bonus, attrVal, char.habilidade, null) { getAttributeName(it) }
             
             _lastRoll.value = result
             _rollEvent.value = com.galeria.defensores.utils.Event(result)
@@ -1275,7 +1149,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
             }
 
 
-            val result = calculateCustomRollResult(char, roll, null)
+            val result = calculateCustomRollUseCase(char, roll, null)
             _lastRoll.value = result
             _rollEvent.value = com.galeria.defensores.utils.Event(result)
             _isRolling.value = false
@@ -1284,179 +1158,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                 com.galeria.defensores.data.TableRepository.addRollToHistory(char.tableId, result)
             }
         }
-    }
-
-    private fun calculateStandardRollResult(
-        char: com.galeria.defensores.models.Character,
-        type: RollType,
-        bonus: Int,
-        attrVal: Int,
-        skillVal: Int,
-        diceOverride: Int? = null
-    ): RollResult {
-        // Determine Die Result
-        val die = diceOverride ?: (Random.nextInt(6) + 1)
-        val isCritical = die == 6
-        val effectiveAttr = if (isCritical) attrVal * 2 else attrVal
-        val total = effectiveAttr + skillVal + die + bonus
-        
-        val displayAttr = when(type) {
-             RollType.ATTACK_F -> getAttributeName("forca")
-             RollType.ATTACK_PDF -> getAttributeName("poderFogo")
-             RollType.DEFENSE -> getAttributeName("armadura")
-             RollType.INITIATIVE -> "Iniciativa"
-             else -> "Atributo"
-        }
-
-        val attrDetail = if (isCritical) "$displayAttr [$attrVal x2!]" else "$displayAttr [$attrVal]"
-        val bonusDetail = if (bonus != 0) " + Bônus [$bonus]" else ""
-        val dieDetail = if (isCritical) "1d6 [6!]" else "1d6 [$die]"
-        
-        val details = "$attrDetail + Hab [$skillVal] + $dieDetail$bonusDetail = $total"
-
-        return RollResult(
-            total = total,
-            die = die,
-            attributeUsed = displayAttr,
-            attributeValue = attrVal,
-            skillValue = skillVal,
-            bonus = bonus,
-            isCritical = isCritical,
-            timestamp = System.currentTimeMillis(),
-            name = char.name,
-            characterId = char.id,
-            details = details,
-            diceResults = listOf(die)
-        )
-    }
-
-    private fun calculateCustomRollResult(
-        char: com.galeria.defensores.models.Character, 
-        roll: com.galeria.defensores.models.CustomRoll, 
-        diceOverride: List<Int>? = null
-    ): RollResult {
-        var totalSum = 0
-        val parts = mutableListOf<String>()
-        var isCriticalSummary = false
-        var totalCrits = 0
-        val allDice = mutableListOf<Int>()
-        
-        val combatNameCheck = roll.name.contains("Ataque", ignoreCase = true) || 
-                             roll.name.contains("Defesa", ignoreCase = true) || 
-                             roll.name.contains("PdF", ignoreCase = true) ||
-                             roll.name.contains(" F ", ignoreCase = true)
-
-        var overrideIndex = 0
-
-        // 1. Process Dice Components
-        roll.components.forEach { comp ->
-            var compTotal = 0
-            val rolls = mutableListOf<Int>()
-            
-            repeat(comp.count) {
-                val die = if (diceOverride != null && overrideIndex < diceOverride.size) {
-                    diceOverride[overrideIndex++]
-                } else {
-                    Random.nextInt(comp.faces) + 1
-                }
-                
-                val currentCanCrit = comp.canCrit || combatNameCheck
-                val isCrit = currentCanCrit && (
-                    (comp.critRangeStart != null && die >= comp.critRangeStart!!) || 
-                    (comp.critRangeStart == null && die == comp.faces)
-                )
-                
-                if (isCrit) {
-                    totalCrits++
-                    isCriticalSummary = true
-                }
-                
-                rolls.add(die)
-                allDice.add(die)
-                compTotal += die
-            }
-            
-            val finalCompTotal = if (comp.isNegative) -compTotal else compTotal
-            totalSum += finalCompTotal + comp.bonus
-            
-            // Format: "2d6 [3,5] + 2"
-            val signPrefix = if (comp.isNegative) "- " else (if (parts.isNotEmpty()) "+ " else "")
-            
-            val formattedRolls = rolls.map { d ->
-                val isMax = (d == comp.faces && comp.canCrit)
-                if (isMax) "$d!" else "$d"
-            }.joinToString(",")
-            
-            val diceStr = "${comp.count}d${comp.faces} [$formattedRolls]"
-            val bonusStr = if (comp.bonus != 0) {
-                 " + ${comp.bonus}"
-            } else ""
-            
-            parts.add("$signPrefix$diceStr$bonusStr")
-        }
-
-        // 2. Resolve Attributes & Crits
-        fun getAttrValue(attrName: String): Int {
-            return when(attrName) {
-                "forca" -> char.forca
-                "habilidade" -> char.habilidade
-                "resistencia" -> char.resistencia
-                "armadura" -> char.armadura
-                "poderFogo" -> char.poderFogo
-                else -> 0
-            }
-        }
-        
-        val primaryVal = getAttrValue(roll.primaryAttribute)
-        val secondaryVal = getAttrValue(roll.secondaryAttribute)
-        
-        // Calculate Multiplier
-        var critMultiplier = 1
-        if (isCriticalSummary) {
-             critMultiplier = if (roll.accumulateCrit) 1 + totalCrits else 2
-        }
-        
-        val finalPrimary = primaryVal * critMultiplier
-        totalSum += finalPrimary + secondaryVal + roll.globalModifier
-
-        // 3. Append Attributes formatted
-        if (roll.primaryAttribute != "none" && primaryVal != 0) {
-            val pName = roll.primaryAttribute.replaceFirstChar { it.uppercase() }.take(3)
-            val critInfo = if (critMultiplier > 1) " x$critMultiplier!" else ""
-            val prefix = if (parts.isNotEmpty()) "+ " else ""
-            parts.add("$prefix$pName [$primaryVal$critInfo]")
-        }
-        
-        if (roll.secondaryAttribute != "none" && secondaryVal != 0) {
-            val sName = roll.secondaryAttribute.replaceFirstChar { it.uppercase() }.take(3)
-            val prefix = if (parts.isNotEmpty()) "+ " else ""
-            parts.add("$prefix$sName [$secondaryVal]")
-        }
-        
-        // 4. Global Modifier
-        if (roll.globalModifier != 0) {
-             val prefix = if (roll.globalModifier > 0) (if (parts.isNotEmpty()) "+ " else "") else "- "
-             parts.add("$prefix[${kotlin.math.abs(roll.globalModifier)}]")
-        }
-        
-        // 5. Build Final String
-        val finalString = "${parts.joinToString(" ").replace("  ", " ").trim()} = $totalSum"
-
-        return RollResult(
-            total = totalSum,
-            die = 0, 
-            attributeUsed = "Custom", // Or keep blank to force usage of details?
-            attributeValue = 0,
-            skillValue = 0,
-            bonus = roll.globalModifier,
-            isCritical = isCriticalSummary,
-            timestamp = System.currentTimeMillis(),
-            name = "${char.name} - ${roll.name}",
-            characterId = char.id,
-            details = finalString,
-            diceResults = allDice
-        )
-    }
+       }
     fun uploadCharacterAvatar(context: Context, uri: android.net.Uri, onSuccess: () -> Unit, onError: (String) -> Unit) {
         val charId = _character.value?.id ?: return
         android.util.Log.d("AvatarUpdate", "Starting Base64 update for charId: $charId")
