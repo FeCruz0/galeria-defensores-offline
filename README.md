@@ -5,6 +5,8 @@ Galeria de Defensores is an Android application designed for managing character 
 ## Features
 
 - **Character Management**: Create and manage character sheets with various attributes.
+- **Dual Rule Systems**: Support for both standard 3D&T Alpha and the alternative Gaiden rulesets.
+- **Modular Advantages**: Advanced system to handle advantages that provide customizable modifiers (like "Armadura Extra" or "Ataque Especial") with dynamic point cost calculations, including special 3-for-1 pricing rules.
 - **User-Friendly Interface**: Easy navigation through character lists and details.
 - **Data Persistence**: Save character data for future access.
 

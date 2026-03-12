@@ -287,6 +287,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         expression = expression.replace("X", "*")
         
         // Evaluate simple expression (very basic: A op B)
+        var result = 0
         try {
             // Check for multiplication
             if (expression.contains("*")) {
@@ -295,38 +296,38 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                     // 3D&T usually R*5. Let's precise
                     val a = parts[0].trim().toIntOrNull() ?: 0
                     val b = parts[1].trim().toIntOrNull() ?: 0
-                    return a * b
+                    result = a * b
                 }
             } else if (expression.contains("+")) {
                 val parts = expression.split("+")
                 if (parts.size >= 2) {
                     val a = parts[0].trim().toIntOrNull() ?: 0
                     val b = parts[1].trim().toIntOrNull() ?: 0
-                    return a + b
+                    result = a + b
                 }
             } else if (expression.contains("-")) {
                  val parts = expression.split("-")
                  if (parts.size >= 2) {
                      val a = parts[0].trim().toIntOrNull() ?: 0
                      val b = parts[1].trim().toIntOrNull() ?: 0
-                     return a - b
+                     result = a - b
                  }
             } else if (expression.contains("/")) {
                   val parts = expression.split("/")
                   if (parts.size >= 2) {
                       val a = parts[0].trim().toIntOrNull() ?: 0
                       val b = parts[1].trim().toIntOrNull() ?: 0
-                      if (b != 0) return a / b
+                      if (b != 0) result = a / b
                   }
             } else {
                 // Try direct number
-                return expression.trim().toIntOrNull() ?: 0
+                result = expression.trim().toIntOrNull() ?: 0
             }
         } catch (e: Exception) {
             android.util.Log.e("FormulaError", "Failed to parse formula: $formula", e)
         }
         
-        return 0
+        return result.coerceAtLeast(1)
     }
 
     fun updateName(name: String) {
