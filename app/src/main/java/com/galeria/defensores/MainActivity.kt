@@ -21,6 +21,9 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             // Always assume logged in (offline)
             lifecycleScope.launch {
+                // Migrate legacy JSON data to Room on first run
+                com.galeria.defensores.data.database.JsonToRoomMigrator.migrateIfNeeded(this@MainActivity)
+                
                 SessionManager.refreshUser() // Sets mock user
                 startNotificationObserver() 
                 supportFragmentManager.beginTransaction()

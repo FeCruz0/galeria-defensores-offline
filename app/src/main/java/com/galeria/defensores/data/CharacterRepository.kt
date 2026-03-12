@@ -18,9 +18,11 @@ object CharacterRepository {
     // Let's use a "lateinit var context" initialized in MainActivity/SessionManager.
     
     private lateinit var appContext: android.content.Context
+    private lateinit var database: com.galeria.defensores.data.database.AppDatabase
 
     fun init(context: android.content.Context) {
         appContext = context.applicationContext
+        database = com.galeria.defensores.data.database.AppDatabase.getDatabase(appContext)
     }
     
     // Safety check helper
@@ -29,53 +31,35 @@ object CharacterRepository {
     }
 
     suspend fun getCharacters(tableId: String? = null): List<Character> {
-        val context = getContext() ?: return emptyList()
-        val allFiles = LocalFileManager.listFiles(context, PREFIX)
-        val characters = mutableListOf<Character>()
-        
-        for (file in allFiles) {
-            val char = LocalFileManager.readJson(context, file.name, Character::class.java)
-            if (char != null) {
-                if (tableId == null || char.tableId == tableId) {
-                    characters.add(char)
-                }
-            }
+        if (!::database.isInitialized) return emptyList()
+        val entities = if (tableId == null) {
+            database.characterDao().getAll()
+        } else {
+            database.characterDao().getByTable(tableId)
         }
-        return characters
+        return entities.map { it.toCharacter() }
     }
 
     suspend fun getCharactersForUser(userId: String): List<Character> {
-        // In offline mode, current user owns everything basically, 
-        // or we filter by the mock ID "offline_user_id". 
-        // Let's just return all characters matching the ownerId 
-        // (which should be "offline_user_id" for new ones).
-        
-        val context = getContext() ?: return emptyList()
-        val allFiles = LocalFileManager.listFiles(context, PREFIX)
-        val characters = mutableListOf<Character>()
-        
-        for (file in allFiles) {
-            val char = LocalFileManager.readJson(context, file.name, Character::class.java)
-            if (char != null && char.ownerId == userId) {
-                characters.add(char)
-            }
-        }
-        return characters
+        if (!::database.isInitialized) return emptyList()
+        val entities = database.characterDao().getByOwner(userId)
+        return entities.map { it.toCharacter() }
     }
 
     suspend fun getCharacter(id: String): Character? {
-        val context = getContext() ?: return null
-        return LocalFileManager.readJson(context, "$PREFIX$id.json", Character::class.java)
+        if (!::database.isInitialized) return null
+        return database.characterDao().getById(id)?.toCharacter()
     }
 
     suspend fun saveCharacter(character: Character) {
-        val context = getContext() ?: return
-        LocalFileManager.saveJson(context, "$PREFIX${character.id}.json", character)
+        if (!::database.isInitialized) return
+        database.characterDao().insert(com.galeria.defensores.data.database.entities.CharacterEntity.fromCharacter(character))
     }
 
     suspend fun deleteCharacter(id: String): Boolean {
-        val context = getContext() ?: return false
-        return LocalFileManager.deleteFile(context, "$PREFIX$id.json")
+        if (!::database.isInitialized) return false
+        database.characterDao().deleteById(id)
+        return true
     }
 
     suspend fun unlinkCharactersFromTable(tableId: String) {

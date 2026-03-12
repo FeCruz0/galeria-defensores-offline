@@ -14,12 +14,12 @@ object RuleSystemRepository {
     private const val GAIDEN_SYSTEM_ID = "3det_gaiden_base"
     
     private lateinit var appContext: Context
+    private lateinit var database: com.galeria.defensores.data.database.AppDatabase
 
     fun init(context: Context) {
         appContext = context.applicationContext
-        // Using GlobalScope or runBlocking here since this mimics a lightweight dependency injection initialization
-        // For a proper architecture, this should be done in a coroutine scope aware of the lifecycle, 
-        // but for now we use runBlocking to ensure base system exists before usage.
+        database = com.galeria.defensores.data.database.AppDatabase.getDatabase(appContext)
+        
         kotlinx.coroutines.runBlocking {
             ensureBaseSystemExists()
         }
@@ -42,70 +42,56 @@ object RuleSystemRepository {
     }
 
     private suspend fun ensureBaseSystemExists() {
-        // We no longer rely on the file for the base system logic, 
-        // but we might save it for valid file listing consistency if needed.
-        val context = getContext() ?: return
-        val baseFile = File(context.filesDir, "$PREFIX$BASE_SYSTEM_ID.json")
-        if (!baseFile.exists()) {
-            LocalFileManager.saveJson(context, "$PREFIX$BASE_SYSTEM_ID.json", createBaseSystem())
+        if (!::database.isInitialized) return
+        if (database.ruleSystemDao().getById(BASE_SYSTEM_ID) == null) {
+            database.ruleSystemDao().insert(com.galeria.defensores.data.database.entities.RuleSystemEntity.fromRuleSystem(createBaseSystem()))
         }
     }
 
     suspend fun getSystems(): List<RuleSystem> {
-        val context = getContext() ?: return emptyList()
-        val allFiles = LocalFileManager.listFiles(context, PREFIX)
-        val systems = mutableListOf<RuleSystem>()
+        if (!::database.isInitialized) return listOf(createBaseSystem(), GaidenData.createSystem())
         
-        // Add Base Systems explicitly (Hardcoded Source of Truth)
+        val systems = mutableListOf<RuleSystem>()
         systems.add(createBaseSystem())
         systems.add(GaidenData.createSystem())
 
-        for (file in allFiles) {
-            // Skip base system files if encountered (we added them manually)
-            if (file.name == "$PREFIX$BASE_SYSTEM_ID.json") continue
-            if (file.name == "$PREFIX$GAIDEN_SYSTEM_ID.json") continue
-
-            val sys = LocalFileManager.readJson(context, file.name, RuleSystem::class.java)
-            if (sys != null) {
-                systems.add(sys)
+        val dbSystems = database.ruleSystemDao().getAll()
+        dbSystems.forEach { entity ->
+            if (entity.id != BASE_SYSTEM_ID && entity.id != GAIDEN_SYSTEM_ID) {
+                systems.add(entity.toRuleSystem())
             }
         }
         
-        // Sort: Base first, then alphabetical
         return systems.sortedWith(compareBy({ !it.isBaseSystem }, { it.name }))
     }
 
     suspend fun getSystem(id: String): RuleSystem? {
-        if (id == BASE_SYSTEM_ID) return createBaseSystem() // Always return fresh default
-        if (id == GAIDEN_SYSTEM_ID) return GaidenData.createSystem() // Always return fresh default
+        if (id == BASE_SYSTEM_ID) return createBaseSystem()
+        if (id == GAIDEN_SYSTEM_ID) return GaidenData.createSystem()
         
-        val context = getContext() ?: return null
-        return LocalFileManager.readJson(context, "$PREFIX$id.json", RuleSystem::class.java)
+        if (!::database.isInitialized) return null
+        return database.ruleSystemDao().getById(id)?.toRuleSystem()
     }
     
-    // Fallback if ID is null (default to base)
     suspend fun getSystemOrDefault(id: String?): RuleSystem {
         if (id == null || id == BASE_SYSTEM_ID) return createBaseSystem()
         if (id == GAIDEN_SYSTEM_ID) return GaidenData.createSystem()
         return getSystem(id) ?: createBaseSystem()
     }
-    
-    private suspend fun getBaseSystem(): RuleSystem {
-        return createBaseSystem()
-    }
 
     suspend fun saveSystem(system: RuleSystem) {
-        if (system.id == BASE_SYSTEM_ID) return // PREVENT SAVING BASE SYSTEM
-        if (system.id == GAIDEN_SYSTEM_ID) return // PREVENT SAVING GAIDEN SYSTEM
-        val context = getContext() ?: return
-        LocalFileManager.saveJson(context, "$PREFIX${system.id}.json", system)
+        if (system.id == BASE_SYSTEM_ID) return
+        if (system.id == GAIDEN_SYSTEM_ID) return
+        if (!::database.isInitialized) return
+        database.ruleSystemDao().insert(com.galeria.defensores.data.database.entities.RuleSystemEntity.fromRuleSystem(system))
     }
 
     suspend fun deleteSystem(id: String): Boolean {
-        if (id == BASE_SYSTEM_ID) return false // Cannot delete base
-        if (id == GAIDEN_SYSTEM_ID) return false // Cannot delete gaiden
-        val context = getContext() ?: return false
-        return LocalFileManager.deleteFile(context, "$PREFIX$id.json")
+        if (id == BASE_SYSTEM_ID) return false
+        if (id == GAIDEN_SYSTEM_ID) return false
+        if (!::database.isInitialized) return false
+        database.ruleSystemDao().deleteById(id)
+        return true
     }
 
     suspend fun resetBaseSystem() {
