@@ -26,6 +26,8 @@ import com.galeria.defensores.models.Spell
 import com.galeria.defensores.utils.TextFormatUtils
 
 import com.galeria.defensores.viewmodels.CharacterViewModel
+import com.galeria.defensores.viewmodels.RollViewModel
+import com.galeria.defensores.viewmodels.RuleSystemViewModel
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
@@ -42,6 +44,8 @@ class CharacterSheetFragment : Fragment() {
     @Inject lateinit var backupRepository: BackupRepository
     @Inject lateinit var tableRepository: com.galeria.defensores.data.TableRepository
     private val viewModel: CharacterViewModel by activityViewModels()
+    private val rollViewModel: RollViewModel by activityViewModels()
+    private val ruleSystemViewModel: RuleSystemViewModel by activityViewModels()
     private val cropImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
             val resultUri = com.yalantis.ucrop.UCrop.getOutput(result.data!!)
@@ -85,7 +89,7 @@ class CharacterSheetFragment : Fragment() {
 
     private val systemExportLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json")) { uri ->
         if (uri != null) {
-            val json = viewModel.exportSystemJson()
+            val json = ruleSystemViewModel.exportSystemJson()
             lifecycleScope.launch {
                  try {
                      requireContext().contentResolver.openOutputStream(uri)?.use { output ->
@@ -108,7 +112,7 @@ class CharacterSheetFragment : Fragment() {
                         input.bufferedReader().readText()
                     }
                     if (json != null) {
-                        if (viewModel.importSystemJson(json)) {
+                        if (ruleSystemViewModel.importSystemJson(json)) {
                             Toast.makeText(context, "Sistema importado com sucesso!", Toast.LENGTH_SHORT).show()
                         } else {
                             Toast.makeText(context, "Erro ao importar sistema. Conteúdo inválido.", Toast.LENGTH_SHORT).show()
@@ -261,8 +265,8 @@ class CharacterSheetFragment : Fragment() {
                      
                      itemView.setOnLongClickListener {
                          DialogEditAttributeDefinition(attr, 
-                              onSave = { updated -> viewModel.updateAttributeDefinition(updated) },
-                              onDelete = { deleted -> viewModel.removeAttributeDefinition(deleted) }
+                              onSave = { updated -> ruleSystemViewModel.updateAttributeDefinition(updated) },
+                              onDelete = { deleted -> ruleSystemViewModel.removeAttributeDefinition(deleted) }
                           ).show(parentFragmentManager, "EditAttribute")
                          true
                      }
@@ -319,8 +323,8 @@ class CharacterSheetFragment : Fragment() {
              onResourceLongClick = { res ->
                  if (isCurrentMaster) {
                      DialogEditResourceDefinition(res, 
-                         onSave = { updated -> viewModel.updateResourceDefinition(updated) },
-                         onDelete = { deleted -> viewModel.removeResourceDefinition(deleted) }
+                         onSave = { updated -> ruleSystemViewModel.updateResourceDefinition(updated) },
+                         onDelete = { deleted -> ruleSystemViewModel.removeResourceDefinition(deleted) }
                      ).show(parentFragmentManager, "EditResource")
                  }
              }
@@ -345,7 +349,7 @@ class CharacterSheetFragment : Fragment() {
             val dialog = DialogSystemOptions(
                 onSaveAsClick = {
                      DialogSaveSystem { newName ->
-                         viewModel.saveSystemAs(newName) { success ->
+                         ruleSystemViewModel.saveSystemAs(newName) { success ->
                              if (success) {
                                  Toast.makeText(context, "Sistema salvo como '$newName'!", Toast.LENGTH_SHORT).show()
                              } else {
@@ -355,7 +359,7 @@ class CharacterSheetFragment : Fragment() {
                      }.show(parentFragmentManager, "SaveSystem")
                 },
                 onExportClick = {
-                    val sysName = viewModel.ruleSystem.value?.name ?: "sistema"
+                    val sysName = ruleSystemViewModel.ruleSystem.value?.name ?: "sistema"
                     val safeName = sysName.replace("[^a-zA-Z0-9.-]".toRegex(), "_")
                     systemExportLauncher.launch("system_${safeName}.json")
                 },
@@ -367,7 +371,7 @@ class CharacterSheetFragment : Fragment() {
                         .setTitle("Restaurar Sistema Padrão?")
                         .setMessage("Isso irá reverter o sistema '3DeT Alpha' para as regras originais. \n\nCUIDADO: Se você editou o sistema padrão sem salvar como cópia, suas alterações serão perdidas.")
                         .setPositiveButton("Restaurar") { _, _ ->
-                            viewModel.resetBaseSystem { success ->
+                            ruleSystemViewModel.resetBaseSystem { success ->
                                 if (success) Toast.makeText(context, "Sistema restaurado!", Toast.LENGTH_SHORT).show()
                                 else Toast.makeText(context, "Erro ao restaurar.", Toast.LENGTH_SHORT).show()
                             }
@@ -403,7 +407,7 @@ class CharacterSheetFragment : Fragment() {
 
 
         // Virtual Roll Observer
-        viewModel.virtualRollRequest.observe(viewLifecycleOwner) { event ->
+        rollViewModel.virtualRollRequest.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let { request ->
                 val frag = com.galeria.defensores.ui.VirtualDiceFragment.newInstance(
                     diceCount = request.diceCount,
@@ -430,7 +434,7 @@ class CharacterSheetFragment : Fragment() {
             viewLifecycleOwner
         ) { _, bundle ->
             val diceValues = bundle.getIntegerArrayList("diceValues")?.toList() ?: emptyList()
-            viewModel.finalizeVirtualRoll(diceValues)
+            rollViewModel.finalizeVirtualRoll(diceValues)
         }
 
         fun updateAdapters(char: com.galeria.defensores.models.Character, ruleSystem: com.galeria.defensores.models.RuleSystem) {
@@ -443,7 +447,7 @@ class CharacterSheetFragment : Fragment() {
              
              ruleSystem.resources.forEach { res ->
                  // Calculate Max
-                 val max = viewModel.calculateResourceMax(res, char)
+                 val max = viewModel.calculateResourceMax(res, char, ruleSystem)
                  maxValues[res.key] = max
                  
                  // Get Current
@@ -457,7 +461,7 @@ class CharacterSheetFragment : Fragment() {
              resourcesAdapter.updateData(ruleSystem.resources, currentResourceValues, maxValues)
         }
 
-        viewModel.ruleSystem.observe(viewLifecycleOwner) { ruleSystem ->
+        ruleSystemViewModel.ruleSystem.observe(viewLifecycleOwner) { ruleSystem ->
             val char = viewModel.character.value ?: return@observe
             updateAdapters(char, ruleSystem)
         }
@@ -471,7 +475,7 @@ class CharacterSheetFragment : Fragment() {
 
             // Restore lost Data Binding
             // Update Adapters
-            val ruleSystem = viewModel.ruleSystem.value ?: com.galeria.defensores.models.RuleSystem()
+            val ruleSystem = ruleSystemViewModel.ruleSystem.value ?: com.galeria.defensores.models.RuleSystem()
             updateAdapters(char, ruleSystem)
 
             // Handle Permissions
@@ -496,7 +500,7 @@ class CharacterSheetFragment : Fragment() {
                 
                 // Load Damage Types if not already associated (or just refresh)
                 if (char.tableId.isNotEmpty()) {
-                    viewModel.loadDamageTypes(char.tableId)
+                    ruleSystemViewModel.loadDamageTypes(char.tableId)
                 }
                 
                 // Add Buttons Logic
@@ -508,13 +512,13 @@ class CharacterSheetFragment : Fragment() {
                 
                 btnAddAttribute.setOnClickListener {
                      DialogEditAttributeDefinition(null, { newAttr ->
-                         viewModel.addAttributeDefinition(newAttr)
+                         ruleSystemViewModel.addAttributeDefinition(newAttr)
                      }).show(parentFragmentManager, "AddAttribute")
                 }
                 
                 btnAddResource.setOnClickListener {
                      DialogEditResourceDefinition(null, { newRes ->
-                         viewModel.addResourceDefinition(newRes)
+                         ruleSystemViewModel.addResourceDefinition(newRes)
                      }).show(parentFragmentManager, "AddResource")
                 }
 
@@ -588,7 +592,7 @@ class CharacterSheetFragment : Fragment() {
                 }
 
                 // UNIQUE ADVANTAGE LOGIC
-                viewModel.loadUniqueAdvantages(effectiveTableId)
+                ruleSystemViewModel.loadUniqueAdvantages(effectiveTableId)
                 val uaCard = view.findViewById<View>(R.id.card_unique_advantage)
                 val btnSelectUA = view.findViewById<Button>(R.id.btn_select_ua)
 
@@ -717,14 +721,13 @@ class CharacterSheetFragment : Fragment() {
                 controls.forEach { it.visibility = if (canEdit) View.VISIBLE else View.INVISIBLE }
 
                 // Observer for Unique Advantages to keep local list updated
-                viewModel.availableUniqueAdvantages.observe(viewLifecycleOwner) { uas ->
-                    // Just update a local reference or the adapter if we had one here (we don't, it's for the dialog)
-                    // We can access viewModel.availableUniqueAdvantages.value directly in the click listener,
+                ruleSystemViewModel.availableUniqueAdvantages.observe(viewLifecycleOwner) { uas ->
+                    // We can access ruleSystemViewModel.availableUniqueAdvantages.value directly in the click listener,
                     // but since LiveData value can be null, we rely on the ViewModel state.
                 }
 
                 btnSelectUA.setOnClickListener {
-                    val uas = viewModel.availableUniqueAdvantages.value ?: emptyList()
+                    val uas = ruleSystemViewModel.availableUniqueAdvantages.value ?: emptyList()
                     if (uas.isNotEmpty()) {
                         if (parentFragmentManager.findFragmentByTag("SelectUADialog") == null) {
                              val dialog = SelectUniqueAdvantageDialogFragment(
@@ -734,13 +737,13 @@ class CharacterSheetFragment : Fragment() {
                                      viewModel.setUniqueAdvantage(selectedUA)
                                  },
                                  onAddCustom = { newUA ->
-                                     viewModel.addCustomUniqueAdvantage(newUA)
+                                     ruleSystemViewModel.addCustomUniqueAdvantage(newUA)
                                  },
                                  onEditCustom = { oldUA, newUA ->
-                                     viewModel.updateCustomUniqueAdvantage(oldUA, newUA)
+                                     ruleSystemViewModel.updateCustomUniqueAdvantage(oldUA, newUA)
                                  },
                                  onDeleteCustom = { uaToDelete ->
-                                     viewModel.removeCustomUniqueAdvantage(uaToDelete)
+                                     ruleSystemViewModel.removeCustomUniqueAdvantage(uaToDelete)
                                  }
                              )
                              dialog.show(parentFragmentManager, "SelectUADialog")
@@ -752,7 +755,7 @@ class CharacterSheetFragment : Fragment() {
                 }
 
                 btnManageTypes.setOnClickListener {
-                    val types = viewModel.availableDamageTypes.value ?: emptyList()
+                    val types = ruleSystemViewModel.availableDamageTypes.value ?: emptyList()
                     // Filter out defaults usually? Or allow removing custom only.
                     // The dialog logic handles removing custom. We pass the custom ones?
                     // The ViewModel logic handles Add/Remove.
@@ -766,7 +769,7 @@ class CharacterSheetFragment : Fragment() {
                     // Let's use VM helper.
                     
                     val dialog = ManageDamageTypesDialogFragment(
-                         currentTypes = viewModel.availableDamageTypes.value?.filter { 
+                         currentTypes = ruleSystemViewModel.availableDamageTypes.value?.filter { 
                              // Filter out defaults if we want to show only customs?
                              // User said "add or remove options". 
                              // "Delete" default options might be bad.
@@ -775,14 +778,14 @@ class CharacterSheetFragment : Fragment() {
                              // For now pass all.
                              true
                          } ?: emptyList(),
-                         onAdd = { viewModel.addCustomDamageType(it) },
-                         onRemove = { viewModel.removeCustomDamageType(it) }
+                         onAdd = { ruleSystemViewModel.addCustomDamageType(it) },
+                         onRemove = { ruleSystemViewModel.removeCustomDamageType(it) }
                     )
                     dialog.show(parentFragmentManager, "ManageDamageTypes")
                 }
 
                 // Setup Spinners
-                viewModel.availableDamageTypes.observe(viewLifecycleOwner) { types ->
+                ruleSystemViewModel.availableDamageTypes.observe(viewLifecycleOwner) { types ->
                     val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, types)
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     spinnerForca.adapter = adapter
@@ -950,7 +953,7 @@ class CharacterSheetFragment : Fragment() {
 
         }
         
-        viewModel.lastRoll.observe(viewLifecycleOwner) { result ->
+        rollViewModel.lastRoll.observe(viewLifecycleOwner) { result ->
             if (result != null) {
                 rollResultCard.visibility = View.VISIBLE
                 rollNameText.text = result.name
@@ -970,7 +973,7 @@ class CharacterSheetFragment : Fragment() {
             }
         }
 
-        viewModel.rollEvent.observe(viewLifecycleOwner) { event ->
+        rollViewModel.rollEvent.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let { result ->
                 // Send to Chat if in a table
                 // if (tableId != null) {
@@ -980,7 +983,7 @@ class CharacterSheetFragment : Fragment() {
             }
         }
 
-        viewModel.isRolling.observe(viewLifecycleOwner) { isRolling ->
+        rollViewModel.isRolling.observe(viewLifecycleOwner) { isRolling ->
             val buttons = listOf<Button>(
                 view.findViewById(R.id.btn_attack_f),
                 view.findViewById(R.id.btn_attack_pdf),
@@ -1115,7 +1118,7 @@ class CharacterSheetFragment : Fragment() {
         val btnAddRes = view.findViewById<Button>(R.id.btn_add_resource)
         
         // Protection: formatting visibility based on system
-        viewModel.ruleSystem.observe(viewLifecycleOwner) { sys ->
+        ruleSystemViewModel.ruleSystem.observe(viewLifecycleOwner) { sys ->
             val isBase = sys.id == "3det_alpha_base" || sys.isBaseSystem
             val canEditSystem = !isBase
             
@@ -1129,27 +1132,24 @@ class CharacterSheetFragment : Fragment() {
         }
 
         btnAddAttr.setOnClickListener {
-             // Extra check
-             val sys = viewModel.ruleSystem.value
+             val sys = ruleSystemViewModel.ruleSystem.value
              if (sys != null && (sys.id == "3det_alpha_base" || sys.isBaseSystem)) {
                  Toast.makeText(context, "Não é possível editar o Sistema Base. Use 'Salvar como' primeiro.", Toast.LENGTH_LONG).show()
                  return@setOnClickListener
              }
-
              DialogEditAttributeDefinition(null, { newAttr ->
-                 viewModel.addAttributeDefinition(newAttr)
+                 ruleSystemViewModel.addAttributeDefinition(newAttr)
              }).show(parentFragmentManager, "AddAttribute")
         }
 
         btnAddRes.setOnClickListener {
-             val sys = viewModel.ruleSystem.value
+             val sys = ruleSystemViewModel.ruleSystem.value
              if (sys != null && (sys.id == "3det_alpha_base" || sys.isBaseSystem)) {
                  Toast.makeText(context, "Não é possível editar o Sistema Base. Use 'Salvar como' primeiro.", Toast.LENGTH_LONG).show()
                  return@setOnClickListener
              }
-             
              DialogEditResourceDefinition(null, { newRes ->
-                 viewModel.addResourceDefinition(newRes)
+                 ruleSystemViewModel.addResourceDefinition(newRes)
              }).show(parentFragmentManager, "AddResource")
         }
 
@@ -1164,7 +1164,7 @@ class CharacterSheetFragment : Fragment() {
         
         val customRollsAdapter = CustomRollsAdapter(
             items = mutableListOf(),
-            onRollClick = { roll -> viewModel.rollCustom(roll) },
+            onRollClick = { roll -> rollViewModel.rollCustom(roll) },
             onEditClick = { roll ->
                 // Show Edit Dialog
                  val dialog = EditCustomRollDialogFragment(
@@ -1209,7 +1209,7 @@ class CharacterSheetFragment : Fragment() {
                  // update adapter permissions
                  val newAdapter = CustomRollsAdapter(
                     items = char.customRolls,
-                    onRollClick = { roll -> viewModel.rollCustom(roll) },
+                    onRollClick = { roll -> rollViewModel.rollCustom(roll) },
                     onEditClick = { roll ->
                          if (canManageRolls) {
                              val dialog = EditCustomRollDialogFragment(
@@ -1254,7 +1254,7 @@ class CharacterSheetFragment : Fragment() {
                 val isOwner = char.ownerId == currentUserId
                 
                 if (isMaster || isOwner) {
-                    viewModel.rollDice(type)
+                    rollViewModel.rollDice(type)
                 } else {
                     Toast.makeText(context, "Apenas o dono ou mestre pode rolar dados.", Toast.LENGTH_SHORT).show()
                 }

@@ -19,6 +19,7 @@ import com.galeria.defensores.models.CustomRoll
 import com.galeria.defensores.models.RollResult
 import com.galeria.defensores.models.RollType
 import com.galeria.defensores.viewmodels.CharacterViewModel
+import com.galeria.defensores.viewmodels.RollViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -35,6 +36,7 @@ class QuickRollBottomSheet(
     @Inject lateinit var characterRepository: CharacterRepository
     @Inject lateinit var tableRepository: TableRepository
     private val viewModel: CharacterViewModel by activityViewModels()
+    private val rollViewModel: RollViewModel by activityViewModels()
     private var myCharacterId: String? = null
 
     override fun onCreateView(
@@ -123,7 +125,7 @@ class QuickRollBottomSheet(
                  
                  if (char.customRolls.isNotEmpty()) {
                     recycler.adapter = QuickRollAdapter(char.customRolls) { roll ->
-                        viewModel.rollCustom(roll)
+                        rollViewModel.rollCustom(roll)
                     }
                     recycler.visibility = View.VISIBLE
                     emptyText.visibility = View.GONE
@@ -138,17 +140,17 @@ class QuickRollBottomSheet(
         }
         
         // 3. Observe Results
-        viewModel.rollEvent.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.let { result ->
-                val avatarUrl = viewModel.character.value?.imageUrl
-                onRollResult(result, avatarUrl)
+        rollViewModel.rollEvent.observe(viewLifecycleOwner) { event ->
+            val result = event.getContentIfNotHandled()
+            if (result != null) {
+                onRollResult(result, result.characterId)
                 dismiss()
             }
         }
 
-        // Virtual Roll Observer
-        viewModel.virtualRollRequest.observe(viewLifecycleOwner) { event ->
-             event.getContentIfNotHandled()?.let { request ->
+        rollViewModel.virtualRollRequest.observe(viewLifecycleOwner) { event ->
+            val request = event.getContentIfNotHandled()
+            if (request != null) {
                  val frag = com.galeria.defensores.ui.VirtualDiceFragment.newInstance(
                      diceCount = request.diceCount,
                      bonus = request.bonus,
@@ -172,7 +174,7 @@ class QuickRollBottomSheet(
             viewLifecycleOwner
         ) { _, bundle ->
             val diceValues = bundle.getIntegerArrayList("diceValues")?.toList() ?: emptyList()
-            viewModel.finalizeVirtualRoll(diceValues)
+            rollViewModel.finalizeVirtualRoll(diceValues)
         }
     }
     
@@ -183,16 +185,16 @@ class QuickRollBottomSheet(
 
     private fun setupStandardButtons(view: View) {
         view.findViewById<Button>(R.id.btn_quick_attack_f).setOnClickListener {
-            viewModel.rollDice(RollType.ATTACK_F)
+            rollViewModel.rollDice(RollType.ATTACK_F)
         }
-        view.findViewById<Button>(R.id.btn_quick_attack_pdf).setOnClickListener {
-             viewModel.rollDice(RollType.ATTACK_PDF)
+        view.findViewById<Button>(R.id.btn_quick_attack_pdf)?.setOnClickListener {
+             rollViewModel.rollDice(RollType.ATTACK_PDF)
         }
-        view.findViewById<Button>(R.id.btn_quick_defense).setOnClickListener {
-             viewModel.rollDice(RollType.DEFENSE)
+        view.findViewById<Button>(R.id.btn_quick_defense)?.setOnClickListener {
+             rollViewModel.rollDice(RollType.DEFENSE)
         }
-        view.findViewById<Button>(R.id.btn_quick_initiative).setOnClickListener {
-             viewModel.rollDice(RollType.INITIATIVE)
+        view.findViewById<Button>(R.id.btn_quick_initiative)?.setOnClickListener {
+             rollViewModel.rollDice(RollType.INITIATIVE)
         }
     }
     
