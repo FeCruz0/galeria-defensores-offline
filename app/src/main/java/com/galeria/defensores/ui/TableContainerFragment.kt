@@ -9,12 +9,17 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.galeria.defensores.R
 import com.galeria.defensores.data.TableRepository
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@AndroidEntryPoint
 class TableContainerFragment : Fragment() {
+
+    @Inject lateinit var tableRepository: TableRepository
 
     private var tableId: String? = null
 
@@ -62,7 +67,7 @@ class TableContainerFragment : Fragment() {
         // Load Table Data for Title
         tableId?.let { id ->
              CoroutineScope(Dispatchers.IO).launch {
-                 val table = TableRepository.getTable(id)
+                 val table = tableRepository.getTable(id)
                  withContext(Dispatchers.Main) {
                      titleView.text = table?.name ?: "Mesa"
                  }

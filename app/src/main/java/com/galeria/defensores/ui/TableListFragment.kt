@@ -17,12 +17,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.galeria.defensores.R
 import com.galeria.defensores.data.SessionManager
 import com.galeria.defensores.data.TableRepository
+import com.galeria.defensores.data.RuleSystemRepository
+import com.galeria.defensores.data.BackupRepository
 import com.galeria.defensores.data.UserRepository
 import com.galeria.defensores.models.Table
-import com.galeria.defensores.ui.MyCharactersFragment // Added
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class TableListFragment : Fragment() {
+
+    @Inject lateinit var tableRepository: TableRepository
+    @Inject lateinit var ruleSystemRepository: RuleSystemRepository
+    @Inject lateinit var backupRepository: BackupRepository
 
     private var pendingExportTable: Table? = null
 
@@ -30,7 +38,7 @@ class TableListFragment : Fragment() {
         if (uri != null && pendingExportTable != null) {
             val table = pendingExportTable!!
             lifecycleScope.launch {
-                val success = com.galeria.defensores.data.BackupRepository.exportTable(requireContext(), table.id, uri)
+                val success = backupRepository.exportTable(requireContext(), table.id, uri)
                 if (success) {
                     Toast.makeText(context, "Mesa exportada com sucesso!", Toast.LENGTH_SHORT).show()
                 } else {
@@ -45,7 +53,7 @@ class TableListFragment : Fragment() {
     private val importTableLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
             lifecycleScope.launch {
-                val success = com.galeria.defensores.data.BackupRepository.importTable(requireContext(), uri)
+                val success = backupRepository.importTable(requireContext(), uri)
                 if (success) {
                     Toast.makeText(context, "Mesa importada com sucesso!", Toast.LENGTH_SHORT).show()
                     // We need to refresh the table list. The loadTables is defined inside onViewCreated...
@@ -85,7 +93,7 @@ class TableListFragment : Fragment() {
                     }
                     
                     val currentUser = SessionManager.currentUser
-                    val tables = TableRepository.getTables()
+                    val tables = tableRepository.getTables()
                     // Simple sort by name
                     val sortedTables = tables.sortedBy { it.name }
 
@@ -238,7 +246,7 @@ class TableListFragment : Fragment() {
         layout.addView(systemSpinner)
 
         val loadingSystems = viewLifecycleOwner.lifecycleScope.async {
-            com.galeria.defensores.data.RuleSystemRepository.getSystems()
+            ruleSystemRepository.getSystems()
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -266,7 +274,7 @@ class TableListFragment : Fragment() {
 
                 viewLifecycleOwner.lifecycleScope.launch {
                     // Re-fetch systems safely or rely on index if list didn't change
-                    val systems = com.galeria.defensores.data.RuleSystemRepository.getSystems()
+                    val systems = ruleSystemRepository.getSystems()
                     if (systemSpinner.selectedItemPosition >= 0 && systemSpinner.selectedItemPosition < systems.size) {
                         ruleSystemId = systems[systemSpinner.selectedItemPosition].id
                     }
@@ -286,7 +294,7 @@ class TableListFragment : Fragment() {
                             password = null,
                             ruleSystemId = ruleSystemId
                         )
-                        val success = TableRepository.addTable(newTable)
+                        val success = tableRepository.addTable(newTable)
                         if (success) {
                             android.widget.Toast.makeText(context, "Mesa criada com sucesso!", android.widget.Toast.LENGTH_SHORT).show()
                             onTableAdded()
@@ -334,7 +342,7 @@ class TableListFragment : Fragment() {
                         password = null
                     )
                     viewLifecycleOwner.lifecycleScope.launch {
-                        TableRepository.updateTable(updatedTable)
+                        tableRepository.updateTable(updatedTable)
                         onTableUpdated()
                     }
                 }
@@ -349,7 +357,7 @@ class TableListFragment : Fragment() {
             .setMessage("Tem certeza que deseja excluir a mesa '${table.name}'?")
             .setPositiveButton("Excluir") { _, _ ->
                 viewLifecycleOwner.lifecycleScope.launch {
-                    TableRepository.deleteTable(table.id)
+                    tableRepository.deleteTable(table.id)
                     onTableDeleted()
                 }
             }

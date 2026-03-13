@@ -27,14 +27,21 @@ import com.galeria.defensores.utils.TextFormatUtils
 
 import com.galeria.defensores.viewmodels.CharacterViewModel
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.galeria.defensores.data.BackupRepository
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
+@AndroidEntryPoint
 class CharacterSheetFragment : Fragment() {
 
-    private lateinit var viewModel: CharacterViewModel
+    @Inject lateinit var backupRepository: BackupRepository
+    @Inject lateinit var tableRepository: com.galeria.defensores.data.TableRepository
+    private val viewModel: CharacterViewModel by activityViewModels()
     private val cropImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
             val resultUri = com.yalantis.ucrop.UCrop.getOutput(result.data!!)
@@ -65,7 +72,7 @@ class CharacterSheetFragment : Fragment() {
             val char = viewModel.character.value
             if (char != null) {
                 lifecycleScope.launch {
-                    val success = com.galeria.defensores.data.BackupRepository.exportCharacter(requireContext(), char.id, uri)
+                    val success = backupRepository.exportCharacter(requireContext(), char.id, uri)
                     if (success) {
                         Toast.makeText(context, "Ficha exportada com sucesso!", Toast.LENGTH_SHORT).show()
                     } else {
@@ -170,7 +177,7 @@ class CharacterSheetFragment : Fragment() {
             characterId = it.getString(ARG_CHARACTER_ID)
             tableId = it.getString(ARG_TABLE_ID)
         }
-        viewModel = ViewModelProvider(this).get(CharacterViewModel::class.java)
+
 
     }
 
@@ -1192,7 +1199,7 @@ class CharacterSheetFragment : Fragment() {
              val effectiveTableId = tableId ?: char.tableId
              
              viewLifecycleOwner.lifecycleScope.launch {
-                 val table = if (effectiveTableId.isNotEmpty()) com.galeria.defensores.data.TableRepository.getTable(effectiveTableId) else null
+                 val table = if (effectiveTableId.isNotEmpty()) tableRepository.getTable(effectiveTableId) else null
                  val isMaster = table?.masterId == currentUserId || table?.masterId == "mock-master-id"
                  
                  val canManageRolls = isMaster
@@ -1242,7 +1249,7 @@ class CharacterSheetFragment : Fragment() {
             
             // Let's implement a proper check
             viewLifecycleOwner.lifecycleScope.launch {
-                val table = if (char.tableId.isNotEmpty()) com.galeria.defensores.data.TableRepository.getTable(char.tableId) else null
+                val table = if (char.tableId.isNotEmpty()) tableRepository.getTable(char.tableId) else null
                 val isMaster = table?.masterId == currentUserId || table?.masterId == "mock-master-id"
                 val isOwner = char.ownerId == currentUserId
                 

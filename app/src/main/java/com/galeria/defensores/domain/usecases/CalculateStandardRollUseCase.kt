@@ -8,7 +8,7 @@ import kotlin.random.Random
 /**
  * Use Case to calculate the result of a standard 3DeT dice roll (Attribute + Skill + 1d6 + Bonus).
  */
-class CalculateStandardRollUseCase {
+class CalculateStandardRollUseCase @javax.inject.Inject constructor() {
     
     operator fun invoke(
         char: Character,

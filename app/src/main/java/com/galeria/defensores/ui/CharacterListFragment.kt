@@ -11,18 +11,26 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.galeria.defensores.R
 import com.galeria.defensores.data.CharacterRepository
+import com.galeria.defensores.data.TableRepository
+import com.galeria.defensores.data.BackupRepository
 import com.galeria.defensores.models.Character
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import com.galeria.defensores.ui.CharacterSheetFragment
 import androidx.appcompat.app.AlertDialog
 import android.widget.ImageButton
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 import com.galeria.defensores.models.Notification
 import com.galeria.defensores.models.NotificationStatus
 
+@AndroidEntryPoint
 class CharacterListFragment : Fragment() {
+
+    @Inject lateinit var characterRepository: CharacterRepository
+    @Inject lateinit var tableRepository: TableRepository
+    @Inject lateinit var backupRepository: BackupRepository
 
     private lateinit var characterRecyclerView: RecyclerView
     private lateinit var adapter: CharacterAdapter
@@ -104,7 +112,7 @@ class CharacterListFragment : Fragment() {
                         armadura = 0,
                         poderFogo = 0
                     )
-                    CharacterRepository.saveCharacter(newCharacter)
+                    characterRepository.saveCharacter(newCharacter)
                     openCharacterSheet(newCharacter.id)
                     
                     // Close menu
@@ -126,7 +134,7 @@ class CharacterListFragment : Fragment() {
         val importCharacterLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
             if (uri != null && tableId != null) {
                 viewLifecycleOwner.lifecycleScope.launch {
-                     val success = com.galeria.defensores.data.BackupRepository.importCharacter(requireContext(), uri, tableId!!)
+                     val success = backupRepository.importCharacter(requireContext(), uri, tableId!!)
                      if (success) {
                          Toast.makeText(context, "Personagem importado!", Toast.LENGTH_SHORT).show()
                          loadCharacters()
@@ -159,7 +167,7 @@ class CharacterListFragment : Fragment() {
                     .setMessage("Tem certeza que deseja apagar todo o histórico de rolagens desta mesa? Essa ação não pode ser desfeita.")
                     .setPositiveButton("Limpar") { _, _ ->
                         viewLifecycleOwner.lifecycleScope.launch {
-                             val success = com.galeria.defensores.data.TableRepository.clearRollHistory(tableId!!)
+                             val success = tableRepository.clearRollHistory(tableId!!)
                              if (success) {
                                  Toast.makeText(context, "Histórico limpo com sucesso.", Toast.LENGTH_SHORT).show()
                              } else {
@@ -206,7 +214,7 @@ class CharacterListFragment : Fragment() {
             android.util.Log.d("CharacterListDebug", "Loading characters for tableId=$tableId")
             if (tableId != null) {
                 val currentUserId = com.galeria.defensores.data.SessionManager.currentUser?.id ?: return@launch
-                val table = com.galeria.defensores.data.TableRepository.getTable(tableId!!)
+                val table = tableRepository.getTable(tableId!!)
                 isCurrentUserMaster = table?.masterId == currentUserId || table?.masterId == "mock-master-id"
                 val isMaster = isCurrentUserMaster
                 val isMember = table?.players?.contains(currentUserId) == true || isMaster
@@ -229,7 +237,7 @@ class CharacterListFragment : Fragment() {
                 btnLogs?.visibility = View.VISIBLE
             }
                 
-                val allCharacters = CharacterRepository.getCharacters(tableId)
+                val allCharacters = characterRepository.getCharacters(tableId)
                 android.util.Log.d("CharacterListDebug", "Fetched ${allCharacters.size} characters. CurrentUser=$currentUserId, isMaster=$isMaster")
                 
                 val filteredCharacters = allCharacters
@@ -246,7 +254,7 @@ class CharacterListFragment : Fragment() {
                 characterRecyclerView.adapter = adapter
             } else {
                 android.util.Log.d("CharacterListDebug", "Loading global character list (no tableId)")
-                val characters = CharacterRepository.getCharacters(null)
+                val characters = characterRepository.getCharacters(null)
                 val currentUserId = com.galeria.defensores.data.SessionManager.currentUser?.id
                 adapter = CharacterAdapter(characters, true, currentUserId) { character ->
                     openCharacterSheet(character.id)
@@ -272,7 +280,7 @@ class CharacterListFragment : Fragment() {
             .setMessage("Tem certeza que deseja excluir '${character.name}'?")
             .setPositiveButton("Excluir") { _, _ ->
                 viewLifecycleOwner.lifecycleScope.launch {
-                    CharacterRepository.deleteCharacter(character.id)
+                    characterRepository.deleteCharacter(character.id)
                     Toast.makeText(context, "Personagem excluído.", Toast.LENGTH_SHORT).show()
                     loadCharacters() // Refresh list
                 }

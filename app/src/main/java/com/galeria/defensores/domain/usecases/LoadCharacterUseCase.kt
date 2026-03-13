@@ -10,18 +10,22 @@ import kotlinx.coroutines.withContext
  * Use Case to load a character and its associated rule system.
  * Also performs data migrations and upgrades (e.g., modular advantages).
  */
-class LoadCharacterUseCase {
+class LoadCharacterUseCase @javax.inject.Inject constructor(
+    private val characterRepository: com.galeria.defensores.data.CharacterRepository,
+    private val tableRepository: com.galeria.defensores.data.TableRepository,
+    private val ruleSystemRepository: com.galeria.defensores.data.RuleSystemRepository
+) {
 
     suspend operator fun invoke(id: String?, tableId: String?): CharacterResult = withContext(Dispatchers.IO) {
         try {
             // 1. Load Character from repository or create default
             var loadedChar: Character? = null
             if (id != null) {
-                loadedChar = CharacterRepository.getCharacter(id)
+                loadedChar = characterRepository.getCharacter(id)
             }
             
             if (loadedChar == null) {
-                val currentUser = SessionManager.currentUser
+                val currentUser = com.galeria.defensores.data.SessionManager.currentUser
                 loadedChar = Character(
                     tableId = tableId ?: "",
                     ownerId = currentUser?.id ?: ""
@@ -31,14 +35,14 @@ class LoadCharacterUseCase {
             // 2. Resolve Rule System to load
             val effectiveTableId = if (loadedChar.tableId.isNotEmpty()) loadedChar.tableId else tableId
             val systemToLoad = if (!effectiveTableId.isNullOrEmpty()) {
-                val table = TableRepository.getTable(effectiveTableId)
+                val table = tableRepository.getTable(effectiveTableId)
                 if (table != null) {
-                    RuleSystemRepository.getSystemOrDefault(table.ruleSystemId)
+                    ruleSystemRepository.getSystemOrDefault(table.ruleSystemId)
                 } else {
-                    RuleSystemRepository.getSystemOrDefault(null)
+                    ruleSystemRepository.getSystemOrDefault(null)
                 }
             } else {
-                RuleSystemRepository.getSystemOrDefault(null)
+                ruleSystemRepository.getSystemOrDefault(null)
             }
             
             // 3. Update active data in repositories

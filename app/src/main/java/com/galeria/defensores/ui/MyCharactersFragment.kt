@@ -10,12 +10,20 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.galeria.defensores.R
 import com.galeria.defensores.data.CharacterRepository
+import com.galeria.defensores.data.BackupRepository
 import com.galeria.defensores.data.SessionManager
 import com.galeria.defensores.data.TableRepository
 import com.galeria.defensores.models.Character
 import kotlinx.coroutines.launch
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MyCharactersFragment : Fragment() {
+
+    @Inject lateinit var characterRepository: CharacterRepository
+    @Inject lateinit var tableRepository: TableRepository
+    @Inject lateinit var backupRepository: BackupRepository
 
     private lateinit var recyclerCharacters: RecyclerView
     private lateinit var textEmpty: TextView
@@ -27,7 +35,7 @@ class MyCharactersFragment : Fragment() {
         if (uri != null && pendingExportCharacter != null) {
             val character = pendingExportCharacter!!
             lifecycleScope.launch {
-                val success = com.galeria.defensores.data.BackupRepository.exportCharacter(requireContext(), character.id, uri)
+                val success = backupRepository.exportCharacter(requireContext(), character.id, uri)
                 if (success) {
                     android.widget.Toast.makeText(context, "Personagem exportado com sucesso!", android.widget.Toast.LENGTH_SHORT).show()
                 } else {
@@ -65,7 +73,7 @@ class MyCharactersFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val currentUser = SessionManager.currentUser
             if (currentUser != null) {
-                val characters = CharacterRepository.getCharactersForUser(currentUser.id)
+                val characters = characterRepository.getCharactersForUser(currentUser.id)
                 if (characters.isEmpty()) {
                     textEmpty.visibility = View.VISIBLE
                     recyclerCharacters.visibility = View.GONE
@@ -75,7 +83,7 @@ class MyCharactersFragment : Fragment() {
                     
                     val charactersWithTableNames = characters.map { character ->
                         val tableName = if (character.tableId.isNotEmpty()) {
-                             val table = TableRepository.getTable(character.tableId)
+                             val table = tableRepository.getTable(character.tableId)
                              table?.name ?: "Mesa Desconhecida"
                         } else {
                             "Nenhuma"
@@ -103,7 +111,7 @@ class MyCharactersFragment : Fragment() {
                                 .setMessage("Tem certeza que deseja excluir ${character.name}?")
                                 .setPositiveButton("Excluir") { _, _ ->
                                     lifecycleScope.launch {
-                                        CharacterRepository.deleteCharacter(character.id)
+                                        characterRepository.deleteCharacter(character.id)
                                         loadCharacters() 
                                     }
                                 }

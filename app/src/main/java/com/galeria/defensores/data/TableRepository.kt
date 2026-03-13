@@ -1,35 +1,27 @@
 package com.galeria.defensores.data
 
 import com.galeria.defensores.models.Table
-
+import com.galeria.defensores.data.database.daos.TableDao
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
-object TableRepository {
-    private const val PREFIX = "table_"
-    
-    // Similar Context strategy as CharacterRepository
-    private lateinit var appContext: android.content.Context
-    private lateinit var database: com.galeria.defensores.data.database.AppDatabase
-
-    fun init(context: android.content.Context) {
-        appContext = context.applicationContext
-        database = com.galeria.defensores.data.database.AppDatabase.getDatabase(appContext)
-    }
-    
-    private fun getContext(): android.content.Context? {
-        return if (::appContext.isInitialized) appContext else null
-    }
+@Singleton
+class TableRepository @Inject constructor(
+    private val tableDao: TableDao,
+    private val characterRepository: CharacterRepository
+) {
+    // Legacy init removed as Hilt handles injection
+    fun init(context: android.content.Context) {}
 
     suspend fun getTables(): List<Table> {
-        if (!::database.isInitialized) return emptyList()
-        return database.tableDao().getAll().map { it.toTable() }
+        return tableDao.getAll().map { it.toTable() }
     }
 
     suspend fun getTable(id: String): Table? {
-        if (!::database.isInitialized) return null
-        return database.tableDao().getById(id)?.toTable()
+        return tableDao.getById(id)?.toTable()
     }
 
     suspend fun addTable(table: Table): Boolean {
@@ -37,22 +29,19 @@ object TableRepository {
     }
 
     suspend fun updateTable(table: Table): Boolean {
-        if (!::database.isInitialized) return false
-        database.tableDao().insert(com.galeria.defensores.data.database.entities.TableEntity.fromTable(table))
+        tableDao.insert(com.galeria.defensores.data.database.entities.TableEntity.fromTable(table))
         return true
     }
 
     suspend fun deleteTable(id: String): Boolean {
-        if (!::database.isInitialized) return false
-        
         // 1. Delete pending notifications (Mocked/Local)
         com.galeria.defensores.data.NotificationRepository.deleteNotificationsForTable(id)
         
         // 2. Unlink characters
-        com.galeria.defensores.data.CharacterRepository.unlinkCharactersFromTable(id)
+        characterRepository.unlinkCharactersFromTable(id)
         
         // 3. Delete from DB
-        database.tableDao().deleteById(id)
+        tableDao.deleteById(id)
         return true
     }
 

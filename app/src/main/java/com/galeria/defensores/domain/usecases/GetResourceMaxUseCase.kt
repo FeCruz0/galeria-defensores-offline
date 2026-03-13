@@ -8,7 +8,7 @@ import com.galeria.defensores.models.RuleSystem
  * Use Case to calculate the maximum value of a character resource (PV, PM, etc.)
  * based on the formula defined in the RuleSystem.
  */
-class GetResourceMaxUseCase {
+class GetResourceMaxUseCase @javax.inject.Inject constructor() {
     
     operator fun invoke(res: ResourceDefinition, char: Character, ruleSystem: RuleSystem): Int {
         val formula = res.formula.trim().uppercase()

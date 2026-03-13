@@ -7,16 +7,16 @@ import kotlinx.coroutines.launch
 import com.galeria.defensores.data.SessionManager
 import com.galeria.defensores.ui.TableListFragment
 
-class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
+@dagger.hilt.android.AndroidEntryPoint
+class MainActivity : androidx.appcompat.app.AppCompatActivity() {
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         // Offline mode: No Firebase Auth init needed
         SessionManager.init(this)
-        com.galeria.defensores.data.CharacterRepository.init(this)
-        com.galeria.defensores.data.TableRepository.init(this)
-        com.galeria.defensores.data.RuleSystemRepository.init(this)
+        
+        // Hilt handles Repository initializations via DatabaseModule
 
         if (savedInstanceState == null) {
             // Always assume logged in (offline)

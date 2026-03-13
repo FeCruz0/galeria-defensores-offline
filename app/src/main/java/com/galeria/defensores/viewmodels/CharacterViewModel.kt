@@ -19,7 +19,17 @@ import com.galeria.defensores.models.RuleSystem
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 
-class CharacterViewModel(application: Application) : AndroidViewModel(application) {
+@dagger.hilt.android.lifecycle.HiltViewModel
+class CharacterViewModel @javax.inject.Inject constructor(
+    application: android.app.Application,
+    private val characterRepository: CharacterRepository,
+    private val tableRepository: TableRepository,
+    private val ruleSystemRepository: RuleSystemRepository,
+    private val getResourceMaxUseCase: com.galeria.defensores.domain.usecases.GetResourceMaxUseCase,
+    private val calculateStandardRollUseCase: com.galeria.defensores.domain.usecases.CalculateStandardRollUseCase,
+    private val calculateCustomRollUseCase: com.galeria.defensores.domain.usecases.CalculateCustomRollUseCase,
+    private val loadCharacterUseCase: com.galeria.defensores.domain.usecases.LoadCharacterUseCase
+) : AndroidViewModel(application) {
 
     private val _character = MutableLiveData<Character>()
     val character: LiveData<Character> = _character
@@ -38,16 +48,9 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
     private val _ruleSystem = MutableLiveData<RuleSystem>(RuleSystem()) // Default
     val ruleSystem: LiveData<RuleSystem> = _ruleSystem
     
-    // Helper property for internal access, derived from LiveData value or separate tracking
-    // We can just use _ruleSystem.value!! since we initialized it.
     private val currentRuleSystem: RuleSystem
         get() = _ruleSystem.value!!
 
-    // Domain Layer (Use Cases)
-    private val getResourceMaxUseCase = com.galeria.defensores.domain.usecases.GetResourceMaxUseCase()
-    private val calculateStandardRollUseCase = com.galeria.defensores.domain.usecases.CalculateStandardRollUseCase()
-    private val calculateCustomRollUseCase = com.galeria.defensores.domain.usecases.CalculateCustomRollUseCase()
-    private val loadCharacterUseCase = com.galeria.defensores.domain.usecases.LoadCharacterUseCase()
 
     fun getAttributeName(key: String): String {
         return currentRuleSystem.attributes.find { it.key == key }?.name ?: key.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
@@ -93,7 +96,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
     fun saveCharacter() {
         _character.value?.let { char ->
             viewModelScope.launch {
-                CharacterRepository.saveCharacter(char)
+                characterRepository.saveCharacter(char)
             }
         }
     }
@@ -262,7 +265,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         this.currentTableId = tableId
         viewModelScope.launch {
             val customTypes = if (!tableId.isNullOrEmpty()) {
-                val table = TableRepository.getTable(tableId)
+                val table = tableRepository.getTable(tableId)
                 table?.customDamageTypes ?: emptyList()
             } else {
                 emptyList()
@@ -288,11 +291,11 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         if (type.isBlank()) return
         
         viewModelScope.launch {
-            val table = TableRepository.getTable(tableId)
+            val table = tableRepository.getTable(tableId)
             if (table != null) {
                 if (!table.customDamageTypes.contains(type)) {
                     table.customDamageTypes.add(type)
-                    TableRepository.updateTable(table) // Assuming updateTable exists or creating helper
+                    tableRepository.updateTable(table) // Assuming updateTable exists or creating helper
                 }
                 loadDamageTypes(tableId) // Reload
             }
@@ -303,10 +306,10 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         val tableId = currentTableId ?: return
         
         viewModelScope.launch {
-            val table = TableRepository.getTable(tableId)
+            val table = tableRepository.getTable(tableId)
             if (table != null) {
                 if (table.customDamageTypes.remove(type)) {
-                    TableRepository.updateTable(table)
+                    tableRepository.updateTable(table)
                 }
                 loadDamageTypes(tableId) // Reload
             }
@@ -336,7 +339,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                 if (system.id == "3det_alpha_base" || system.isBaseSystem) {
                     android.util.Log.d("SystemDebug", "Overwriting Base System configuration for Offline Mode.")
                 }
-                com.galeria.defensores.data.RuleSystemRepository.saveSystem(system)
+                ruleSystemRepository.saveSystem(system)
             }
         }
     }
@@ -409,7 +412,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         
         viewModelScope.launch {
             try {
-                com.galeria.defensores.data.RuleSystemRepository.saveSystem(newSystem)
+                ruleSystemRepository.saveSystem(newSystem)
                 onComplete(true)
             } catch (e: Exception) {
                 android.util.Log.e("SystemSaveAs", "Error saving new system", e)
@@ -422,11 +425,11 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
     fun resetBaseSystem(onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
             try {
-                com.galeria.defensores.data.RuleSystemRepository.resetBaseSystem()
+                ruleSystemRepository.resetBaseSystem()
                 // If current is base, reload it
                 val current = _ruleSystem.value
                 if (current?.id == "3det_alpha_base") {
-                    _ruleSystem.value = com.galeria.defensores.data.RuleSystemRepository.getSystem("3det_alpha_base")
+                    _ruleSystem.value = ruleSystemRepository.getSystem("3det_alpha_base")
                 }
                 onComplete(true)
             } catch (e: Exception) {
@@ -591,7 +594,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
          val currentChar = _character.value ?: return
          if (currentChar.tableId.isNotEmpty()) {
              viewModelScope.launch {
-                com.galeria.defensores.data.TableRepository.addRollToHistory(currentChar.tableId, result)
+                tableRepository.addRollToHistory(currentChar.tableId, result)
              }
         }
     }
@@ -669,7 +672,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                         critRangeStart = 6
                     )
                     android.util.Log.d("VisualRollDebug", "Broadcasting standard roll: sender=$currentUserId, table=${char.tableId}")
-                    TableRepository.broadcastVisualRoll(char.tableId, visualRoll)
+                    tableRepository.broadcastVisualRoll(char.tableId, visualRoll)
                 }
 
                 // Intercept and send request
@@ -727,7 +730,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
 
             // Save to Table History
             if (char.tableId.isNotEmpty()) {
-                com.galeria.defensores.data.TableRepository.addRollToHistory(char.tableId, result)
+                tableRepository.addRollToHistory(char.tableId, result)
             }
         }
     }
@@ -904,7 +907,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
     fun deleteCharacter(onSuccess: () -> Unit, onError: (String) -> Unit) {
         val charId = _character.value?.id ?: return
         viewModelScope.launch {
-            val success = CharacterRepository.deleteCharacter(charId)
+            val success = characterRepository.deleteCharacter(charId)
             if (success) {
                 _character.value = null
                 onSuccess()
@@ -955,7 +958,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             val defaults = com.galeria.defensores.data.UniqueAdvantagesData.defaults
             val customUAs = if (!tableId.isNullOrEmpty()) {
-                val table = TableRepository.getTable(tableId)
+                val table = tableRepository.getTable(tableId)
                 table?.customUniqueAdvantages ?: emptyList()
             } else {
                 emptyList()
@@ -977,7 +980,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
     fun addCustomUniqueAdvantage(ua: com.galeria.defensores.models.UniqueAdvantage) {
         val tableId = currentTableId ?: return
         viewModelScope.launch {
-            val table = TableRepository.getTable(tableId)
+            val table = tableRepository.getTable(tableId)
             if (table != null) {
                 // Remove if exists (update) or just add
                val existingIndex = table.customUniqueAdvantages.indexOfFirst { it.name == ua.name } // Check by name uniqueness for simplicity or just allow duplicates? 
@@ -988,7 +991,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                    // Update if exists?
                    table.customUniqueAdvantages[existingIndex] = ua
                }
-                if (TableRepository.updateTable(table)) {
+                if (tableRepository.updateTable(table)) {
                     loadUniqueAdvantages(tableId)
                 }
             }
@@ -998,13 +1001,13 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
     fun removeCustomUniqueAdvantage(ua: com.galeria.defensores.models.UniqueAdvantage) {
         val tableId = currentTableId ?: return
         viewModelScope.launch {
-            val table = TableRepository.getTable(tableId)
+            val table = tableRepository.getTable(tableId)
             if (table != null) {
                 // Logic to remove. Since Custom UAs are saved in the list, we remove by object equality or name.
                 // Assuming UA is from the list.
                 val removed = table.customUniqueAdvantages.removeIf { it.name == ua.name && it.group == ua.group }
                 if (removed) {
-                    if (TableRepository.updateTable(table)) {
+                    if (tableRepository.updateTable(table)) {
                         loadUniqueAdvantages(tableId)
                     }
                 }
@@ -1015,12 +1018,12 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
      fun updateCustomUniqueAdvantage(oldUA: com.galeria.defensores.models.UniqueAdvantage, newUA: com.galeria.defensores.models.UniqueAdvantage) {
         val tableId = currentTableId ?: return
         viewModelScope.launch {
-            val table = TableRepository.getTable(tableId)
+            val table = tableRepository.getTable(tableId)
             if (table != null) {
                  val index = table.customUniqueAdvantages.indexOfFirst { it.name == oldUA.name && it.group == oldUA.group }
                  if (index != -1) {
                      table.customUniqueAdvantages[index] = newUA
-                     if (TableRepository.updateTable(table)) {
+                     if (tableRepository.updateTable(table)) {
                          loadUniqueAdvantages(tableId)
                      }
                  } else {
@@ -1116,7 +1119,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
                         critRangeStart = minCritRange
                     )
                     android.util.Log.d("VisualRollDebug", "Broadcasting custom roll: sender=$currentUserId, table=${char.tableId}")
-                    TableRepository.broadcastVisualRoll(char.tableId, visualRoll)
+                    tableRepository.broadcastVisualRoll(char.tableId, visualRoll)
                 }
 
                 // Intercept and send request
@@ -1155,7 +1158,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
             _isRolling.value = false
             
              if (char.tableId.isNotEmpty()) {
-                com.galeria.defensores.data.TableRepository.addRollToHistory(char.tableId, result)
+                tableRepository.addRollToHistory(char.tableId, result)
             }
         }
        }
@@ -1200,7 +1203,7 @@ class CharacterViewModel(application: Application) : AndroidViewModel(applicatio
         if (currentChar != null) {
              viewModelScope.launch {
                  try {
-                     com.galeria.defensores.data.CharacterRepository.saveCharacter(currentChar)
+                     characterRepository.saveCharacter(currentChar)
                  } catch (e: Exception) {
                      android.util.Log.e("ViewModel", "Error saving character", e)
                  }

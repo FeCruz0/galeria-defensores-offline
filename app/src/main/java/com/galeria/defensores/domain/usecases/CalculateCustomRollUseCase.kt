@@ -8,7 +8,7 @@ import kotlin.random.Random
 /**
  * Use Case to calculate complex custom rolls with multiple components, multipliers, and special rules.
  */
-class CalculateCustomRollUseCase {
+class CalculateCustomRollUseCase @javax.inject.Inject constructor() {
 
     operator fun invoke(
         char: Character, 

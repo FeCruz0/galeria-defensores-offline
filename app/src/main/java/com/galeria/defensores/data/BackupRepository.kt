@@ -12,8 +12,14 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object BackupRepository {
+@Singleton
+class BackupRepository @Inject constructor(
+    private val characterRepository: CharacterRepository,
+    private val tableRepository: TableRepository
+) {
 
     suspend fun exportCharacter(context: Context, charId: String, uri: Uri): Boolean {
         return withContext(Dispatchers.IO) {
@@ -21,7 +27,6 @@ object BackupRepository {
                 val charJson = LocalFileManager.readJson(context, "char_$charId.json", Character::class.java)
                     ?: return@withContext false
                 
-                // Write to Uri
                 context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                     outputStream.write(com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(charJson).toByteArray())
                 }
@@ -36,19 +41,17 @@ object BackupRepository {
     suspend fun exportTable(context: Context, tableId: String, uri: Uri): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                val table = TableRepository.getTable(tableId) ?: return@withContext false
-                val characters = CharacterRepository.getCharacters(tableId)
+                val table = tableRepository.getTable(tableId) ?: return@withContext false
+                val characters = characterRepository.getCharacters(tableId)
                 
                 context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                     ZipOutputStream(BufferedOutputStream(outputStream)).use { zipOut ->
-                        // Add Table JSON
                         val tableEntry = ZipEntry("table.json")
                         zipOut.putNextEntry(tableEntry)
                         val tableJson = com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(table)
                         zipOut.write(tableJson.toByteArray())
                         zipOut.closeEntry()
 
-                        // Add Characters folder
                         for (char in characters) {
                             val charEntry = ZipEntry("characters/char_${char.id}.json")
                             zipOut.putNextEntry(charEntry)
@@ -75,8 +78,6 @@ object BackupRepository {
                 context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                     ZipOutputStream(BufferedOutputStream(outputStream)).use { zipOut ->
                         for (file in files) {
-                            // Only include our known prefixes or expected files
-                            // Prefixes: char_, table_, system_
                             if (file.name.endsWith(".json") && 
                                 (file.name.startsWith("char_") || 
                                  file.name.startsWith("table_") || 
@@ -100,7 +101,6 @@ object BackupRepository {
         }
     }
 
-
     suspend fun importCharacter(context: Context, uri: Uri, tableId: String): Boolean {
         return withContext(Dispatchers.IO) {
             try {
@@ -109,17 +109,12 @@ object BackupRepository {
                 
                 val char = com.google.gson.GsonBuilder().create().fromJson(jsonString, Character::class.java) ?: return@withContext false
                 
-                // Generate new ID and assign to current table
                 val newChar = char.copy(
                     id = java.util.UUID.randomUUID().toString(),
-                    tableId = tableId,
-                    name = "${char.name} (Import)" // Avoid exact name collision confusion? or keep orig? Let's keep orig but ID diff.
-                    // Actually, keeping original name is better for backup restore.
-                    // But if it's a template? Let's keep name.
+                    tableId = tableId
                 )
-                // Just in case, if name collision is an issue UI-wise, the ID is unique.
 
-                CharacterRepository.saveCharacter(newChar)
+                characterRepository.saveCharacter(newChar)
                 true
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -140,9 +135,6 @@ object BackupRepository {
                 
                 while (entry != null) {
                     if (entry.name == "table.json") {
-
-                        // Safe way for ZipInputStream:
-                        // Read bytes
                         val os = java.io.ByteArrayOutputStream()
                         val buffer = ByteArray(1024)
                         var count: Int
@@ -152,7 +144,7 @@ object BackupRepository {
                         val json = os.toString("UTF-8")
                         table = com.google.gson.GsonBuilder().create().fromJson(json, Table::class.java)
                     } else if (entry.name.startsWith("characters/") && entry.name.endsWith(".json")) {
-                         val os = java.io.ByteArrayOutputStream()
+                        val os = java.io.ByteArrayOutputStream()
                         val buffer = ByteArray(1024)
                         var count: Int
                         while (zipIn.read(buffer).also { count = it } != -1) {
@@ -168,24 +160,22 @@ object BackupRepository {
                 }
                 
                 if (table != null) {
-                    // New Table ID
                     val newTableId = java.util.UUID.randomUUID().toString()
                     val newTable = table.copy(
                         id = newTableId,
                         name = "${table.name} (Import)",
-                        masterId = SessionManager.currentUser?.id ?: "offline-master" // Assign to current user
+                        masterId = SessionManager.currentUser?.id ?: "offline-master"
                     )
                     
-                    // Save Characters with new Table ID
                     characters.forEach { char ->
                         val newChar = char.copy(
                             id = java.util.UUID.randomUUID().toString(),
                             tableId = newTableId
                         )
-                        CharacterRepository.saveCharacter(newChar)
+                        characterRepository.saveCharacter(newChar)
                     }
                     
-                    TableRepository.addTable(newTable) // Use addTable or saveTable depending on API
+                    tableRepository.addTable(newTable)
                     true
                 } else {
                     false
@@ -206,8 +196,6 @@ object BackupRepository {
                 var entry = zipIn.nextEntry
                 while (entry != null) {
                     val fileName = entry.name
-                    // Security / Validity check
-                    // We expect files at root level of zip with specific prefixes
                     if (!fileName.contains("..") && 
                         fileName.endsWith(".json") && 
                         (fileName.startsWith("char_") || 

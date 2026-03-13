@@ -7,28 +7,34 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.galeria.defensores.R
 import com.galeria.defensores.data.CharacterRepository
 import com.galeria.defensores.data.SessionManager
+import com.galeria.defensores.data.TableRepository
 import com.galeria.defensores.models.CustomRoll
 import com.galeria.defensores.models.RollResult
 import com.galeria.defensores.models.RollType
 import com.galeria.defensores.viewmodels.CharacterViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@AndroidEntryPoint
 class QuickRollBottomSheet(
     private val tableId: String, 
     private val onRollResult: (RollResult, String?) -> Unit
 ) : BottomSheetDialogFragment() {
 
-    private lateinit var viewModel: CharacterViewModel
+    @Inject lateinit var characterRepository: CharacterRepository
+    @Inject lateinit var tableRepository: TableRepository
+    private val viewModel: CharacterViewModel by activityViewModels()
     private var myCharacterId: String? = null
 
     override fun onCreateView(
@@ -41,7 +47,7 @@ class QuickRollBottomSheet(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        viewModel = ViewModelProvider(this).get(CharacterViewModel::class.java)
+
 
         val recycler = view.findViewById<RecyclerView>(R.id.recycler_quick_rolls)
         val progressBar = view.findViewById<android.widget.ProgressBar>(R.id.progress_quick_roll)
@@ -61,14 +67,14 @@ class QuickRollBottomSheet(
             }
 
             val table = withContext(Dispatchers.IO) {
-                try { com.galeria.defensores.data.TableRepository.getTable(tableId) } catch (e: Exception) { null }
+                try { tableRepository.getTable(tableId) } catch (e: Exception) { null }
             }
             
             val isMaster = table?.masterId == userId || table?.masterId == "mock-master-id"
 
             val characters = withContext(Dispatchers.IO) {
                 try {
-                    CharacterRepository.getCharacters(tableId)
+                    characterRepository.getCharacters(tableId)
                 } catch (e: Exception) {
                     emptyList()
                 }

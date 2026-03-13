@@ -1,0 +1,380 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "37a55d92df4f131fb319b587f6a8eb5f",
+    "entities": [
+      {
+        "tableName": "characters",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `ownerId` TEXT NOT NULL, `ownerName` TEXT NOT NULL, `tableId` TEXT NOT NULL, `imageUrl` TEXT NOT NULL, `scale` INTEGER NOT NULL, `forca` INTEGER NOT NULL, `habilidade` INTEGER NOT NULL, `resistencia` INTEGER NOT NULL, `armadura` INTEGER NOT NULL, `poderFogo` INTEGER NOT NULL, `damageTypeForca` TEXT NOT NULL, `damageTypePdf` TEXT NOT NULL, `currentPv` INTEGER NOT NULL, `currentPm` INTEGER NOT NULL, `savedPoints` INTEGER NOT NULL, `experience` INTEGER NOT NULL, `vantagens` TEXT NOT NULL, `desvantagens` TEXT NOT NULL, `pericias` TEXT NOT NULL, `especializacoes` TEXT NOT NULL, `magias` TEXT NOT NULL, `inventario` TEXT NOT NULL, `uniqueAdvantage` TEXT, `anotacoes` TEXT NOT NULL, `customRolls` TEXT NOT NULL, `systemOverride` TEXT, `attributeValues` TEXT NOT NULL, `resourceValues` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerId",
+            "columnName": "ownerId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerName",
+            "columnName": "ownerName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tableId",
+            "columnName": "tableId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imageUrl",
+            "columnName": "imageUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scale",
+            "columnName": "scale",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "forca",
+            "columnName": "forca",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "habilidade",
+            "columnName": "habilidade",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resistencia",
+            "columnName": "resistencia",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "armadura",
+            "columnName": "armadura",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "poderFogo",
+            "columnName": "poderFogo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "damageTypeForca",
+            "columnName": "damageTypeForca",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "damageTypePdf",
+            "columnName": "damageTypePdf",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentPv",
+            "columnName": "currentPv",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentPm",
+            "columnName": "currentPm",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "savedPoints",
+            "columnName": "savedPoints",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "experience",
+            "columnName": "experience",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vantagens",
+            "columnName": "vantagens",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "desvantagens",
+            "columnName": "desvantagens",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pericias",
+            "columnName": "pericias",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "especializacoes",
+            "columnName": "especializacoes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "magias",
+            "columnName": "magias",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "inventario",
+            "columnName": "inventario",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "uniqueAdvantage",
+            "columnName": "uniqueAdvantage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "anotacoes",
+            "columnName": "anotacoes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customRolls",
+            "columnName": "customRolls",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "systemOverride",
+            "columnName": "systemOverride",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "attributeValues",
+            "columnName": "attributeValues",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resourceValues",
+            "columnName": "resourceValues",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "tables",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `masterId` TEXT NOT NULL, `players` TEXT NOT NULL, `isPrivate` INTEGER NOT NULL, `password` TEXT, `ruleSystemId` TEXT NOT NULL, `rollHistory` TEXT NOT NULL, `customDamageTypes` TEXT NOT NULL, `customUniqueAdvantages` TEXT NOT NULL, `lastVisualRoll` TEXT, `combatState` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "masterId",
+            "columnName": "masterId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "players",
+            "columnName": "players",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isPrivate",
+            "columnName": "isPrivate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "password",
+            "columnName": "password",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ruleSystemId",
+            "columnName": "ruleSystemId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rollHistory",
+            "columnName": "rollHistory",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customDamageTypes",
+            "columnName": "customDamageTypes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customUniqueAdvantages",
+            "columnName": "customUniqueAdvantages",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastVisualRoll",
+            "columnName": "lastVisualRoll",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "combatState",
+            "columnName": "combatState",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "rule_systems",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `isBaseSystem` INTEGER NOT NULL, `attributes` TEXT NOT NULL, `resources` TEXT NOT NULL, `advantages` TEXT NOT NULL, `disadvantages` TEXT NOT NULL, `skills` TEXT NOT NULL, `damageTypes` TEXT NOT NULL, `diceConfig` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isBaseSystem",
+            "columnName": "isBaseSystem",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attributes",
+            "columnName": "attributes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resources",
+            "columnName": "resources",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "advantages",
+            "columnName": "advantages",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "disadvantages",
+            "columnName": "disadvantages",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "skills",
+            "columnName": "skills",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "damageTypes",
+            "columnName": "damageTypes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "diceConfig",
+            "columnName": "diceConfig",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '37a55d92df4f131fb319b587f6a8eb5f')"
+    ]
+  }
+}

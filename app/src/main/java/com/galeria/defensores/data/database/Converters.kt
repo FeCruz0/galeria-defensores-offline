@@ -85,6 +85,17 @@ class Converters {
     }
 
     @TypeConverter
+    fun fromUniqueAdvantageList(value: String?): List<UniqueAdvantage> {
+        val listType = object : TypeToken<List<UniqueAdvantage>>() {}.type
+        return gson.fromJson(value ?: "[]", listType)
+    }
+
+    @TypeConverter
+    fun fromListUniqueAdvantage(list: List<UniqueAdvantage>): String {
+        return gson.toJson(list)
+    }
+
+    @TypeConverter
     fun fromRuleSystem(value: String?): RuleSystem? {
         return gson.fromJson(value, RuleSystem::class.java)
     }

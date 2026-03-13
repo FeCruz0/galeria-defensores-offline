@@ -19,9 +19,13 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.lifecycle.lifecycleScope
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class RollHistoryBottomSheet(private val tableId: String) : BottomSheetDialogFragment() {
+
+    @Inject lateinit var tableRepository: TableRepository
 
     private var allRollsCache: List<RollResult> = emptyList()
 
@@ -44,7 +48,7 @@ class RollHistoryBottomSheet(private val tableId: String) : BottomSheetDialogFra
         // Offline Load
         viewLifecycleOwner.lifecycleScope.launch {
             val table = withContext(Dispatchers.IO) {
-                TableRepository.getTable(tableId)
+                tableRepository.getTable(tableId)
             }
             
             if (table != null) {

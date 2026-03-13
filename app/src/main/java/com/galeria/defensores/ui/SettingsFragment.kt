@@ -11,8 +11,14 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import com.galeria.defensores.R
+import com.galeria.defensores.data.BackupRepository
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class SettingsFragment : Fragment() {
+
+    @Inject lateinit var backupRepository: BackupRepository
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,7 +31,7 @@ class SettingsFragment : Fragment() {
         if (uri != null) {
             lifecycleScope.launch {
                 android.widget.Toast.makeText(context, "Iniciando backup...", android.widget.Toast.LENGTH_SHORT).show()
-                val success = com.galeria.defensores.data.BackupRepository.exportAll(requireContext(), uri)
+                val success = backupRepository.exportAll(requireContext(), uri)
                 if (success) {
                     android.widget.Toast.makeText(context, "Backup completo salvo com sucesso!", android.widget.Toast.LENGTH_LONG).show()
                 } else {
@@ -123,7 +129,7 @@ class SettingsFragment : Fragment() {
         if (uri != null) {
             lifecycleScope.launch {
                 android.widget.Toast.makeText(context, "Restaurando backup...", android.widget.Toast.LENGTH_SHORT).show()
-                val success = com.galeria.defensores.data.BackupRepository.importAll(requireContext(), uri)
+                val success = backupRepository.importAll(requireContext(), uri)
                 if (success) {
                     android.widget.Toast.makeText(context, "Restauração completa! Por favor, navegue entre as telas para atualizar.", android.widget.Toast.LENGTH_LONG).show()
                 } else {
