@@ -8,6 +8,10 @@ import com.galeria.defensores.models.defaultResources
 import com.galeria.defensores.models.DiceConfig
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 
 @Singleton
 class RuleSystemRepository @Inject constructor(
@@ -29,40 +33,48 @@ class RuleSystemRepository @Inject constructor(
     }
 
     suspend fun ensureBaseSystemExists() {
-        if (ruleSystemDao.getById(BASE_SYSTEM_ID) == null) {
+        if (ruleSystemDao.getById(BASE_SYSTEM_ID).first() == null) {
             ruleSystemDao.insert(RuleSystemEntity.fromRuleSystem(createBaseSystem()))
         }
     }
 
-    suspend fun getSystems(): List<RuleSystem> {
-        val systems = mutableListOf<RuleSystem>()
-        systems.add(createBaseSystem())
-        systems.add(GaidenData.createSystem())
+    fun getSystems(): Flow<List<RuleSystem>> {
+        return ruleSystemDao.getAllReactive().map { dbSystems ->
+            val systems = mutableListOf<RuleSystem>()
+            systems.add(createBaseSystem())
+            systems.add(GaidenData.createSystem())
 
-        val dbSystems = ruleSystemDao.getAll()
-        dbSystems.forEach { entity ->
-            if (entity.id != BASE_SYSTEM_ID && entity.id != GAIDEN_SYSTEM_ID) {
-                systems.add(entity.toRuleSystem())
+            dbSystems.forEach { entity ->
+                if (entity.id != BASE_SYSTEM_ID && entity.id != GAIDEN_SYSTEM_ID) {
+                    systems.add(entity.toRuleSystem())
+                }
             }
+            systems.sortedWith(compareBy({ !it.isBaseSystem }, { it.name }))
         }
-
-        return systems.sortedWith(compareBy({ !it.isBaseSystem }, { it.name }))
     }
 
-    suspend fun getSystem(id: String): RuleSystem? {
-        if (id == BASE_SYSTEM_ID) return createBaseSystem()
-        if (id == GAIDEN_SYSTEM_ID) return GaidenData.createSystem()
-        return ruleSystemDao.getById(id)?.toRuleSystem()
+    fun getSystem(id: String): Flow<RuleSystem?> {
+        if (id == GAIDEN_SYSTEM_ID) return flow { emit(GaidenData.createSystem()) }
+        return ruleSystemDao.getById(id).map { entity -> 
+            if (entity == null && id == BASE_SYSTEM_ID) {
+                createBaseSystem()
+            } else {
+                entity?.toRuleSystem()
+            }
+        }
+    }
+
+    suspend fun getSystemOnce(id: String): RuleSystem? {
+        return getSystem(id).first()
     }
 
     suspend fun getSystemOrDefault(id: String?): RuleSystem {
-        if (id == null || id == BASE_SYSTEM_ID) return createBaseSystem()
         if (id == GAIDEN_SYSTEM_ID) return GaidenData.createSystem()
-        return getSystem(id) ?: createBaseSystem()
+        val targetId = if (id.isNullOrEmpty()) BASE_SYSTEM_ID else id
+        return getSystemOnce(targetId) ?: createBaseSystem()
     }
 
     suspend fun saveSystem(system: RuleSystem) {
-        if (system.id == BASE_SYSTEM_ID) return
         if (system.id == GAIDEN_SYSTEM_ID) return
         ruleSystemDao.insert(RuleSystemEntity.fromRuleSystem(system))
     }

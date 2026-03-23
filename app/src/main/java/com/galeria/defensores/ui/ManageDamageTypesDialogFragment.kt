@@ -16,9 +16,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.galeria.defensores.R
 // Actually, let's create a simple inner adapter or separate generic adapter
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import androidx.lifecycle.lifecycleScope
 
 class ManageDamageTypesDialogFragment(
-    private val currentTypes: List<String>,
+    private val availableTypesFlow: StateFlow<List<String>>,
     private val onAdd: (String) -> Unit,
     private val onRemove: (String) -> Unit
 ) : DialogFragment() {
@@ -31,14 +34,20 @@ class ManageDamageTypesDialogFragment(
         val recycler = view.findViewById<RecyclerView>(R.id.recycler_types)
         
         recycler.layoutManager = LinearLayoutManager(context)
-        recycler.adapter = DamageTypeAdapter(currentTypes, onRemove)
+        val adapter = DamageTypeAdapter(emptyList(), onRemove)
+        recycler.adapter = adapter
+        
+        lifecycleScope.launch {
+            availableTypesFlow.collect { types ->
+                adapter.updateData(types)
+            }
+        }
         
         btnAdd.setOnClickListener {
             val newType = editNewType.text.toString().trim()
             if (newType.isNotEmpty()) {
                 onAdd(newType)
                 editNewType.text.clear()
-                dismiss() // Or refresh? For now dismiss to refresh from Fragment
             }
         }
 
@@ -51,9 +60,14 @@ class ManageDamageTypesDialogFragment(
 }
 
 class DamageTypeAdapter(
-    private val types: List<String>,
+    private var types: List<String>,
     private val onRemove: (String) -> Unit
 ) : RecyclerView.Adapter<DamageTypeAdapter.ViewHolder>() {
+
+    fun updateData(newTypes: List<String>) {
+        types = newTypes
+        notifyDataSetChanged()
+    }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val textType: TextView = view.findViewById(R.id.text_type_name)

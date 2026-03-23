@@ -48,12 +48,11 @@ class RollHistoryBottomSheet(private val tableId: String) : BottomSheetDialogFra
         // Offline Load
         viewLifecycleOwner.lifecycleScope.launch {
             val table = withContext(Dispatchers.IO) {
-                tableRepository.getTable(tableId)
+                tableRepository.getTableOnce(tableId)
             }
             
             if (table != null) {
                 allRollsCache = table.rollHistory.sortedByDescending { it.timestamp }
-                
                 updateUI(view, recycler)
             } else {
                 android.widget.Toast.makeText(context, "Mesa não encontrada.", android.widget.Toast.LENGTH_SHORT).show()

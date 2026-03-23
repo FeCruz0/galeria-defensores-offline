@@ -6,6 +6,7 @@ import com.galeria.defensores.models.Character
 import com.galeria.defensores.models.Table
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.first
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileInputStream
@@ -41,8 +42,8 @@ class BackupRepository @Inject constructor(
     suspend fun exportTable(context: Context, tableId: String, uri: Uri): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                val table = tableRepository.getTable(tableId) ?: return@withContext false
-                val characters = characterRepository.getCharacters(tableId)
+                val table = tableRepository.getTableOnce(tableId) ?: return@withContext false
+                val characters = characterRepository.getCharacters(tableId).first()
                 
                 context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                     ZipOutputStream(BufferedOutputStream(outputStream)).use { zipOut ->

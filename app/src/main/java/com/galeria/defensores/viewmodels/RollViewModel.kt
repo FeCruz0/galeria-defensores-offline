@@ -3,17 +3,20 @@ package com.galeria.defensores.viewmodels
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.galeria.defensores.data.SharedCharacterState
 import com.galeria.defensores.data.TableRepository
 import com.galeria.defensores.models.CustomRoll
 import com.galeria.defensores.models.RollResult
 import com.galeria.defensores.models.RollType
-import com.galeria.defensores.utils.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 import javax.inject.Inject
@@ -31,17 +34,19 @@ class RollViewModel @Inject constructor(
     private val calculateCustomRollUseCase: com.galeria.defensores.domain.usecases.CalculateCustomRollUseCase
 ) : AndroidViewModel(application) {
 
-    private val _isRolling = MutableLiveData<Boolean>()
-    val isRolling: LiveData<Boolean> = _isRolling
+    private val _isRolling = MutableStateFlow(false)
+    val isRolling: StateFlow<Boolean> = _isRolling.asStateFlow()
 
-    private val _lastRoll = MutableLiveData<RollResult>()
-    val lastRoll: LiveData<RollResult> = _lastRoll
+    private val _lastRoll = MutableStateFlow<RollResult?>(null)
+    val lastRoll: StateFlow<RollResult?> = _lastRoll.asStateFlow()
 
-    private val _rollEvent = MutableLiveData<Event<RollResult>>()
-    val rollEvent: LiveData<Event<RollResult>> = _rollEvent
+    private val _rollEvent = MutableSharedFlow<RollResult>(replay = 0, extraBufferCapacity = 1)
+    val rollEvent: SharedFlow<RollResult> = _rollEvent.asSharedFlow()
 
-    private val _virtualRollRequest = MutableLiveData<Event<com.galeria.defensores.models.RollRequest>>()
-    val virtualRollRequest: LiveData<Event<com.galeria.defensores.models.RollRequest>> = _virtualRollRequest
+    private val _virtualRollRequest = MutableSharedFlow<com.galeria.defensores.models.RollRequest>(replay = 0, extraBufferCapacity = 1)
+    val virtualRollRequest: SharedFlow<com.galeria.defensores.models.RollRequest> = _virtualRollRequest.asSharedFlow()
+
+    private var currentRollRequest: com.galeria.defensores.models.RollRequest? = null
 
     var isVirtualRollEnabled = true
 
@@ -52,7 +57,7 @@ class RollViewModel @Inject constructor(
     }
 
     fun finalizeVirtualRoll(diceValues: List<Int>) {
-        val request = _virtualRollRequest.value?.peekContent() ?: return
+        val request = currentRollRequest ?: return
         val char = sharedCharacterState.character.value ?: return
 
         val result = if (request.type == com.galeria.defensores.models.RollRequestType.CUSTOM && request.customRoll != null) {
@@ -70,7 +75,7 @@ class RollViewModel @Inject constructor(
         }
 
         _lastRoll.value = result
-        _rollEvent.value = Event(result)
+        viewModelScope.launch { _rollEvent.emit(result) }
         saveRollToHistory(result)
     }
 
@@ -143,8 +148,7 @@ class RollViewModel @Inject constructor(
                     tableRepository.broadcastVisualRoll(char.tableId, visualRoll)
                 }
 
-                _virtualRollRequest.value = Event(
-                    com.galeria.defensores.models.RollRequest(
+                val request = com.galeria.defensores.models.RollRequest(
                         type = reqType,
                         diceCount = 1,
                         bonus = bonus,
@@ -157,7 +161,8 @@ class RollViewModel @Inject constructor(
                         canCrit = canCrit,
                         critRangeStart = 6
                     )
-                )
+                currentRollRequest = request
+                _virtualRollRequest.emit(request)
                 _isRolling.value = false
                 return@launch
             }
@@ -187,7 +192,7 @@ class RollViewModel @Inject constructor(
 
             val result = calculateStandardRollUseCase(char, type, bonus, attrVal, char.habilidade, null) { getAttributeName(it) }
             _lastRoll.value = result
-            _rollEvent.value = Event(result)
+            _rollEvent.emit(result)
             _isRolling.value = false
             saveRollToHistory(result)
         }
@@ -242,8 +247,7 @@ class RollViewModel @Inject constructor(
                     )
                 }
 
-                _virtualRollRequest.value = Event(
-                    com.galeria.defensores.models.RollRequest(
+                val request = com.galeria.defensores.models.RollRequest(
                         type = com.galeria.defensores.models.RollRequestType.CUSTOM,
                         diceCount = roll.components.sumOf { it.count },
                         bonus = roll.globalModifier,
@@ -257,7 +261,8 @@ class RollViewModel @Inject constructor(
                         canCrit = canCrit,
                         critRangeStart = minCritRange
                     )
-                )
+                currentRollRequest = request
+                _virtualRollRequest.emit(request)
                 _isRolling.value = false
                 return@launch
             }
@@ -267,7 +272,7 @@ class RollViewModel @Inject constructor(
 
             val result = calculateCustomRollUseCase(char, roll, null)
             _lastRoll.value = result
-            _rollEvent.value = Event(result)
+            _rollEvent.emit(result)
             _isRolling.value = false
             saveRollToHistory(result)
         }

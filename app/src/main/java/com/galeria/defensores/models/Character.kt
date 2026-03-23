@@ -68,7 +68,20 @@ data class Character(
         
         return attrSum + advantagesSum + skillsSum + specsSum + uniqueAdvantageCost + savedPoints
     }
-    
+    fun deepCopy(): Character {
+        return this.copy(
+            vantagens = vantagens.map { it.copy() }.toMutableList(),
+            desvantagens = desvantagens.map { it.copy() }.toMutableList(),
+            pericias = pericias.map { it.copy() }.toMutableList(),
+            especializacoes = especializacoes.map { it.copy() }.toMutableList(),
+            magias = magias.map { it.copy() }.toMutableList(),
+            inventario = inventario.map { it.copy() }.toMutableList(),
+            customRolls = customRolls.map { it.copy() }.toMutableList(),
+            attributeValues = attributeValues.toMutableMap(),
+            resourceValues = resourceValues.toMutableMap(),
+            uniqueAdvantage = uniqueAdvantage?.copy()
+        )
+    }
 }
 
 data class ModifierOption(

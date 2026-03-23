@@ -8,14 +8,17 @@ interface CharacterDao {
     @Query("SELECT * FROM characters")
     suspend fun getAll(): List<CharacterEntity>
 
+    @Query("SELECT * FROM characters")
+    fun getAllReactive(): kotlinx.coroutines.flow.Flow<List<CharacterEntity>>
+
     @Query("SELECT * FROM characters WHERE id = :id")
-    suspend fun getById(id: String): CharacterEntity?
+    fun getById(id: String): kotlinx.coroutines.flow.Flow<CharacterEntity?>
 
     @Query("SELECT * FROM characters WHERE ownerId = :userId")
-    suspend fun getByOwner(userId: String): List<CharacterEntity>
+    fun getByOwner(userId: String): kotlinx.coroutines.flow.Flow<List<CharacterEntity>>
 
     @Query("SELECT * FROM characters WHERE tableId = :tableId")
-    suspend fun getByTable(tableId: String): List<CharacterEntity>
+    fun getByTable(tableId: String): kotlinx.coroutines.flow.Flow<List<CharacterEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(character: CharacterEntity)

@@ -3,9 +3,10 @@ package com.galeria.defensores.viewmodels
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import com.galeria.defensores.data.CharacterRepository
 import com.galeria.defensores.data.SharedCharacterState
 import com.galeria.defensores.domain.usecases.GetResourceMaxUseCase
@@ -19,6 +20,8 @@ import com.galeria.defensores.models.Spell
 import com.galeria.defensores.models.UniqueAdvantage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 /**
@@ -37,10 +40,14 @@ class CharacterViewModel @Inject constructor(
     private val loadCharacterUseCase: LoadCharacterUseCase
 ) : AndroidViewModel(application) {
 
-    private val _character = MutableLiveData<Character>()
-    val character: LiveData<Character> = _character
+    private val _character = MutableStateFlow<Character?>(null)
+    val character: StateFlow<Character?> = _character.asStateFlow()
+
+    private val _ruleSystem = MutableStateFlow(com.galeria.defensores.models.RuleSystem())
+    val ruleSystem: StateFlow<com.galeria.defensores.models.RuleSystem> = _ruleSystem.asStateFlow()
 
     var isAnimationEnabled = true
+    private val saveMutex = Mutex()
 
     // ────────────────────────────────────────────────────────────────────────
     // Load / Save / Delete
@@ -49,18 +56,23 @@ class CharacterViewModel @Inject constructor(
     fun loadCharacter(id: String?, tableId: String? = null) {
         viewModelScope.launch {
             android.util.Log.d("CharacterDebug", "Loading character: id=$id, tableId=$tableId")
-            when (val result = loadCharacterUseCase(id, tableId)) {
-                is com.galeria.defensores.domain.usecases.CharacterResult.Success -> {
-                    val char = result.character
-                    _character.value = char
-                    sharedCharacterState.update(char)
-                }
-                is com.galeria.defensores.domain.usecases.CharacterResult.Error -> {
-                    android.util.Log.e("CharacterDebug", "Error loading character", result.throwable)
-                    val currentUser = com.galeria.defensores.data.SessionManager.currentUser
-                    val fallback = Character(tableId = tableId ?: "", ownerId = currentUser?.id ?: "")
-                    _character.value = fallback
-                    sharedCharacterState.update(fallback)
+            loadCharacterUseCase(id, tableId).collect { result ->
+                when (result) {
+                    is com.galeria.defensores.domain.usecases.CharacterResult.Success -> {
+                        val char = result.character
+                        val sys = result.ruleSystem
+                        _character.value = char
+                        _ruleSystem.value = sys
+                        sharedCharacterState.update(char)
+                    }
+                    is com.galeria.defensores.domain.usecases.CharacterResult.Error -> {
+                        android.util.Log.e("CharacterDebug", "Error loading character", result.throwable)
+                        val currentUser = com.galeria.defensores.data.SessionManager.currentUser
+                        val fallback = Character(tableId = tableId ?: "", ownerId = currentUser?.id ?: "")
+                        _character.value = fallback
+                        // Already has a default value from initialization
+                        sharedCharacterState.update(fallback)
+                    }
                 }
             }
         }
@@ -68,7 +80,15 @@ class CharacterViewModel @Inject constructor(
 
     fun saveCharacter() {
         _character.value?.let { char ->
-            viewModelScope.launch { characterRepository.saveCharacter(char) }
+            viewModelScope.launch {
+                saveMutex.withLock {
+                    try {
+                        characterRepository.saveCharacter(char)
+                    } catch (e: Exception) {
+                        android.util.Log.e("CharacterDebug", "Error saving character", e)
+                    }
+                }
+            }
         }
     }
 
@@ -92,51 +112,47 @@ class CharacterViewModel @Inject constructor(
     fun updateAttribute(attribute: String, value: Int) {
         val char = _character.value ?: return
         val newValue = value.coerceIn(0, 99)
-        char.attributeValues[attribute] = newValue
+        val updatedChar = char.deepCopy().also { it.attributeValues[attribute] = newValue }
         when (attribute) {
-            "forca"      -> char.forca = newValue
-            "habilidade" -> char.habilidade = newValue
+            "forca"      -> updatedChar.forca = newValue
+            "habilidade" -> updatedChar.habilidade = newValue
             "resistencia" -> {
-                char.resistencia = newValue
-                char.currentPv = char.getMaxPv()
-                char.currentPm = char.getMaxPm()
+                updatedChar.resistencia = newValue
+                updatedChar.currentPv = updatedChar.getMaxPv()
+                updatedChar.currentPm = updatedChar.getMaxPm()
             }
-            "armadura"   -> char.armadura = newValue
-            "poderFogo"  -> char.poderFogo = newValue
+            "armadura"   -> updatedChar.armadura = newValue
+            "poderFogo"  -> updatedChar.poderFogo = newValue
         }
-        publish(char)
+        publish(updatedChar)
         saveCharacter()
     }
 
     fun updateStatus(type: String, delta: Int) {
-        val char = _character.value ?: return
-        when (type) {
-            "pv" -> char.currentPv = (char.currentPv + delta).coerceIn(0, char.getMaxPv())
-            "pm" -> char.currentPm = (char.currentPm + delta).coerceIn(0, char.getMaxPm())
+        mutate { char ->
+            when (type) {
+                "pv" -> char.currentPv = (char.currentPv + delta).coerceIn(0, char.getMaxPv())
+                "pm" -> char.currentPm = (char.currentPm + delta).coerceIn(0, char.getMaxPm())
+            }
         }
-        publish(char)
-        saveCharacter()
     }
 
     fun setStatus(type: String, value: Int) {
-        val char = _character.value ?: return
-        when (type) {
-            "pv" -> char.currentPv = value.coerceIn(0, char.getMaxPv())
-            "pm" -> char.currentPm = value.coerceIn(0, char.getMaxPm())
+        mutate { char ->
+            when (type) {
+                "pv" -> char.currentPv = value.coerceIn(0, char.getMaxPv())
+                "pm" -> char.currentPm = value.coerceIn(0, char.getMaxPm())
+            }
         }
-        publish(char)
-        saveCharacter()
     }
 
     fun updateResource(key: String, delta: Int) {
         if (key.equals("pv", ignoreCase = true)) { updateStatus("pv", delta); return }
         if (key.equals("pm", ignoreCase = true)) { updateStatus("pm", delta); return }
-        val char = _character.value ?: return
-        // For custom resources we need ruleSystem — access via sharedState's consumer or pass in
-        val current = char.resourceValues[key] ?: 999
-        char.resourceValues[key] = (current + delta).coerceIn(0, 999)
-        publish(char)
-        saveCharacter()
+        mutate { char ->
+            val current = char.resourceValues[key] ?: 0
+            char.resourceValues[key] = (current + delta).coerceIn(0, 9999)
+        }
     }
 
     fun calculateResourceMax(res: ResourceDefinition, char: Character, ruleSystem: com.galeria.defensores.models.RuleSystem): Int =
@@ -153,14 +169,15 @@ class CharacterViewModel @Inject constructor(
     fun updateSavedPoints(points: Int) { mutate { it.savedPoints = points.coerceAtLeast(0) } }
 
     fun updateExperience(xp: Int) {
-        val char = _character.value ?: return
-        var newXp = xp.coerceAtLeast(0)
-        var newSaved = char.savedPoints
-        if (newXp >= 10) { newSaved += newXp / 10; newXp %= 10 }
-        if (newXp != char.experience || newSaved != char.savedPoints) {
+        mutate { char ->
+            var newXp = xp.coerceAtLeast(0)
+            var newSaved = char.savedPoints
+            if (newXp >= 10) {
+                newSaved += newXp / 10
+                newXp %= 10
+            }
             char.experience = newXp
             char.savedPoints = newSaved
-            publish(char); saveCharacter()
         }
     }
 
@@ -178,49 +195,129 @@ class CharacterViewModel @Inject constructor(
     // Advantages / Disadvantages
     // ────────────────────────────────────────────────────────────────────────
 
-    fun addAdvantage(advantage: AdvantageItem)       { mutate { it.vantagens    = it.vantagens.toMutableList().also { l -> l.add(advantage) } } }
-    fun updateAdvantage(advantage: AdvantageItem)    { mutateList({ it.vantagens }, { it.id == advantage.id }, advantage) { char, list -> char.vantagens = list } }
-    fun removeAdvantage(advantage: AdvantageItem)    { mutate { it.vantagens = it.vantagens.filter { a -> a.id != advantage.id }.toMutableList() } }
+    fun addAdvantage(advantage: AdvantageItem) {
+        mutate { it.vantagens = it.vantagens.toMutableList().also { l -> l.add(advantage) } }
+    }
+    fun updateAdvantage(advantage: AdvantageItem) {
+        mutate { char ->
+            val list = char.vantagens.toMutableList()
+            val idx = list.indexOfFirst { it.id == advantage.id }
+            if (idx != -1) {
+                list[idx] = advantage
+                char.vantagens = list
+            }
+        }
+    }
+    fun removeAdvantage(advantage: AdvantageItem) {
+        mutate { it.vantagens = it.vantagens.filter { a -> a.id != advantage.id }.toMutableList() }
+    }
 
-    fun addDisadvantage(dis: AdvantageItem)          { mutate { it.desvantagens = it.desvantagens.toMutableList().also { l -> l.add(dis) } } }
-    fun updateDisadvantage(dis: AdvantageItem)       { mutateList({ it.desvantagens }, { it.id == dis.id }, dis) { char, list -> char.desvantagens = list } }
-    fun removeDisadvantage(dis: AdvantageItem)       { mutate { it.desvantagens = it.desvantagens.filter { a -> a.id != dis.id }.toMutableList() } }
+    fun addDisadvantage(dis: AdvantageItem) {
+        mutate { it.desvantagens = it.desvantagens.toMutableList().also { l -> l.add(dis) } }
+    }
+    fun updateDisadvantage(dis: AdvantageItem) {
+        mutate { char ->
+            val list = char.desvantagens.toMutableList()
+            val idx = list.indexOfFirst { it.id == dis.id }
+            if (idx != -1) {
+                list[idx] = dis
+                char.desvantagens = list
+            }
+        }
+    }
+    fun removeDisadvantage(dis: AdvantageItem) {
+        mutate { it.desvantagens = it.desvantagens.filter { a -> a.id != dis.id }.toMutableList() }
+    }
 
-    fun addSkill(skill: AdvantageItem)               { mutate { it.pericias = it.pericias.toMutableList().also { l -> l.add(skill) } } }
-    fun updateSkill(skill: AdvantageItem)            { mutateList({ it.pericias }, { it.id == skill.id }, skill) { char, list -> char.pericias = list } }
-    fun removeSkill(skill: AdvantageItem)            { mutate { it.pericias = it.pericias.filter { s -> s.id != skill.id }.toMutableList() } }
+    fun addSkill(skill: AdvantageItem) {
+        mutate { it.pericias = it.pericias.toMutableList().also { l -> l.add(skill) } }
+    }
+    fun updateSkill(skill: AdvantageItem) {
+        mutate { char ->
+            val list = char.pericias.toMutableList()
+            val idx = list.indexOfFirst { it.id == skill.id }
+            if (idx != -1) {
+                list[idx] = skill
+                char.pericias = list
+            }
+        }
+    }
+    fun removeSkill(skill: AdvantageItem) {
+        mutate { it.pericias = it.pericias.filter { s -> s.id != skill.id }.toMutableList() }
+    }
 
-    fun addSpecializations(specs: List<AdvantageItem>) { mutate { it.especializacoes = it.especializacoes.toMutableList().also { l -> l.addAll(specs) } } }
-    fun updateSpecialization(spec: AdvantageItem)      { mutateList({ it.especializacoes }, { it.id == spec.id }, spec) { char, list -> char.especializacoes = list } }
-    fun removeSpecialization(spec: AdvantageItem)      { mutate { it.especializacoes = it.especializacoes.filter { s -> s.id != spec.id }.toMutableList() } }
+    fun addSpecializations(specs: List<AdvantageItem>) {
+        mutate { it.especializacoes = it.especializacoes.toMutableList().also { l -> l.addAll(specs) } }
+    }
+    fun updateSpecialization(spec: AdvantageItem) {
+        mutate { char ->
+            val list = char.especializacoes.toMutableList()
+            val idx = list.indexOfFirst { it.id == spec.id }
+            if (idx != -1) {
+                list[idx] = spec
+                char.especializacoes = list
+            }
+        }
+    }
+    fun removeSpecialization(spec: AdvantageItem) {
+        mutate { it.especializacoes = it.especializacoes.filter { s -> s.id != spec.id }.toMutableList() }
+    }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Inventory
-    // ────────────────────────────────────────────────────────────────────────
+    fun addInventoryItem(item: InventoryItem) {
+        mutate { it.inventario = it.inventario.toMutableList().also { l -> l.add(item) } }
+    }
+    fun updateInventoryItem(item: InventoryItem) {
+        mutate { char ->
+            val list = char.inventario.toMutableList()
+            val idx = list.indexOfFirst { it.id == item.id }
+            if (idx != -1) {
+                list[idx] = item
+                char.inventario = list
+            }
+        }
+    }
+    fun removeInventoryItem(item: InventoryItem) {
+        mutate { it.inventario = it.inventario.filter { i -> i.id != item.id }.toMutableList() }
+    }
 
-    fun addInventoryItem(item: InventoryItem)         { mutate { it.inventario = it.inventario.toMutableList().also { l -> l.add(item) } } }
-    fun updateInventoryItem(item: InventoryItem)      { mutateList({ it.inventario }, { it.id == item.id }, item) { char, list -> char.inventario = list } }
-    fun removeInventoryItem(item: InventoryItem)      { mutate { it.inventario = it.inventario.filter { i -> i.id != item.id }.toMutableList() } }
     fun adjustInventoryQuantity(item: InventoryItem, delta: Int) {
         val qty = item.quantity.toIntOrNull() ?: return
         updateInventoryItem(item.copy(quantity = (qty + delta).coerceAtLeast(0).toString()))
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Spells
-    // ────────────────────────────────────────────────────────────────────────
+    fun addSpell(spell: Spell) {
+        mutate { it.magias = it.magias.toMutableList().also { l -> l.add(spell) } }
+    }
+    fun updateSpell(spell: Spell) {
+        mutate { char ->
+            val list = char.magias.toMutableList()
+            val idx = list.indexOfFirst { it.id == spell.id }
+            if (idx != -1) {
+                list[idx] = spell
+                char.magias = list
+            }
+        }
+    }
+    fun removeSpell(spell: Spell) {
+        mutate { it.magias = it.magias.filter { s -> s.id != spell.id }.toMutableList() }
+    }
 
-    fun addSpell(spell: Spell)    { mutate { it.magias = it.magias.toMutableList().also { l -> l.add(spell) } } }
-    fun updateSpell(spell: Spell) { mutateList({ it.magias }, { it.id == spell.id }, spell) { char, list -> char.magias = list } }
-    fun removeSpell(spell: Spell) { mutate { it.magias = it.magias.filter { s -> s.id != spell.id }.toMutableList() } }
-
-    // ────────────────────────────────────────────────────────────────────────
-    // Custom Rolls (CRUD only — actual rolling is in RollViewModel)
-    // ────────────────────────────────────────────────────────────────────────
-
-    fun addCustomRoll(roll: CustomRoll)    { mutate { it.customRolls = it.customRolls.toMutableList().also { l -> l.add(roll) } } }
-    fun updateCustomRoll(roll: CustomRoll) { mutateList({ it.customRolls }, { it.id == roll.id }, roll) { char, list -> char.customRolls = list } }
-    fun removeCustomRoll(roll: CustomRoll) { mutate { it.customRolls = it.customRolls.filter { r -> r.id != roll.id }.toMutableList() } }
+    fun addCustomRoll(roll: CustomRoll) {
+        mutate { it.customRolls = it.customRolls.toMutableList().also { l -> l.add(roll) } }
+    }
+    fun updateCustomRoll(roll: CustomRoll) {
+        mutate { char ->
+            val list = char.customRolls.toMutableList()
+            val idx = list.indexOfFirst { it.id == roll.id }
+            if (idx != -1) {
+                list[idx] = roll
+                char.customRolls = list
+            }
+        }
+    }
+    fun removeCustomRoll(roll: CustomRoll) {
+        mutate { it.customRolls = it.customRolls.filter { r -> r.id != roll.id }.toMutableList() }
+    }
 
     // ────────────────────────────────────────────────────────────────────────
     // Avatar
@@ -252,22 +349,10 @@ class CharacterViewModel @Inject constructor(
     /** Apply a mutation, then publish to LiveData and SharedCharacterState. */
     private fun mutate(block: (Character) -> Unit) {
         val char = _character.value ?: return
-        block(char)
-        publish(char)
+        val newChar = char.deepCopy()
+        block(newChar)
+        publish(newChar)
         saveCharacter()
-    }
-
-    /** Update a list item in-place. */
-    private fun <T> mutateList(
-        getList: (Character) -> MutableList<T>,
-        predicate: (T) -> Boolean,
-        replacement: T,
-        setList: (Character, MutableList<T>) -> Unit
-    ) {
-        val char = _character.value ?: return
-        val list = getList(char).toMutableList()
-        val idx = list.indexOfFirst(predicate)
-        if (idx != -1) { list[idx] = replacement; setList(char, list); publish(char); saveCharacter() }
     }
 
     /** Emit to LiveData and bridge. */

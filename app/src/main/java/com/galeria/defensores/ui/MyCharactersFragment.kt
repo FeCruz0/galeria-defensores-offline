@@ -73,53 +73,52 @@ class MyCharactersFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val currentUser = SessionManager.currentUser
             if (currentUser != null) {
-                val characters = characterRepository.getCharactersForUser(currentUser.id)
-                if (characters.isEmpty()) {
-                    textEmpty.visibility = View.VISIBLE
-                    recyclerCharacters.visibility = View.GONE
-                } else {
-                    textEmpty.visibility = View.GONE
-                    recyclerCharacters.visibility = View.VISIBLE
-                    
-                    val charactersWithTableNames = characters.map { character ->
-                        val tableName = if (character.tableId.isNotEmpty()) {
-                             val table = tableRepository.getTable(character.tableId)
-                             table?.name ?: "Mesa Desconhecida"
-                        } else {
-                            "Nenhuma"
+                characterRepository.getCharactersForUser(currentUser.id).collect { characters ->
+                    if (characters.isEmpty()) {
+                        textEmpty.visibility = View.VISIBLE
+                        recyclerCharacters.visibility = View.GONE
+                    } else {
+                        textEmpty.visibility = View.GONE
+                        recyclerCharacters.visibility = View.VISIBLE
+                        
+                        val charactersWithTableNames = characters.map { character ->
+                            val tableName = if (character.tableId.isNotEmpty()) {
+                                 val table = tableRepository.getTableOnce(character.tableId)
+                                 table?.name ?: "Mesa Desconhecida"
+                            } else {
+                                "Nenhuma"
+                            }
+                            character to tableName
                         }
-                        character to tableName
-                    }
 
-                    adapter = MyCharactersAdapter(charactersWithTableNames, 
-                        onClick = { character ->
-                            // Open Sheet
-                            val fragment = CharacterSheetFragment.newInstance(character.id)
-                            parentFragmentManager.beginTransaction()
-                                .replace(R.id.fragment_container, fragment)
-                                .addToBackStack(null)
-                                .commit()
-                        },
-                        onExport = { character ->
-                            pendingExportCharacter = character
-                            val safeName = character.name.replace("[^a-zA-Z0-9.-]".toRegex(), "_")
-                            exportCharacterLauncher.launch("char_${safeName}_${character.id.take(4)}.json")
-                        },
-                        onDelete = { character ->
-                             androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                                .setTitle("Excluir Personagem")
-                                .setMessage("Tem certeza que deseja excluir ${character.name}?")
-                                .setPositiveButton("Excluir") { _, _ ->
-                                    lifecycleScope.launch {
-                                        characterRepository.deleteCharacter(character.id)
-                                        loadCharacters() 
+                        adapter = MyCharactersAdapter(charactersWithTableNames, 
+                            onClick = { character ->
+                                val fragment = CharacterSheetFragment.newInstance(character.id)
+                                parentFragmentManager.beginTransaction()
+                                    .replace(R.id.fragment_container, fragment)
+                                    .addToBackStack(null)
+                                    .commit()
+                            },
+                            onExport = { character ->
+                                pendingExportCharacter = character
+                                val safeName = character.name.replace("[^a-zA-Z0-9.-]".toRegex(), "_")
+                                exportCharacterLauncher.launch("char_${safeName}_${character.id.take(4)}.json")
+                            },
+                            onDelete = { character ->
+                                 androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                                    .setTitle("Excluir Personagem")
+                                    .setMessage("Tem certeza que deseja excluir ${character.name}?")
+                                    .setPositiveButton("Excluir") { _, _ ->
+                                        lifecycleScope.launch {
+                                            characterRepository.deleteCharacter(character.id)
+                                        }
                                     }
-                                }
-                                .setNegativeButton("Cancelar", null)
-                                .show()
-                        }
-                    )
-                    recyclerCharacters.adapter = adapter
+                                    .setNegativeButton("Cancelar", null)
+                                    .show()
+                            }
+                        )
+                        recyclerCharacters.adapter = adapter
+                    }
                 }
             }
         }

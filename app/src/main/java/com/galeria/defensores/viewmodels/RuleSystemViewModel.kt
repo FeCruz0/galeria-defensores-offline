@@ -1,9 +1,10 @@
 package com.galeria.defensores.viewmodels
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import com.galeria.defensores.data.RuleSystemRepository
 import com.galeria.defensores.data.SharedCharacterState
 import com.galeria.defensores.data.TableRepository
@@ -31,14 +32,14 @@ class RuleSystemViewModel @Inject constructor(
     private val getResourceMaxUseCase: GetResourceMaxUseCase
 ) : ViewModel() {
 
-    private val _ruleSystem = MutableLiveData<RuleSystem>(RuleSystem())
-    val ruleSystem: LiveData<RuleSystem> = _ruleSystem
+    private val _ruleSystem = MutableStateFlow(RuleSystem())
+    val ruleSystem: StateFlow<RuleSystem> = _ruleSystem.asStateFlow()
 
-    private val _availableDamageTypes = MutableLiveData<List<String>>()
-    val availableDamageTypes: LiveData<List<String>> = _availableDamageTypes
+    private val _availableDamageTypes = MutableStateFlow<List<String>>(emptyList())
+    val availableDamageTypes: StateFlow<List<String>> = _availableDamageTypes.asStateFlow()
 
-    private val _availableUniqueAdvantages = MutableLiveData<List<UniqueAdvantage>>()
-    val availableUniqueAdvantages: LiveData<List<UniqueAdvantage>> = _availableUniqueAdvantages
+    private val _availableUniqueAdvantages = MutableStateFlow<List<UniqueAdvantage>>(emptyList())
+    val availableUniqueAdvantages: StateFlow<List<UniqueAdvantage>> = _availableUniqueAdvantages.asStateFlow()
 
     private val defaultDamageTypes = listOf(
         "Corte", "Perfuração", "Esmagamento",
@@ -48,7 +49,7 @@ class RuleSystemViewModel @Inject constructor(
     private var currentTableId: String? = null
 
     private val currentRuleSystem: RuleSystem
-        get() = _ruleSystem.value!!
+        get() = _ruleSystem.value
 
     // --- Public API ---
 
@@ -182,7 +183,7 @@ class RuleSystemViewModel @Inject constructor(
                 ruleSystemRepository.resetBaseSystem()
                 val current = _ruleSystem.value
                 if (current?.id == "3det_alpha_base") {
-                    _ruleSystem.value = ruleSystemRepository.getSystem("3det_alpha_base")
+                    _ruleSystem.value = ruleSystemRepository.getSystemOnce("3det_alpha_base") ?: RuleSystem()
                 }
                 onComplete(true)
             } catch (e: Exception) {
@@ -195,11 +196,18 @@ class RuleSystemViewModel @Inject constructor(
 
     fun loadDamageTypes(tableId: String?) {
         currentTableId = tableId
+        if (tableId.isNullOrEmpty()) {
+            _availableDamageTypes.value = defaultDamageTypes.sorted()
+            return
+        }
         viewModelScope.launch {
-            val customTypes = if (!tableId.isNullOrEmpty()) {
-                tableRepository.getTable(tableId)?.customDamageTypes ?: emptyList()
-            } else emptyList()
-            _availableDamageTypes.value = (defaultDamageTypes + customTypes).distinct().sorted()
+            tableRepository.getTable(tableId).collect { table ->
+                val customTypes = table?.customDamageTypes ?: emptyList()
+                val deletedDefaults = customTypes.filter { it.startsWith("-") }.map { it.drop(1) }
+                val addedCustoms = customTypes.filter { !it.startsWith("-") }
+                
+                _availableDamageTypes.value = (defaultDamageTypes.filterNot { it in deletedDefaults } + addedCustoms).distinct().sorted()
+            }
         }
     }
 
@@ -207,21 +215,30 @@ class RuleSystemViewModel @Inject constructor(
         val tableId = currentTableId ?: return
         if (type.isBlank()) return
         viewModelScope.launch {
-            val table = tableRepository.getTable(tableId) ?: return@launch
-            if (!table.customDamageTypes.contains(type)) {
+            val table = tableRepository.getTableOnce(tableId) ?: return@launch
+            if (defaultDamageTypes.contains(type)) {
+                if (table.customDamageTypes.remove("-$type")) {
+                    tableRepository.updateTable(table)
+                }
+            } else if (!table.customDamageTypes.contains(type)) {
                 table.customDamageTypes.add(type)
                 tableRepository.updateTable(table)
             }
-            loadDamageTypes(tableId)
         }
     }
 
     fun removeCustomDamageType(type: String) {
         val tableId = currentTableId ?: return
         viewModelScope.launch {
-            val table = tableRepository.getTable(tableId) ?: return@launch
-            if (table.customDamageTypes.remove(type)) tableRepository.updateTable(table)
-            loadDamageTypes(tableId)
+            val table = tableRepository.getTableOnce(tableId) ?: return@launch
+            if (defaultDamageTypes.contains(type)) {
+                if (!table.customDamageTypes.contains("-$type")) {
+                     table.customDamageTypes.add("-$type")
+                     tableRepository.updateTable(table)
+                }
+            } else {
+                if (table.customDamageTypes.remove(type)) tableRepository.updateTable(table)
+            }
         }
     }
 
@@ -229,31 +246,35 @@ class RuleSystemViewModel @Inject constructor(
 
     fun loadUniqueAdvantages(tableId: String?) {
         currentTableId = tableId
+        if (tableId.isNullOrEmpty()) {
+            _availableUniqueAdvantages.value = com.galeria.defensores.data.UniqueAdvantagesData.defaults.sortedBy { it.name }
+            return
+        }
         viewModelScope.launch {
-            val defaults = com.galeria.defensores.data.UniqueAdvantagesData.defaults
-            val custom = if (!tableId.isNullOrEmpty()) {
-                tableRepository.getTable(tableId)?.customUniqueAdvantages ?: emptyList()
-            } else emptyList()
-            _availableUniqueAdvantages.value = (defaults + custom).sortedBy { it.name }
+            tableRepository.getTable(tableId).collect { table ->
+                val defaults = com.galeria.defensores.data.UniqueAdvantagesData.defaults
+                val custom = table?.customUniqueAdvantages ?: emptyList()
+                _availableUniqueAdvantages.value = (defaults + custom).distinctBy { it.name }.sortedBy { it.name }
+            }
         }
     }
 
     fun addCustomUniqueAdvantage(ua: UniqueAdvantage) {
         val tableId = currentTableId ?: return
         viewModelScope.launch {
-            val table = tableRepository.getTable(tableId) ?: return@launch
+            val table = tableRepository.getTableOnce(tableId) ?: return@launch
             val idx = table.customUniqueAdvantages.indexOfFirst { it.name == ua.name }
             if (idx == -1) table.customUniqueAdvantages.add(ua)
             else table.customUniqueAdvantages[idx] = ua
-            if (tableRepository.updateTable(table)) loadUniqueAdvantages(tableId)
+            tableRepository.updateTable(table)
         }
     }
 
     fun removeCustomUniqueAdvantage(ua: UniqueAdvantage) {
         val tableId = currentTableId ?: return
         viewModelScope.launch {
-            val table = tableRepository.getTable(tableId) ?: return@launch
-            if (table.customUniqueAdvantages.removeIf { it.name == ua.name && it.group == ua.group }) {
+            val table = tableRepository.getTableOnce(tableId) ?: return@launch
+            if (table.customUniqueAdvantages.removeAll { it.name == ua.name && it.group == ua.group }) {
                 if (tableRepository.updateTable(table)) loadUniqueAdvantages(tableId)
             }
         }
@@ -262,7 +283,7 @@ class RuleSystemViewModel @Inject constructor(
     fun updateCustomUniqueAdvantage(oldUA: UniqueAdvantage, newUA: UniqueAdvantage) {
         val tableId = currentTableId ?: return
         viewModelScope.launch {
-            val table = tableRepository.getTable(tableId) ?: return@launch
+            val table = tableRepository.getTableOnce(tableId) ?: return@launch
             val index = table.customUniqueAdvantages.indexOfFirst { it.name == oldUA.name && it.group == oldUA.group }
             if (index != -1) {
                 table.customUniqueAdvantages[index] = newUA

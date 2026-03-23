@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.lifecycle.lifecycleScope
 
 @AndroidEntryPoint
 class TableContainerFragment : Fragment() {
@@ -66,11 +67,9 @@ class TableContainerFragment : Fragment() {
         
         // Load Table Data for Title
         tableId?.let { id ->
-             CoroutineScope(Dispatchers.IO).launch {
-                 val table = tableRepository.getTable(id)
-                 withContext(Dispatchers.Main) {
-                     titleView.text = table?.name ?: "Mesa"
-                 }
+             viewLifecycleOwner.lifecycleScope.launch {
+                 val table = withContext(Dispatchers.IO) { tableRepository.getTableOnce(id) }
+                 titleView.text = table?.name ?: "Mesa"
              }
 
             // Initialize Character List Fragment directly

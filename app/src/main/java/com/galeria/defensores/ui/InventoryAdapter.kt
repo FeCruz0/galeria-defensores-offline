@@ -9,11 +9,18 @@ import com.galeria.defensores.R
 import com.galeria.defensores.models.InventoryItem
 
 class InventoryAdapter(
-    private val items: List<InventoryItem>,
+    private var items: List<InventoryItem>,
     private val canEdit: Boolean,
     private val onItemClick: (InventoryItem) -> Unit,
     private val onQuantityChange: (InventoryItem, Int) -> Unit
 ) : RecyclerView.Adapter<InventoryAdapter.ViewHolder>() {
+
+    fun updateData(newItems: List<InventoryItem>) {
+        if (items != newItems) {
+            items = newItems
+            notifyDataSetChanged()
+        }
+    }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val name: TextView = view.findViewById(R.id.text_item_name)

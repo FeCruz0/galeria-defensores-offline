@@ -8,7 +8,9 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.galeria.defensores.R
@@ -26,6 +28,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.first
 
 @AndroidEntryPoint
 class QuickRollBottomSheet(
@@ -69,16 +72,16 @@ class QuickRollBottomSheet(
             }
 
             val table = withContext(Dispatchers.IO) {
-                try { tableRepository.getTable(tableId) } catch (e: Exception) { null }
+                try { tableRepository.getTableOnce(tableId) } catch (e: Exception) { null }
             }
             
             val isMaster = table?.masterId == userId || table?.masterId == "mock-master-id"
 
             val characters = withContext(Dispatchers.IO) {
                 try {
-                    characterRepository.getCharacters(tableId)
+                    characterRepository.getCharacters(tableId).first()
                 } catch (e: Exception) {
-                    emptyList()
+                    emptyList<com.galeria.defensores.models.Character>()
                 }
             }
 
@@ -118,56 +121,61 @@ class QuickRollBottomSheet(
             }
         }
         
-        // 2. Observe Character to Update UI (Custom Rolls)
-        viewModel.character.observe(viewLifecycleOwner) { char ->
-             if (char != null) {
-                 setupStandardButtons(view) // Enable buttons
-                 
-                 if (char.customRolls.isNotEmpty()) {
-                    recycler.adapter = QuickRollAdapter(char.customRolls) { roll ->
-                        rollViewModel.rollCustom(roll)
+        // 2. Observe Data using Flow collection
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Character Flow
+                launch {
+                    viewModel.character.collect { char ->
+                        if (char != null) {
+                            setupStandardButtons(view) // Enable buttons
+                            if (char.customRolls.isNotEmpty()) {
+                                recycler.adapter = QuickRollAdapter(char.customRolls) { roll ->
+                                    rollViewModel.rollCustom(roll)
+                                }
+                                recycler.visibility = View.VISIBLE
+                                emptyText.visibility = View.GONE
+                            } else {
+                                recycler.visibility = View.GONE
+                                emptyText.visibility = View.VISIBLE
+                                emptyText.text = "Nenhuma rolagem personalizada criada."
+                            }
+                        } else {
+                            disableButtons(view)
+                        }
                     }
-                    recycler.visibility = View.VISIBLE
-                    emptyText.visibility = View.GONE
-                } else {
-                    recycler.visibility = View.GONE
-                    emptyText.visibility = View.VISIBLE
-                    emptyText.text = "Nenhuma rolagem personalizada criada."
                 }
-             } else {
-                 disableButtons(view)
-             }
-        }
-        
-        // 3. Observe Results
-        rollViewModel.rollEvent.observe(viewLifecycleOwner) { event ->
-            val result = event.getContentIfNotHandled()
-            if (result != null) {
-                onRollResult(result, result.characterId)
-                dismiss()
+
+                // Roll Event Flow (SharedFlow)
+                launch {
+                    rollViewModel.rollEvent.collect { result ->
+                        onRollResult(result, result.characterId)
+                        dismiss()
+                    }
+                }
+
+                // Virtual Roll Request Flow (SharedFlow)
+                launch {
+                    rollViewModel.virtualRollRequest.collect { request ->
+                        val frag = com.galeria.defensores.ui.VirtualDiceFragment.newInstance(
+                            diceCount = request.diceCount,
+                            bonus = request.bonus,
+                            attrVal = request.attributeValue,
+                            skillVal = request.skillValue,
+                            attrName = request.attributeName,
+                            charId = viewModel.character.value?.id ?: "",
+                            expectedResults = request.diceOverride,
+                            canCrit = request.canCrit,
+                            isNegative = request.isNegative,
+                            critRangeStart = request.critRangeStart,
+                            diceProperties = request.diceProperties
+                        )
+                        frag.show(parentFragmentManager, "virtual_dice")
+                    }
+                }
             }
         }
-
-        rollViewModel.virtualRollRequest.observe(viewLifecycleOwner) { event ->
-            val request = event.getContentIfNotHandled()
-            if (request != null) {
-                 val frag = com.galeria.defensores.ui.VirtualDiceFragment.newInstance(
-                     diceCount = request.diceCount,
-                     bonus = request.bonus,
-                     attrVal = request.attributeValue,
-                     skillVal = request.skillValue,
-                     attrName = request.attributeName,
-                     charId = viewModel.character.value?.id ?: "",
-                     expectedResults = request.diceOverride,
-                     canCrit = request.canCrit,
-                     isNegative = request.isNegative,
-                     critRangeStart = request.critRangeStart,
-                     diceProperties = request.diceProperties
-                 )
-                 frag.show(parentFragmentManager, "virtual_dice")
-             }
-        }
-        
+ 
         // Virtual Roll Result Listener
         parentFragmentManager.setFragmentResultListener(
             com.galeria.defensores.ui.VirtualDiceFragment.REQUEST_KEY,

@@ -10,9 +10,16 @@ import com.galeria.defensores.models.Spell
 import com.galeria.defensores.utils.TextFormatUtils
 
 class SpellsAdapter(
-    private val spells: List<Spell>,
+    private var spells: List<Spell>,
     private val onSpellClick: (Spell) -> Unit
 ) : RecyclerView.Adapter<SpellsAdapter.ViewHolder>() {
+
+    fun updateData(newItems: List<Spell>) {
+        if (spells != newItems) {
+            spells = newItems
+            notifyDataSetChanged()
+        }
+    }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val nameText: TextView = view.findViewById(R.id.text_spell_name)

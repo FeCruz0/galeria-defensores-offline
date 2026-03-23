@@ -36,8 +36,7 @@
                 android:layout_height="wrap_content"
                 android:text="0 pts"
                 android:textColor="#3B82F6"
-                android:textStyle="bold"
-                android:visibility="gone" />
+                android:textStyle="bold" />
         </LinearLayout>
 
         <TextView
@@ -51,13 +50,12 @@
             android:visibility="gone" />
 
         <TextView
-            android:id="@+id/text_ua_benefits"
+            android:id="@+id/text_ua_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Benefícios: ..."
+            android:text="Benefícios e Fraquezas..."
             android:textSize="12sp"
-            android:textColor="@color/text_secondary"
-            android:visibility="gone" />
+            android:textColor="@color/text_secondary" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

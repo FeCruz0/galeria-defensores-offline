@@ -6,10 +6,10 @@ import com.galeria.defensores.data.database.entities.*
 @Dao
 interface RuleSystemDao {
     @Query("SELECT * FROM rule_systems")
-    suspend fun getAll(): List<RuleSystemEntity>
+    fun getAllReactive(): kotlinx.coroutines.flow.Flow<List<RuleSystemEntity>>
 
     @Query("SELECT * FROM rule_systems WHERE id = :id")
-    suspend fun getById(id: String): RuleSystemEntity?
+    fun getById(id: String): kotlinx.coroutines.flow.Flow<RuleSystemEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(ruleSystem: RuleSystemEntity)

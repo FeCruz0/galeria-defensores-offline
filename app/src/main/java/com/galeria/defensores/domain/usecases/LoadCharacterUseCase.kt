@@ -5,6 +5,10 @@ import com.galeria.defensores.models.Character
 import com.galeria.defensores.models.RuleSystem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flowOn
 
 /**
  * Use Case to load a character and its associated rule system.
@@ -16,46 +20,52 @@ class LoadCharacterUseCase @javax.inject.Inject constructor(
     private val ruleSystemRepository: com.galeria.defensores.data.RuleSystemRepository
 ) {
 
-    suspend operator fun invoke(id: String?, tableId: String?): CharacterResult = withContext(Dispatchers.IO) {
-        try {
-            // 1. Load Character from repository or create default
-            var loadedChar: Character? = null
-            if (id != null) {
-                loadedChar = characterRepository.getCharacter(id)
-            }
-            
-            if (loadedChar == null) {
-                val currentUser = com.galeria.defensores.data.SessionManager.currentUser
-                loadedChar = Character(
+    operator fun invoke(id: String?, tableId: String?): Flow<CharacterResult> {
+        val currentUser = com.galeria.defensores.data.SessionManager.currentUser
+        
+        if (id == null) {
+            return flow {
+                val fallback = Character(
                     tableId = tableId ?: "",
                     ownerId = currentUser?.id ?: ""
                 )
+                val system = resolveRuleSystem(tableId)
+                emit(CharacterResult.Success(performMigrations(fallback, system), system))
+            }.flowOn(Dispatchers.IO)
+        }
+
+        return characterRepository.getCharacter(id).map { loadedChar ->
+            try {
+                val char = loadedChar ?: Character(
+                    tableId = tableId ?: "",
+                    ownerId = currentUser?.id ?: ""
+                )
+                
+                val effectiveTableId = if (char.tableId.isNotEmpty()) char.tableId else tableId
+                val system = resolveRuleSystem(effectiveTableId)
+                
+                AdvantagesRepository.loadSystem(system)
+                DisadvantagesRepository.loadSystem(system)
+                SkillsRepository.loadSystem(system)
+                
+                val migratedChar = performMigrations(char, system)
+                CharacterResult.Success(migratedChar, system)
+            } catch (e: Exception) {
+                CharacterResult.Error(e)
             }
-            
-            // 2. Resolve Rule System to load
-            val effectiveTableId = if (loadedChar.tableId.isNotEmpty()) loadedChar.tableId else tableId
-            val systemToLoad = if (!effectiveTableId.isNullOrEmpty()) {
-                val table = tableRepository.getTable(effectiveTableId)
-                if (table != null) {
-                    ruleSystemRepository.getSystemOrDefault(table.ruleSystemId)
-                } else {
-                    ruleSystemRepository.getSystemOrDefault(null)
-                }
+        }.flowOn(Dispatchers.IO)
+    }
+
+    private suspend fun resolveRuleSystem(tableId: String?): RuleSystem {
+        return if (!tableId.isNullOrEmpty()) {
+            val table = tableRepository.getTableOnce(tableId)
+            if (table != null) {
+                ruleSystemRepository.getSystemOrDefault(table.ruleSystemId)
             } else {
                 ruleSystemRepository.getSystemOrDefault(null)
             }
-            
-            // 3. Update active data in repositories
-            AdvantagesRepository.loadSystem(systemToLoad)
-            DisadvantagesRepository.loadSystem(systemToLoad)
-            SkillsRepository.loadSystem(systemToLoad)
-            
-            // 4. Perform migrations and data upgrades
-            val character = performMigrations(loadedChar, systemToLoad)
-            
-            CharacterResult.Success(character, systemToLoad)
-        } catch (e: Exception) {
-            CharacterResult.Error(e)
+        } else {
+            ruleSystemRepository.getSystemOrDefault(null)
         }
     }
     

@@ -4,9 +4,10 @@ import com.galeria.defensores.models.Table
 import com.galeria.defensores.data.database.daos.TableDao
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 @Singleton
 class TableRepository @Inject constructor(
@@ -16,12 +17,16 @@ class TableRepository @Inject constructor(
     // Legacy init removed as Hilt handles injection
     fun init(context: android.content.Context) {}
 
-    suspend fun getTables(): List<Table> {
-        return tableDao.getAll().map { it.toTable() }
+    fun getTables(): Flow<List<Table>> {
+        return tableDao.getAll().map { entities -> entities.map { it.toTable() } }
     }
 
-    suspend fun getTable(id: String): Table? {
-        return tableDao.getById(id)?.toTable()
+    fun getTable(id: String): Flow<Table?> {
+        return tableDao.getById(id).map { it?.toTable() }
+    }
+
+    suspend fun getTableOnce(id: String): Table? {
+        return getTable(id).first()
     }
 
     suspend fun addTable(table: Table): Boolean {
@@ -46,20 +51,20 @@ class TableRepository @Inject constructor(
     }
 
     suspend fun checkUserHasActiveTables(userId: String): Boolean {
-        val tables = getTables()
+        val tables = getTables().first()
         return tables.any { it.masterId == userId && it.players.isNotEmpty() }
     }
-
+ 
     suspend fun addPlayerToTable(tableId: String, playerId: String) {
-        val table = getTable(tableId) ?: return
+        val table = getTableOnce(tableId) ?: return
         if (!table.players.contains(playerId)) {
             val updatedTable = table.copy(players = (table.players + playerId).toMutableList())
             updateTable(updatedTable)
         }
     }
-
+ 
     suspend fun addRollToHistory(tableId: String, roll: com.galeria.defensores.models.RollResult) {
-        val table = getTable(tableId) ?: return
+        val table = getTableOnce(tableId) ?: return
         val updatedHistory = table.rollHistory.toMutableList()
         updatedHistory.add(roll)
         if (updatedHistory.size > 50) {
@@ -68,27 +73,19 @@ class TableRepository @Inject constructor(
         val updatedTable = table.copy(rollHistory = updatedHistory)
         updateTable(updatedTable)
     }
-
+ 
     suspend fun clearRollHistory(tableId: String): Boolean {
-         val table = getTable(tableId) ?: return false
+         val table = getTableOnce(tableId) ?: return false
          val updatedTable = table.copy(rollHistory = mutableListOf())
          updateTable(updatedTable)
          return true
     }
-
+ 
     suspend fun broadcastVisualRoll(tableId: String, visualRoll: com.galeria.defensores.models.VisualRoll) {
-         val table = getTable(tableId) ?: return
+         val table = getTableOnce(tableId) ?: return
          val updatedTable = table.copy(lastVisualRoll = visualRoll)
          updateTable(updatedTable)
     }
 
-    fun getTableFlow(id: String): Flow<Table?> = callbackFlow {
-        // Since we are not using StateFlow/Live-Query yet for simplicity in this migration,
-        // we'll emit the current value. Full Flow integration with Room 'Query as Flow' 
-        // can be a follow-up optimization.
-        val table = getTable(id)
-        trySend(table)
-        close() 
-        awaitClose { }
-    }
+    fun getTableFlow(id: String): Flow<Table?> = getTable(id)
 }

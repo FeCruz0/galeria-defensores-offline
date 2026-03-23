@@ -211,55 +211,51 @@ class CharacterListFragment : Fragment() {
 
     private fun loadCharacters() {
         viewLifecycleOwner.lifecycleScope.launch {
-            android.util.Log.d("CharacterListDebug", "Loading characters for tableId=$tableId")
             if (tableId != null) {
                 val currentUserId = com.galeria.defensores.data.SessionManager.currentUser?.id ?: return@launch
-                val table = tableRepository.getTable(tableId!!)
-                isCurrentUserMaster = table?.masterId == currentUserId || table?.masterId == "mock-master-id"
-                val isMaster = isCurrentUserMaster
-                val isMember = table?.players?.contains(currentUserId) == true || isMaster
+                
+                // Collect table updates to update master status and visibility
+                launch {
+                    tableRepository.getTable(tableId!!).collect { table ->
+                        isCurrentUserMaster = table?.masterId == currentUserId || table?.masterId == "mock-master-id"
+                        val isMaster = isCurrentUserMaster
+                        val isMember = table?.players?.contains(currentUserId) == true || isMaster
 
-                val fabMenu = view?.findViewById<FloatingActionButton>(R.id.fab_menu)
-                val btnLogs = view?.findViewById<ImageButton>(R.id.btn_logs)
-                
-            // Hide Transfer Option initially (will be shown if menu opens + isMaster)
-            val layoutFabTransferOwnership = view?.findViewById<View>(R.id.layout_fab_transfer_ownership)
-            layoutFabTransferOwnership?.visibility = View.GONE
-            view?.findViewById<View>(R.id.layout_fab_clear_history)?.visibility = View.GONE
-            
-            if (!isMember && table != null) {
-                // Visitor - Hide Interaction Buttons
-                fabMenu?.visibility = View.GONE
-                btnLogs?.visibility = View.GONE
-            } else {
-                // Member - Show Interaction Buttons
-                fabMenu?.visibility = View.VISIBLE
-                btnLogs?.visibility = View.VISIBLE
-            }
-                
-                val allCharacters = characterRepository.getCharacters(tableId)
-                android.util.Log.d("CharacterListDebug", "Fetched ${allCharacters.size} characters. CurrentUser=$currentUserId, isMaster=$isMaster")
-                
-                val filteredCharacters = allCharacters
+                        val fabMenu = view?.findViewById<FloatingActionButton>(R.id.fab_menu)
+                        val btnLogs = view?.findViewById<ImageButton>(R.id.btn_logs)
+                        
+                        view?.findViewById<View>(R.id.layout_fab_transfer_ownership)?.visibility = View.GONE
+                        view?.findViewById<View>(R.id.layout_fab_clear_history)?.visibility = View.GONE
+                        
+                        if (!isMember && table != null) {
+                            fabMenu?.visibility = View.GONE
+                            btnLogs?.visibility = View.GONE
+                        } else {
+                            fabMenu?.visibility = View.VISIBLE
+                            btnLogs?.visibility = View.VISIBLE
+                        }
+                    }
+                }
 
-                val sortedCharacters = filteredCharacters.sortedWith(
-                    compareByDescending<Character> { it.ownerId == currentUserId }
-                        .thenBy { it.name }
-                )
-                android.util.Log.d("CharacterListDebug", "Showing ${sortedCharacters.size} characters after filter and sort")
-                
-                adapter = CharacterAdapter(sortedCharacters, isMaster, currentUserId) { character ->
-                    openCharacterSheet(character.id)
+                // Collect character updates
+                characterRepository.getCharacters(tableId).collect { allCharacters ->
+                    val sortedCharacters = allCharacters.sortedWith(
+                        compareByDescending<Character> { it.ownerId == currentUserId }
+                            .thenBy { it.name }
+                    )
+                    adapter = CharacterAdapter(sortedCharacters, isCurrentUserMaster, currentUserId) { character ->
+                        openCharacterSheet(character.id)
+                    }
+                    characterRecyclerView.adapter = adapter
                 }
-                characterRecyclerView.adapter = adapter
             } else {
-                android.util.Log.d("CharacterListDebug", "Loading global character list (no tableId)")
-                val characters = characterRepository.getCharacters(null)
-                val currentUserId = com.galeria.defensores.data.SessionManager.currentUser?.id
-                adapter = CharacterAdapter(characters, true, currentUserId) { character ->
-                    openCharacterSheet(character.id)
+                characterRepository.getCharacters(null).collect { characters ->
+                    val currentUserId = com.galeria.defensores.data.SessionManager.currentUser?.id
+                    adapter = CharacterAdapter(characters, true, currentUserId) { character ->
+                        openCharacterSheet(character.id)
+                    }
+                    characterRecyclerView.adapter = adapter
                 }
-                characterRecyclerView.adapter = adapter
             }
         }
     }

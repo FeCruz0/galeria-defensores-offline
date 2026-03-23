@@ -19,10 +19,17 @@ class ResourcesAdapter(
 ) : RecyclerView.Adapter<ResourcesAdapter.ViewHolder>() {
 
     fun updateData(newResources: List<ResourceDefinition>, newCurrent: Map<String, Int>, newMax: Map<String, Int>) {
-        resources = newResources
-        currentValues = newCurrent
-        maxValues = newMax
-        notifyDataSetChanged()
+        var changed = false
+        if (resources != newResources) changed = true
+        if (currentValues != newCurrent) changed = true
+        if (maxValues != newMax) changed = true
+        
+        if (changed) {
+            resources = newResources
+            currentValues = newCurrent
+            maxValues = newMax
+            notifyDataSetChanged()
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

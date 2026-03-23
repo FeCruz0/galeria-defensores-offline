@@ -6,10 +6,10 @@ import com.galeria.defensores.data.database.entities.*
 @Dao
 interface TableDao {
     @Query("SELECT * FROM tables")
-    suspend fun getAll(): List<TableEntity>
+    fun getAll(): kotlinx.coroutines.flow.Flow<List<TableEntity>>
 
     @Query("SELECT * FROM tables WHERE id = :id")
-    suspend fun getById(id: String): TableEntity?
+    fun getById(id: String): kotlinx.coroutines.flow.Flow<TableEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(table: TableEntity)

@@ -35,8 +35,10 @@ class AdvantagesAdapter(
     private val pendingSelections = mutableMapOf<String, MutableSet<String>>()
 
     fun updateItems(newItems: List<AdvantageItem>) {
-        items = newItems
-        notifyDataSetChanged()
+        if (items != newItems) {
+            items = newItems
+            notifyDataSetChanged()
+        }
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

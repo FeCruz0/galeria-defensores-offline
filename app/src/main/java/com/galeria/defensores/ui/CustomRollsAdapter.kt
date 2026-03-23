@@ -43,8 +43,10 @@ class CustomRollsAdapter(
     override fun getItemCount(): Int = items.size
     
     fun updateData(newItems: List<CustomRoll>) {
-        items.clear()
-        items.addAll(newItems)
-        notifyDataSetChanged()
+        if (items != newItems) {
+            items.clear()
+            items.addAll(newItems)
+            notifyDataSetChanged()
+        }
     }
 }

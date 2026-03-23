@@ -26,7 +26,7 @@ class UniqueAdvantagesAdapter(
         val nameText: TextView = view.findViewById(R.id.text_ua_name)
         val costText: TextView = view.findViewById(R.id.text_ua_cost)
         val groupText: TextView = view.findViewById(R.id.text_ua_group)
-        val benefitsText: TextView = view.findViewById(R.id.text_ua_benefits)
+        val benefitsText: TextView = view.findViewById(R.id.text_ua_description)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

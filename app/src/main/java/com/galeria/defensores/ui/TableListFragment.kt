@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.galeria.defensores.R
@@ -86,44 +87,42 @@ class TableListFragment : Fragment() {
 
         fun loadTables() {
             viewLifecycleOwner.lifecycleScope.launch {
-                try {
-                    // Safeguard: Ensure user is loaded
-                    if (SessionManager.currentUser == null) {
-                        SessionManager.refreshUser()
-                    }
-                    
-                    val currentUser = SessionManager.currentUser
-                    val tables = tableRepository.getTables()
-                    // Simple sort by name
-                    val sortedTables = tables.sortedBy { it.name }
-
-                    val adapter = TablesAdapter(
-                        tables = sortedTables,
-                        onTableClick = { table ->
-                            // Access Granted directly
-                            val fragment = TableContainerFragment.newInstance(table.id)
-                            parentFragmentManager.beginTransaction()
-                                .replace(R.id.fragment_container, fragment)
-                                .addToBackStack(null)
-                                .commit()
-                        },
-                        onEditClick = { table ->
-                            showEditTableDialog(table) { loadTables() }
-                        },
-                        onDeleteClick = { table ->
-                            showDeleteTableDialog(table) { loadTables() }
-                        },
-                        onExportClick = { table ->
-                            pendingExportTable = table
-                            val dateStr = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault()).format(java.util.Date())
-                            val safeName = table.name.replace("[^a-zA-Z0-9.-]".toRegex(), "_")
-                            exportTableLauncher.launch("table_${safeName}_$dateStr.zip")
+                tableRepository.getTables().collect { tables ->
+                    try {
+                        // Safeguard: Ensure user is loaded
+                        if (SessionManager.currentUser == null) {
+                            SessionManager.refreshUser()
                         }
-                    )
-                    recyclerView.adapter = adapter
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Toast.makeText(context, "Erro ao carregar mesas: ${e.message}", Toast.LENGTH_LONG).show()
+                        
+                        val sortedTables = tables.sortedBy { it.name }
+
+                        val adapter = TablesAdapter(
+                            tables = sortedTables,
+                            onTableClick = { table ->
+                                val fragment = TableContainerFragment.newInstance(table.id)
+                                parentFragmentManager.beginTransaction()
+                                    .replace(R.id.fragment_container, fragment)
+                                    .addToBackStack(null)
+                                    .commit()
+                            },
+                            onEditClick = { table ->
+                                showEditTableDialog(table) { loadTables() }
+                            },
+                            onDeleteClick = { table ->
+                                showDeleteTableDialog(table) { loadTables() }
+                            },
+                            onExportClick = { table ->
+                                pendingExportTable = table
+                                val dateStr = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault()).format(java.util.Date())
+                                val safeName = table.name.replace("[^a-zA-Z0-9.-]".toRegex(), "_")
+                                exportTableLauncher.launch("table_${safeName}_$dateStr.zip")
+                            }
+                        )
+                        recyclerView.adapter = adapter
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Toast.makeText(context, "Erro ao carregar mesas: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
         }
@@ -246,7 +245,7 @@ class TableListFragment : Fragment() {
         layout.addView(systemSpinner)
 
         val loadingSystems = viewLifecycleOwner.lifecycleScope.async {
-            ruleSystemRepository.getSystems()
+            ruleSystemRepository.getSystems().first()
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -274,7 +273,7 @@ class TableListFragment : Fragment() {
 
                 viewLifecycleOwner.lifecycleScope.launch {
                     // Re-fetch systems safely or rely on index if list didn't change
-                    val systems = ruleSystemRepository.getSystems()
+                    val systems = ruleSystemRepository.getSystems().first()
                     if (systemSpinner.selectedItemPosition >= 0 && systemSpinner.selectedItemPosition < systems.size) {
                         ruleSystemId = systems[systemSpinner.selectedItemPosition].id
                     }
