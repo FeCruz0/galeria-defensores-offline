@@ -1,5 +1,8 @@
 package com.galeria.defensores.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class VisualRoll(
     val id: String = java.util.UUID.randomUUID().toString(),
     val senderId: String = "",

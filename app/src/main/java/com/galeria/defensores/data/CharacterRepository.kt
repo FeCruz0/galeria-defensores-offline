@@ -32,7 +32,17 @@ class CharacterRepository @Inject constructor(
         return characterDao.getById(id).map { it?.toCharacter() }
     }
 
+    suspend fun getCharacterOnce(id: String): Character? {
+        return characterDao.getByIdOnce(id)?.toCharacter()
+    }
+
     suspend fun saveCharacter(character: Character) {
+        if (character.tableId.isNotEmpty() && character.name.isNotBlank()) {
+            val existing = getCharacters(character.tableId).first()
+            if (existing.any { it.name.equals(character.name, ignoreCase = true) && it.id != character.id }) {
+                throw IllegalArgumentException("Já existe um personagem com o nome '${character.name}' nesta mesa.")
+            }
+        }
         characterDao.insert(com.galeria.defensores.data.database.entities.CharacterEntity.fromCharacter(character))
     }
 

@@ -75,7 +75,8 @@ class AdvantagesAdapter(
                     .filter { it.id in selectedIds }
                     .sumOf { it.costPt }
             }
-            holder.cost.text = if (computed != 0) "$computed PT" else item.cost
+            val ptLabel = if (Math.abs(computed) == 1) "ponto" else "pontos"
+            holder.cost.text = if (computed != 0) "$computed $ptLabel" else item.cost
         } else {
             holder.cost.text = item.cost
         }
@@ -153,7 +154,8 @@ class AdvantagesAdapter(
                     .filter { it.id in selected }
                     .sumOf { it.costPt }
             }
-            holder.computedCost.text = if (total >= 0) "$total PT" else "$total PT (desconto)"
+            val ptLabel = if (Math.abs(total) == 1) "ponto" else "pontos"
+            holder.computedCost.text = if (total >= 0) "$total $ptLabel" else "$total $ptLabel (desconto)"
         }
         refreshCost()
 
@@ -164,8 +166,14 @@ class AdvantagesAdapter(
                 "${mod.name}: ${mod.description}"
             } else {
                 when {
-                    mod.costPt > 0 -> "${mod.name}  (+${mod.costPt}PT)"
-                    mod.costPt < 0 -> "${mod.name}  (${mod.costPt}PT)"
+                    mod.costPt > 0 -> {
+                        val ptLabel = if (Math.abs(mod.costPt) == 1) "ponto" else "pontos"
+                        "${mod.name}  (+${mod.costPt} $ptLabel)"
+                    }
+                    mod.costPt < 0 -> {
+                        val ptLabel = if (Math.abs(mod.costPt) == 1) "ponto" else "pontos"
+                        "${mod.name}  (${mod.costPt} $ptLabel)"
+                    }
                     else -> mod.name
                 }
             }
@@ -184,7 +192,8 @@ class AdvantagesAdapter(
                     val total = item.baseCostPt + item.modifiers
                         .filter { it.id in selected }
                         .sumOf { it.costPt }
-                    "$total PT"
+                    val ptLabel = if (Math.abs(total) == 1) "ponto" else "pontos"
+                    "$total $ptLabel"
                 }
             )
             onModularItemConfirmed?.invoke(confirmed)

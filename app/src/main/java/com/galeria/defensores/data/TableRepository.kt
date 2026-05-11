@@ -30,10 +30,22 @@ class TableRepository @Inject constructor(
     }
 
     suspend fun addTable(table: Table): Boolean {
+        if (table.name.isNotBlank()) {
+            val existing = getTables().first()
+            if (existing.any { it.name.equals(table.name, ignoreCase = true) && it.id != table.id }) {
+                throw IllegalArgumentException("Já existe uma mesa com o nome '${table.name}'.")
+            }
+        }
         return updateTable(table)
     }
 
     suspend fun updateTable(table: Table): Boolean {
+        if (table.name.isNotBlank()) {
+            val existing = getTables().first()
+            if (existing.any { it.name.equals(table.name, ignoreCase = true) && it.id != table.id }) {
+                throw IllegalArgumentException("Já existe uma mesa com o nome '${table.name}'.")
+            }
+        }
         tableDao.insert(com.galeria.defensores.data.database.entities.TableEntity.fromTable(table))
         return true
     }

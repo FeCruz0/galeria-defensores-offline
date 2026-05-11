@@ -19,6 +19,9 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
 
 /**
  * Manages the rule system definition (attributes, resources, dice config),
@@ -135,22 +138,22 @@ class RuleSystemViewModel @Inject constructor(
     // --- Rule System Import/Export/Reset ---
 
     fun exportSystemJson(): String = try {
-        com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(_ruleSystem.value ?: RuleSystem())
+        Json { prettyPrint = true }.encodeToString(_ruleSystem.value ?: RuleSystem())
     } catch (e: Exception) {
         "{ \"error\": \"Failed to export system\" }"
     }
 
     fun importSystemJson(json: String): Boolean {
         return try {
-            val newSystem = com.google.gson.Gson().fromJson(json, RuleSystem::class.java) ?: return false
-            if (newSystem.attributes.isEmpty() && newSystem.resources.isEmpty()) return false
+            val importedSystem = Json { ignoreUnknownKeys = true }.decodeFromString<RuleSystem>(json)
+            if (importedSystem.attributes.isEmpty() && importedSystem.resources.isEmpty()) return false
             val current = _ruleSystem.value ?: RuleSystem()
             val updated = current.copy(
-                name = newSystem.name,
-                description = newSystem.description,
-                attributes = newSystem.attributes,
-                resources = newSystem.resources,
-                diceConfig = newSystem.diceConfig
+                name = importedSystem.name,
+                description = importedSystem.description,
+                attributes = importedSystem.attributes,
+                resources = importedSystem.resources,
+                diceConfig = importedSystem.diceConfig
             )
             saveRuleSystem(updated)
             true
@@ -295,10 +298,17 @@ class RuleSystemViewModel @Inject constructor(
     // --- Private ---
 
     private fun saveRuleSystem(system: RuleSystem) {
+        val previousSystem = _ruleSystem.value
         _ruleSystem.value = system
         viewModelScope.launch {
-            withContext(NonCancellable) {
-                ruleSystemRepository.saveSystem(system)
+            try {
+                withContext(NonCancellable) {
+                    ruleSystemRepository.saveSystem(system)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("RuleSystemViewModel", "Error saving rule system: ${e.message}", e)
+                // Revert state if save fails
+                _ruleSystem.value = previousSystem
             }
         }
     }

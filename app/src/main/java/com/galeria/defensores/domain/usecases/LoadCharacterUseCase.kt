@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.flatMapLatest
 
 /**
  * Use Case to load a character and its associated rule system.
@@ -20,6 +21,7 @@ class LoadCharacterUseCase @javax.inject.Inject constructor(
     private val ruleSystemRepository: com.galeria.defensores.data.RuleSystemRepository
 ) {
 
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     operator fun invoke(id: String?, tableId: String?): Flow<CharacterResult> {
         val currentUser = com.galeria.defensores.data.SessionManager.currentUser
         
@@ -29,34 +31,45 @@ class LoadCharacterUseCase @javax.inject.Inject constructor(
                     tableId = tableId ?: "",
                     ownerId = currentUser?.id ?: ""
                 )
-                val system = resolveRuleSystem(tableId)
+                val system = resolveRuleSystemSync(tableId)
                 emit(CharacterResult.Success(performMigrations(fallback, system), system))
             }.flowOn(Dispatchers.IO)
         }
 
-        return characterRepository.getCharacter(id).map { loadedChar ->
+        return flow {
+            val loadedChar = characterRepository.getCharacterOnce(id)
+            val char = loadedChar ?: Character(
+                tableId = tableId ?: "",
+                ownerId = currentUser?.id ?: ""
+            )
+            
+            val effectiveTableId = if (char.tableId.isNotEmpty()) char.tableId else tableId
+            
+            val sysId = if (!effectiveTableId.isNullOrEmpty()) {
+                val table = tableRepository.getTableOnce(effectiveTableId)
+                table?.ruleSystemId ?: RuleSystemRepository.BASE_SYSTEM_ID
+            } else {
+                RuleSystemRepository.BASE_SYSTEM_ID
+            }
+            
+            val sys = ruleSystemRepository.getSystemOnce(sysId)
+            
             try {
-                val char = loadedChar ?: Character(
-                    tableId = tableId ?: "",
-                    ownerId = currentUser?.id ?: ""
-                )
+                val finalSys = sys ?: ruleSystemRepository.getSystemOnce(RuleSystemRepository.BASE_SYSTEM_ID) ?: RuleSystem(id = RuleSystemRepository.BASE_SYSTEM_ID, name = "3D&T ALPHA")
                 
-                val effectiveTableId = if (char.tableId.isNotEmpty()) char.tableId else tableId
-                val system = resolveRuleSystem(effectiveTableId)
+                AdvantagesRepository.loadSystem(finalSys)
+                DisadvantagesRepository.loadSystem(finalSys)
+                SkillsRepository.loadSystem(finalSys)
                 
-                AdvantagesRepository.loadSystem(system)
-                DisadvantagesRepository.loadSystem(system)
-                SkillsRepository.loadSystem(system)
-                
-                val migratedChar = performMigrations(char, system)
-                CharacterResult.Success(migratedChar, system)
+                val migratedChar = performMigrations(char, finalSys)
+                emit(CharacterResult.Success(migratedChar, finalSys))
             } catch (e: Exception) {
-                CharacterResult.Error(e)
+                emit(CharacterResult.Error(e))
             }
         }.flowOn(Dispatchers.IO)
     }
 
-    private suspend fun resolveRuleSystem(tableId: String?): RuleSystem {
+    private suspend fun resolveRuleSystemSync(tableId: String?): RuleSystem {
         return if (!tableId.isNullOrEmpty()) {
             val table = tableRepository.getTableOnce(tableId)
             if (table != null) {

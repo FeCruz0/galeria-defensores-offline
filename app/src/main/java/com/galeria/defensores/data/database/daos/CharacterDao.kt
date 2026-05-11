@@ -14,6 +14,9 @@ interface CharacterDao {
     @Query("SELECT * FROM characters WHERE id = :id")
     fun getById(id: String): kotlinx.coroutines.flow.Flow<CharacterEntity?>
 
+    @Query("SELECT * FROM characters WHERE id = :id")
+    suspend fun getByIdOnce(id: String): CharacterEntity?
+
     @Query("SELECT * FROM characters WHERE ownerId = :userId")
     fun getByOwner(userId: String): kotlinx.coroutines.flow.Flow<List<CharacterEntity>>
 

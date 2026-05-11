@@ -1,5 +1,8 @@
 package com.galeria.defensores.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class RollResult(
     val total: Int = 0,
     val die: Int = 0,
@@ -16,6 +19,7 @@ data class RollResult(
     val diceResults: List<Int> = emptyList() // Individual dice outcomes
 )
 
+@Serializable
 enum class RollType(val displayName: String) {
     ATTACK_F("Força"),
     ATTACK_PDF("Poder de Fogo"),

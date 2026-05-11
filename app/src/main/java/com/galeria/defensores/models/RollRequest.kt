@@ -1,5 +1,8 @@
 package com.galeria.defensores.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class RollRequestType {
     ATTACK_F,
     ATTACK_PDF,
@@ -9,6 +12,7 @@ enum class RollRequestType {
     ATTRIBUTE
 }
 
+@Serializable
 data class RollRequest(
     val type: RollRequestType,
     val diceCount: Int,

@@ -2,180 +2,127 @@ package com.galeria.defensores.data.database
 
 import androidx.room.TypeConverter
 import com.galeria.defensores.models.*
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
 
 class Converters {
-    private val gson = Gson()
+    private val json = Json { ignoreUnknownKeys = true }
 
     @TypeConverter
-    fun fromStringList(value: String?): List<String> {
-        val listType = object : TypeToken<List<String>>() {}.type
-        return gson.fromJson(value ?: "[]", listType)
-    }
+    fun fromStringList(value: String?): List<String> =
+        try { json.decodeFromString(value ?: "[]") } catch (e: Exception) { emptyList() }
 
     @TypeConverter
-    fun fromListString(list: List<String>): String {
-        return gson.toJson(list)
-    }
+    fun fromListString(list: List<String>): String = json.encodeToString(list)
 
     @TypeConverter
-    fun fromAdvantageList(value: String?): List<AdvantageItem> {
-        val listType = object : TypeToken<List<AdvantageItem>>() {}.type
-        return gson.fromJson(value ?: "[]", listType)
-    }
+    fun fromAdvantageList(value: String?): List<AdvantageItem> =
+        try { json.decodeFromString(value ?: "[]") } catch (e: Exception) { emptyList() }
 
     @TypeConverter
-    fun fromListAdvantage(list: List<AdvantageItem>): String {
-        return gson.toJson(list)
-    }
+    fun fromListAdvantage(list: List<AdvantageItem>): String = json.encodeToString(list)
 
     @TypeConverter
-    fun fromSpellList(value: String?): List<Spell> {
-        val listType = object : TypeToken<List<Spell>>() {}.type
-        return gson.fromJson(value ?: "[]", listType)
-    }
+    fun fromSpellList(value: String?): List<Spell> =
+        try { json.decodeFromString(value ?: "[]") } catch (e: Exception) { emptyList() }
 
     @TypeConverter
-    fun fromListSpell(list: List<Spell>): String {
-        return gson.toJson(list)
-    }
+    fun fromListSpell(list: List<Spell>): String = json.encodeToString(list)
 
     @TypeConverter
-    fun fromInventoryList(value: String?): List<InventoryItem> {
-        val listType = object : TypeToken<List<InventoryItem>>() {}.type
-        return gson.fromJson(value ?: "[]", listType)
-    }
+    fun fromInventoryList(value: String?): List<InventoryItem> =
+        try { json.decodeFromString(value ?: "[]") } catch (e: Exception) { emptyList() }
 
     @TypeConverter
-    fun fromListInventory(list: List<InventoryItem>): String {
-        return gson.toJson(list)
-    }
+    fun fromListInventory(list: List<InventoryItem>): String = json.encodeToString(list)
 
     @TypeConverter
-    fun fromCustomRollList(value: String?): List<CustomRoll> {
-        val listType = object : TypeToken<List<CustomRoll>>() {}.type
-        return gson.fromJson(value ?: "[]", listType)
-    }
+    fun fromCustomRollList(value: String?): List<CustomRoll> =
+        try { json.decodeFromString(value ?: "[]") } catch (e: Exception) { emptyList() }
 
     @TypeConverter
-    fun fromListCustomRoll(list: List<CustomRoll>): String {
-        return gson.toJson(list)
-    }
+    fun fromListCustomRoll(list: List<CustomRoll>): String = json.encodeToString(list)
 
     @TypeConverter
-    fun fromRollResultList(value: String?): List<RollResult> {
-        val listType = object : TypeToken<List<RollResult>>() {}.type
-        return gson.fromJson(value ?: "[]", listType)
-    }
+    fun fromRollResultList(value: String?): List<RollResult> =
+        try { json.decodeFromString(value ?: "[]") } catch (e: Exception) { emptyList() }
 
     @TypeConverter
-    fun fromListRollResult(list: List<RollResult>): String {
-        return gson.toJson(list)
-    }
+    fun fromListRollResult(list: List<RollResult>): String = json.encodeToString(list)
 
     @TypeConverter
-    fun fromUniqueAdvantage(value: String?): UniqueAdvantage? {
-        return gson.fromJson(value, UniqueAdvantage::class.java)
-    }
+    fun fromUniqueAdvantage(value: String?): UniqueAdvantage? =
+        try { value?.let { json.decodeFromString(it) } } catch (e: Exception) { null }
 
     @TypeConverter
-    fun fromUniqueAdvantageToString(ua: UniqueAdvantage?): String? {
-        return gson.toJson(ua)
-    }
+    fun fromUniqueAdvantageToString(ua: UniqueAdvantage?): String? =
+        ua?.let { json.encodeToString(it) }
 
     @TypeConverter
-    fun fromUniqueAdvantageList(value: String?): List<UniqueAdvantage> {
-        val listType = object : TypeToken<List<UniqueAdvantage>>() {}.type
-        return gson.fromJson(value ?: "[]", listType)
-    }
+    fun fromUniqueAdvantageList(value: String?): List<UniqueAdvantage> =
+        try { json.decodeFromString(value ?: "[]") } catch (e: Exception) { emptyList() }
 
     @TypeConverter
-    fun fromListUniqueAdvantage(list: List<UniqueAdvantage>): String {
-        return gson.toJson(list)
-    }
+    fun fromListUniqueAdvantage(list: List<UniqueAdvantage>): String = json.encodeToString(list)
 
     @TypeConverter
-    fun fromRuleSystem(value: String?): RuleSystem? {
-        return gson.fromJson(value, RuleSystem::class.java)
-    }
+    fun fromRuleSystem(value: String?): RuleSystem? =
+        try { value?.let { json.decodeFromString(it) } } catch (e: Exception) { null }
 
     @TypeConverter
-    fun fromRuleSystemToString(rs: RuleSystem?): String? {
-        return gson.toJson(rs)
-    }
+    fun fromRuleSystemToString(rs: RuleSystem?): String? =
+        rs?.let { json.encodeToString(it) }
 
     @TypeConverter
-    fun fromVisualRoll(value: String?): VisualRoll? {
-        return gson.fromJson(value, VisualRoll::class.java)
-    }
+    fun fromVisualRoll(value: String?): VisualRoll? =
+        try { value?.let { json.decodeFromString(it) } } catch (e: Exception) { null }
 
     @TypeConverter
-    fun fromVisualRollToString(vr: VisualRoll?): String? {
-        return gson.toJson(vr)
-    }
+    fun fromVisualRollToString(vr: VisualRoll?): String? =
+        vr?.let { json.encodeToString(it) }
 
     @TypeConverter
-    fun fromCombatState(value: String?): CombatState? {
-        return gson.fromJson(value, CombatState::class.java)
-    }
+    fun fromCombatState(value: String?): CombatState? =
+        try { value?.let { json.decodeFromString(it) } } catch (e: Exception) { null }
 
     @TypeConverter
-    fun fromCombatStateToString(cs: CombatState?): String? {
-        return gson.toJson(cs)
-    }
+    fun fromCombatStateToString(cs: CombatState?): String? =
+        cs?.let { json.encodeToString(it) }
 
     @TypeConverter
-    fun fromIntMap(value: String?): Map<String, Int> {
-        val mapType = object : TypeToken<Map<String, Int>>() {}.type
-        return gson.fromJson(value ?: "{}", mapType)
-    }
+    fun fromIntMap(value: String?): Map<String, Int> =
+        try { json.decodeFromString(value ?: "{}") } catch (e: Exception) { emptyMap() }
 
     @TypeConverter
-    fun fromMapInt(map: Map<String, Int>): String {
-        return gson.toJson(map)
-    }
+    fun fromMapInt(map: Map<String, Int>): String = json.encodeToString(map)
     
     @TypeConverter
-    fun fromAttributeList(value: String?): List<AttributeDefinition> {
-        val listType = object : TypeToken<List<AttributeDefinition>>() {}.type
-        return gson.fromJson(value ?: "[]", listType)
-    }
+    fun fromAttributeList(value: String?): List<AttributeDefinition> =
+        try { json.decodeFromString(value ?: "[]") } catch (e: Exception) { emptyList() }
 
     @TypeConverter
-    fun fromListAttribute(list: List<AttributeDefinition>): String {
-        return gson.toJson(list)
-    }
+    fun fromListAttribute(list: List<AttributeDefinition>): String = json.encodeToString(list)
 
     @TypeConverter
-    fun fromResourceList(value: String?): List<ResourceDefinition> {
-        val listType = object : TypeToken<List<ResourceDefinition>>() {}.type
-        return gson.fromJson(value ?: "[]", listType)
-    }
+    fun fromResourceList(value: String?): List<ResourceDefinition> =
+        try { json.decodeFromString(value ?: "[]") } catch (e: Exception) { emptyList() }
 
     @TypeConverter
-    fun fromListResource(list: List<ResourceDefinition>): String {
-        return gson.toJson(list)
-    }
+    fun fromListResource(list: List<ResourceDefinition>): String = json.encodeToString(list)
 
     @TypeConverter
-    fun fromItemDefinitionList(value: String?): List<ItemDefinition> {
-        val listType = object : TypeToken<List<ItemDefinition>>() {}.type
-        return gson.fromJson(value ?: "[]", listType)
-    }
+    fun fromItemDefinitionList(value: String?): List<ItemDefinition> =
+        try { json.decodeFromString(value ?: "[]") } catch (e: Exception) { emptyList() }
 
     @TypeConverter
-    fun fromListItemDefinition(list: List<ItemDefinition>): String {
-        return gson.toJson(list)
-    }
+    fun fromListItemDefinition(list: List<ItemDefinition>): String = json.encodeToString(list)
 
     @TypeConverter
-    fun fromDiceConfig(value: String?): DiceConfig? {
-        return gson.fromJson(value, DiceConfig::class.java)
-    }
+    fun fromDiceConfig(value: String?): DiceConfig? =
+        try { value?.let { json.decodeFromString(it) } } catch (e: Exception) { null }
 
     @TypeConverter
-    fun fromDiceConfigToString(dc: DiceConfig?): String? {
-        return gson.toJson(dc)
-    }
+    fun fromDiceConfigToString(dc: DiceConfig?): String? =
+        dc?.let { json.encodeToString(it) }
 }

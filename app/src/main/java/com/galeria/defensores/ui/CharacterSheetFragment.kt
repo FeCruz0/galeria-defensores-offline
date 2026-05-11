@@ -91,7 +91,7 @@ class CharacterSheetFragment : Fragment() {
 
     private val exportLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json")) { uri ->
         if (uri != null) {
-            val char = viewModel.character.value
+            val char = (viewModel.uiState.value as? com.galeria.defensores.viewmodels.CharacterUiState.Success)?.character
             if (char != null) {
                 lifecycleScope.launch {
                     val success = backupRepository.exportCharacter(requireContext(), char.id, uri)
@@ -223,28 +223,7 @@ class CharacterSheetFragment : Fragment() {
         // Attributes Container
         val attributesContainer = view.findViewById<android.widget.LinearLayout>(R.id.container_attributes)
         
-        // Setup RecyclerViews
-        val recyclerResources = view.findViewById<RecyclerView>(R.id.recycler_resources)
         
-        recyclerResources.layoutManager = LinearLayoutManager(context)
-        
-        resourcesAdapter = ResourcesAdapter(emptyList(), emptyMap(), emptyMap(),
-             onValueChange = { key, delta ->
-                viewModel.updateResource(key, delta)
-             },
-             onResourceLongClick = { res ->
-                 if (isCurrentMaster) {
-                     DialogEditResourceDefinition(res, 
-                         onSave = { updated -> ruleSystemViewModel.updateResourceDefinition(updated) },
-                         onDelete = { deleted -> ruleSystemViewModel.removeResourceDefinition(deleted) }
-                     ).show(parentFragmentManager, "EditResource")
-                 }
-             }
-        )
-        
-        
-        recyclerResources.adapter = resourcesAdapter
-
         // Bind UI
         nameEdit = view.findViewById(R.id.edit_char_name)
         rollResultCard = view.findViewById(R.id.card_roll_result)
@@ -321,78 +300,63 @@ class CharacterSheetFragment : Fragment() {
         setupButtonListeners(view)
     }
 
-    private fun renderAttributes(ruleSystem: com.galeria.defensores.models.RuleSystem, char: com.galeria.defensores.models.Character) {
+    /**
+     * Creates or removes attribute views based on the current rule system.
+     * MUST be called from the ruleSystemViewModel.ruleSystem observer ONLY.
+     * This separates view creation (expensive) from value updates (cheap).
+     */
+    private fun renderAttributeStructure(ruleSystem: com.galeria.defensores.models.RuleSystem) {
         val attributesContainer = view?.findViewById<android.widget.LinearLayout>(R.id.container_attributes) ?: return
         val inflater = android.view.LayoutInflater.from(context)
         
-        // Re-render if keys don't match or count is different
         val currentKeys = (0 until attributesContainer.childCount).mapNotNull { attributesContainer.getChildAt(it).tag as? String }
         val targetKeys = ruleSystem.attributes.map { it.key }
         
-        if (currentKeys != targetKeys) {
-            // Only remove views that are no longer in targetKeys, or add new ones at the end
-            // Instead of removeAllViews() and recreating everything, let's gracefully sync the views
+        if (currentKeys == targetKeys) return // Nothing to do structurally
+        
+        // Rebuild views to ensure exact alignment with target rules
+        attributesContainer.removeAllViews()
+        
+        ruleSystem.attributes.forEach { attr ->
+            val itemView = inflater.inflate(R.layout.view_attribute_input, attributesContainer, false)
+            itemView.tag = attr.key
             
-            // Remove missing
-            for (i in attributesContainer.childCount - 1 downTo 0) {
-                val tag = attributesContainer.getChildAt(i).tag as? String
-                if (!targetKeys.contains(tag)) {
-                    attributesContainer.removeViewAt(i)
+            itemView.findViewById<Button>(R.id.btn_minus).setOnClickListener {
+                val input = itemView.findViewById<EditText>(R.id.attribute_input)
+                input.clearFocus()
+                val currentVal = input.text.toString().toIntOrNull() ?: 0
+                viewModel.updateAttribute(attr.key, currentVal - 1)
+            }
+            
+            itemView.findViewById<Button>(R.id.btn_plus).setOnClickListener {
+                val input = itemView.findViewById<EditText>(R.id.attribute_input)
+                input.clearFocus()
+                val currentVal = input.text.toString().toIntOrNull() ?: 0
+                viewModel.updateAttribute(attr.key, currentVal + 1)
+            }
+            
+            itemView.findViewById<EditText>(R.id.attribute_input).setOnFocusChangeListener { v, hasFocus ->
+                if (!hasFocus) {
+                    val input = v as EditText
+                    val quantity = input.text.toString().toIntOrNull() ?: 0
+                    val currentVal = (viewModel.uiState.value as? com.galeria.defensores.viewmodels.CharacterUiState.Success)
+                        ?.character?.attributeValues?.get(attr.key) ?: 0
+                    if (quantity != currentVal) {
+                        viewModel.updateAttribute(attr.key, quantity)
+                    }
                 }
             }
             
-            // Add new missing views
-            val existingKeys = (0 until attributesContainer.childCount).mapNotNull { attributesContainer.getChildAt(it).tag as? String }
-            
-            ruleSystem.attributes.forEachIndexed { index, attr ->
-                if (!existingKeys.contains(attr.key)) {
-                    val itemView = inflater.inflate(R.layout.view_attribute_input, attributesContainer, false)
-                    itemView.tag = attr.key
-                    
-                    itemView.findViewById<Button>(R.id.btn_minus).setOnClickListener {
-                        val input = itemView.findViewById<EditText>(R.id.attribute_input)
-                        input.clearFocus()
-                        val currentVal = input.text.toString().toIntOrNull() ?: 0
-                        viewModel.updateAttribute(attr.key, currentVal - 1)
-                    }
-                    
-                    itemView.findViewById<Button>(R.id.btn_plus).setOnClickListener {
-                        val input = itemView.findViewById<EditText>(R.id.attribute_input)
-                        input.clearFocus()
-                        val currentVal = input.text.toString().toIntOrNull() ?: 0
-                        viewModel.updateAttribute(attr.key, currentVal + 1)
-                    }
-                    
-                    itemView.findViewById<EditText>(R.id.attribute_input).setOnFocusChangeListener { view, hasFocus ->
-                        if (!hasFocus) {
-                            val input = view as EditText
-                            val quantity = input.text.toString().toIntOrNull() ?: 0
-                            if (quantity != (char.attributeValues[attr.key] ?: 0)) {
-                                viewModel.updateAttribute(attr.key, quantity)
-                            }
-                        }
-                    }
-                    
-                    itemView.setOnLongClickListener {
-                        DialogEditAttributeDefinition(attr, 
-                            onSave = { updated -> ruleSystemViewModel.updateAttributeDefinition(updated) },
-                            onDelete = { deleted -> ruleSystemViewModel.removeAttributeDefinition(deleted) }
-                        ).show(parentFragmentManager, "EditAttribute")
-                        true
-                    }
-                    
-                    attributesContainer.addView(itemView, index)
-                }
+            itemView.setOnLongClickListener {
+                DialogEditAttributeDefinition(attr, 
+                    onSave = { updated -> ruleSystemViewModel.updateAttributeDefinition(updated) },
+                    onDelete = { deleted -> ruleSystemViewModel.removeAttributeDefinition(deleted) }
+                ).show(parentFragmentManager, "EditAttribute")
+                true
             }
-        }
-
- 
-        ruleSystem.attributes.forEachIndexed { index, attr ->
-            val itemView = attributesContainer.getChildAt(index) ?: return@forEachIndexed
+            
             val label = itemView.findViewById<TextView>(R.id.attribute_label)
-            val input = itemView.findViewById<EditText>(R.id.attribute_input)
             val icon = itemView.findViewById<ImageView>(R.id.attribute_icon)
-            
             label.text = (attr.name ?: "UNNAMED").uppercase()
             try {
                 val parsedColor = Color.parseColor(if (!attr.color.isNullOrEmpty()) attr.color else "#000000")
@@ -403,7 +367,25 @@ class CharacterSheetFragment : Fragment() {
                 icon.setColorFilter(Color.BLACK)
             }
             
-            val value = char.attributeValues[attr.key] ?: 0
+            attributesContainer.addView(itemView)
+        }
+    }
+
+    /**
+     * Updates attribute values in existing views. Cheap and safe to call on every character state emission.
+     * Does NOT create or remove views.
+     */
+    private fun updateAttributeValues(char: com.galeria.defensores.models.Character) {
+        val attributesContainer = view?.findViewById<android.widget.LinearLayout>(R.id.container_attributes) ?: return
+        val sys = ruleSystemViewModel.ruleSystem.value
+        
+        // Iterate over current views and correctly associate tags instead of mixing indices
+        for (i in 0 until attributesContainer.childCount) {
+            val itemView = attributesContainer.getChildAt(i)
+            val key = itemView.tag as? String ?: continue
+            val input = itemView.findViewById<EditText>(R.id.attribute_input) ?: continue
+            
+            val value = char.attributeValues[key] ?: 0
             if (input.text.toString() != value.toString() && !input.hasFocus()) {
                 input.setText(value.toString())
             }
@@ -512,26 +494,26 @@ class CharacterSheetFragment : Fragment() {
 
         // Score Buttons (Saved & XP)
         view.findViewById<Button>(R.id.btn_minus_saved).setOnClickListener {
-            val current = viewModel.character.value?.savedPoints ?: 0
+            val current = (viewModel.uiState.value as? com.galeria.defensores.viewmodels.CharacterUiState.Success)?.character?.savedPoints ?: 0
             if (current > 0) viewModel.updateSavedPoints(current - 1)
         }
         view.findViewById<Button>(R.id.btn_plus_saved).setOnClickListener {
-            val current = viewModel.character.value?.savedPoints ?: 0
+            val current = (viewModel.uiState.value as? com.galeria.defensores.viewmodels.CharacterUiState.Success)?.character?.savedPoints ?: 0
             viewModel.updateSavedPoints(current + 1)
         }
         view.findViewById<Button>(R.id.btn_minus_xp).setOnClickListener {
-            val current = viewModel.character.value?.experience ?: 0
+            val current = (viewModel.uiState.value as? com.galeria.defensores.viewmodels.CharacterUiState.Success)?.character?.experience ?: 0
             if (current > 0) viewModel.updateExperience(current - 1)
         }
         view.findViewById<Button>(R.id.btn_plus_xp).setOnClickListener {
-            val current = viewModel.character.value?.experience ?: 0
+            val current = (viewModel.uiState.value as? com.galeria.defensores.viewmodels.CharacterUiState.Success)?.character?.experience ?: 0
             viewModel.updateExperience(current + 1)
         }
         
         val scaleText = view.findViewById<TextView>(R.id.text_scale)
         scaleText.setOnClickListener {
             val scales = arrayOf("Ningen (x1)", "Sugoi (x10)", "Kiodai (x100)", "Kami (x1000)")
-            val char = viewModel.character.value ?: return@setOnClickListener
+            val char = (viewModel.uiState.value as? com.galeria.defensores.viewmodels.CharacterUiState.Success)?.character ?: return@setOnClickListener
             androidx.appcompat.app.AlertDialog.Builder(requireContext())
                 .setTitle("Alterar Escala de Poder")
                 .setSingleChoiceItems(scales, char.scale) { dialog, which ->
@@ -543,7 +525,7 @@ class CharacterSheetFragment : Fragment() {
 
         val savedPointsText = view.findViewById<TextView>(R.id.text_saved_points)
         savedPointsText.setOnClickListener {
-            val char = viewModel.character.value ?: return@setOnClickListener
+            val char = (viewModel.uiState.value as? com.galeria.defensores.viewmodels.CharacterUiState.Success)?.character ?: return@setOnClickListener
             val context = view.context
             val input = EditText(context)
             input.inputType = android.text.InputType.TYPE_CLASS_NUMBER
@@ -582,7 +564,7 @@ class CharacterSheetFragment : Fragment() {
 
         // Export Button
         view.findViewById<Button>(R.id.btn_export_character).setOnClickListener {
-            val char = viewModel.character.value
+            val char = (viewModel.uiState.value as? com.galeria.defensores.viewmodels.CharacterUiState.Success)?.character
             if (char != null) {
                 val dateStr = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault()).format(java.util.Date())
                 val safeName = char.name.replace("[^a-zA-Z0-9.-]".toRegex(), "_")
@@ -593,7 +575,7 @@ class CharacterSheetFragment : Fragment() {
         // Delete Button
         val btnDelete = view.findViewById<Button>(R.id.btn_delete_character)
         btnDelete.setOnClickListener {
-            val char = viewModel.character.value
+            val char = (viewModel.uiState.value as? com.galeria.defensores.viewmodels.CharacterUiState.Success)?.character
             if (char != null) {
                  androidx.appcompat.app.AlertDialog.Builder(requireContext())
                     .setTitle("Excluir Personagem")
@@ -691,26 +673,18 @@ class CharacterSheetFragment : Fragment() {
         
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                
-                // 1. Keep RuleSystemViewModel in sync with the DB-loaded system from CharacterViewModel
+                // 1. Centralized UiState Collector (MVI)
                 launch {
-                    viewModel.ruleSystem.collect { sys ->
-                        if (sys != null && sys.id.isNotEmpty()) {
-                            // If RuleSystemViewModel is empty or belongs to a different table, load it
-                            if (ruleSystemViewModel.ruleSystem.value.id != sys.id) {
-                                ruleSystemViewModel.loadRuleSystem(sys)
-                            }
+                    viewModel.uiState.collect { state ->
+                        if (state !is com.galeria.defensores.viewmodels.CharacterUiState.Success) return@collect
+                        
+                        val char = state.character
+                        val sys = state.ruleSystem
+                        
+                        // Keep RuleSystemViewModel in sync for its own editing functions
+                        if (ruleSystemViewModel.ruleSystem.value.id != sys.id) {
+                            ruleSystemViewModel.loadRuleSystem(sys)
                         }
-                    }
-                }
-
-                // 2. Combined Collector for Character and active RuleSystem
-                launch {
-                    kotlinx.coroutines.flow.combine(
-                        viewModel.character,
-                        ruleSystemViewModel.ruleSystem
-                    ) { char, sys -> char to sys }.collect { (char, sys) ->
-                        if (char == null || sys.id.isEmpty()) return@collect
                         
                         val effectiveTableId = tableId ?: char.tableId
                         if (effectiveTableId.isNotEmpty() && !adaptersInitialized) {
@@ -719,6 +693,7 @@ class CharacterSheetFragment : Fragment() {
                         }
 
                         // 1. Basic Info
+                        view.findViewById<TextView>(R.id.text_system_name).text = sys.name.uppercase()
                         if (!nameEdit.hasFocus()) { nameEdit.setText(char.name) }
                         nameEdit.isEnabled = true 
 
@@ -740,8 +715,9 @@ class CharacterSheetFragment : Fragment() {
                         view.findViewById<TextView>(R.id.text_experience).text = char.experience.toString()
                         
                         // 4. Unique Advantage
+                        // 4. Unique Advantage
                         val showSelect = char.uniqueAdvantage == null
-                        btnSelectUA.visibility = if (showSelect) View.VISIBLE else View.GONE
+                        btnSelectUA.text = if (showSelect) "Adicionar Vantagem Única" else "Trocar Vantagem"
                         uaCard.visibility = if (showSelect) View.GONE else View.VISIBLE
                         
                         val onUAClick = {
@@ -762,13 +738,19 @@ class CharacterSheetFragment : Fragment() {
                             uaCard.findViewById<TextView>(R.id.text_ua_name).text = ua.name
                             uaCard.findViewById<TextView>(R.id.text_ua_cost).text = if (ua.cost < 0) ua.cost.toString() else "+${ua.cost}"
                             uaCard.findViewById<TextView>(R.id.text_ua_description).text = "Benefícios: ${ua.benefits}\nFraquezas: ${ua.weaknesses}"
-                            uaCard.setOnClickListener { onUAClick() }
+                            uaCard.setOnClickListener {
+                                EditUniqueAdvantageDialogFragment(
+                                    ua = ua,
+                                    onSave = { updatedUA -> viewModel.setUniqueAdvantage(updatedUA) },
+                                    onDelete = { viewModel.setUniqueAdvantage(null) }
+                                ).show(parentFragmentManager, "EditCharacterUA")
+                            }
                         }
 
                         // 5. Spinners
                         // Spinners are updated reactively via availableDamageTypes flow in another launch block
                         // 6. Attributes and Adapters
-                        renderAttributes(sys, char)
+                        updateAttributeValues(char)
                         val currentUser = com.galeria.defensores.data.SessionManager.currentUser
                         val isOwner = currentUser != null && char.ownerId == currentUser.id
                         val canEdit = isOwner || isCurrentMaster
@@ -781,6 +763,7 @@ class CharacterSheetFragment : Fragment() {
                             if (currentUser != null && (isOwner || currentUser.id == "admin")) View.VISIBLE else View.GONE
                             
                         // Trait Lists Add Buttons Visibility
+                        view.findViewById<Button>(R.id.btn_select_ua).visibility = if (canEdit) View.VISIBLE else View.GONE
                         view.findViewById<Button>(R.id.btn_add_advantage).visibility = if (canEdit) View.VISIBLE else View.GONE
                         view.findViewById<Button>(R.id.btn_add_disadvantage).visibility = if (canEdit) View.VISIBLE else View.GONE
                         view.findViewById<Button>(R.id.btn_add_skill).visibility = if (canEdit) View.VISIBLE else View.GONE
@@ -798,7 +781,7 @@ class CharacterSheetFragment : Fragment() {
                             setupRecyclerViewsInternal(view, char, true, true)
                             adaptersInitialized = true
                         }
-                        updateAdaptersInternal(char, sys)
+                        updateAdaptersInternal(char, ruleSystemViewModel.ruleSystem.value)
                     }
                 }
 
@@ -806,7 +789,7 @@ class CharacterSheetFragment : Fragment() {
                 launch {
                     ruleSystemViewModel.availableDamageTypes.collect { damageTypes ->
                         if (damageTypes.isEmpty()) return@collect
-                        val char = viewModel.character.value ?: return@collect
+                        val char = (viewModel.uiState.value as? com.galeria.defensores.viewmodels.CharacterUiState.Success)?.character ?: return@collect
                         val spinnerForca = view.findViewById<android.widget.Spinner>(R.id.spinner_damage_forca)
                         val spinnerPdf = view.findViewById<android.widget.Spinner>(R.id.spinner_damage_pdf)
                         
@@ -839,6 +822,25 @@ class CharacterSheetFragment : Fragment() {
                                     if (char.damageTypePdf != damageTypes[pos]) viewModel.updateDamageType(damageTypes[pos], true)
                                 }
                                 override fun onNothingSelected(p0: android.widget.AdapterView<*>?) {}
+                            }
+                        }
+                    }
+                }
+
+                // Rule System Structure Observer: drives attribute view creation/removal AND resource list.
+                // Separated from uiState to prevent view flashing on character mutations (e.g., +/- presses).
+                launch {
+                    ruleSystemViewModel.ruleSystem.collect { sys ->
+                        renderAttributeStructure(sys)
+                        // Also update values and adapters immediately after structural changes.
+                        // This is critical for showing newly added/removed resources and attributes
+                        // without requiring a full character state reload (which won't happen since
+                        // LoadCharacterUseCase does a one-shot fetch).
+                        val char = (viewModel.uiState.value as? com.galeria.defensores.viewmodels.CharacterUiState.Success)?.character
+                        if (char != null) {
+                            updateAttributeValues(char)
+                            if (adaptersInitialized) {
+                                updateAdaptersInternal(char, sys)
                             }
                         }
                     }
@@ -877,7 +879,7 @@ class CharacterSheetFragment : Fragment() {
                             attrVal = request.attributeValue,
                             skillVal = request.skillValue,
                             attrName = request.attributeName,
-                            charId = viewModel.character.value?.id ?: "",
+                            charId = (viewModel.uiState.value as? com.galeria.defensores.viewmodels.CharacterUiState.Success)?.character?.id ?: "",
                             expectedResults = request.diceOverride,
                             canCrit = request.canCrit,
                             isNegative = request.isNegative,
@@ -991,6 +993,7 @@ class CharacterSheetFragment : Fragment() {
         })
         view.findViewById<RecyclerView>(R.id.recycler_resources).apply {
             layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+            (itemAnimator as? androidx.recyclerview.widget.SimpleItemAnimator)?.supportsChangeAnimations = false
             adapter = resourcesAdapter
         }
     }
@@ -1001,7 +1004,7 @@ class CharacterSheetFragment : Fragment() {
         // Re-check permission on click to be safe, or store it in a member variable
         // For simplicity and safety, let's fetch current state
         val currentUserId = com.galeria.defensores.data.SessionManager.currentUser?.id
-        val char = viewModel.character.value
+        val char = (viewModel.uiState.value as? com.galeria.defensores.viewmodels.CharacterUiState.Success)?.character
         
         if (char != null && currentUserId != null) {
             // We need to fetch table to know if isMaster. 

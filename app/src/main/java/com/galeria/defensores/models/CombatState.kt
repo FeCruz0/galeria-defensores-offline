@@ -2,6 +2,9 @@ package com.galeria.defensores.models
 
 import java.util.UUID
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class CombatState(
     var isActive: Boolean = false,
     var round: Int = 1,
@@ -15,6 +18,7 @@ data class CombatState(
     var log: MutableList<String> = mutableListOf()
 )
 
+@Serializable
 data class CombatAction(
     val type: String = "", // "ATTACK"
     val attackerId: String = "",

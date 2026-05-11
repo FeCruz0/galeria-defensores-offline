@@ -2,7 +2,9 @@ package com.galeria.defensores.models
 
 import java.util.UUID
 import com.galeria.defensores.models.InventoryItem
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Character(
     val id: String = UUID.randomUUID().toString(),
     var name: String = "Defensor", // nome_personagem
@@ -61,12 +63,13 @@ data class Character(
 
     fun calculateScore(): Int {
         val attrSum = forca + habilidade + resistencia + armadura + poderFogo
-        val advantagesSum = vantagens.sumOf { it.cost.toIntOrNull() ?: 0 }
-        val skillsSum = pericias.sumOf { it.cost.toIntOrNull() ?: 0 }
+        val advantagesSum = vantagens.sumOf { it.computedCostPt() }
+        val disadvantagesSum = desvantagens.sumOf { it.computedCostPt() }
+        val skillsSum = pericias.sumOf { it.computedCostPt() }
         val specsSum = (especializacoes.size / 3) // 1 ponto a cada 3 especializações
         val uniqueAdvantageCost = uniqueAdvantage?.cost ?: 0
         
-        return attrSum + advantagesSum + skillsSum + specsSum + uniqueAdvantageCost + savedPoints
+        return attrSum + advantagesSum + disadvantagesSum + skillsSum + specsSum + uniqueAdvantageCost + savedPoints
     }
     fun deepCopy(): Character {
         return this.copy(
@@ -84,6 +87,7 @@ data class Character(
     }
 }
 
+@Serializable
 data class ModifierOption(
     val id: String = "",
     val name: String = "",
@@ -91,6 +95,7 @@ data class ModifierOption(
     val description: String = ""
 )
 
+@Serializable
 data class AdvantageItem(
     val id: String = UUID.randomUUID().toString(),
     val name: String = "",
@@ -104,7 +109,12 @@ data class AdvantageItem(
 ) {
     /** Custo total em pontos = base + soma dos modificadores selecionados */
     fun computedCostPt(): Int {
-        if (!isModular) return cost.toIntOrNull() ?: 0
+        if (!isModular) {
+             // Try to extract the first integer found in the string (handles "1 ponto", "-2 pontos", etc.)
+             val regex = """-?\d+""".toRegex()
+             val match = regex.find(cost)
+             return match?.value?.toIntOrNull() ?: 0
+        }
         
         // Regra específica para Manobras Especiais, Qualidades Especiais, Sentidos Especiais e Status Negativos: 1PT a cada 3 opções
         if (name.equals("MANOBRAS ESPECIAIS", ignoreCase = true) || 
@@ -118,15 +128,25 @@ data class AdvantageItem(
         val selectedCost = modifiers
             .filter { it.id in selectedModifiers }
             .sumOf { it.costPt }
-        return baseCostPt + selectedCost
+            
+        val total = baseCostPt + selectedCost
+        
+        // Vantagens como Ataque Especial não podem custar menos de 1 ponto, mesmo com modificadores negativos.
+        if (name.equals("Ataque Especial", ignoreCase = true) || name.equals("ATAQUE ESPECIAL", ignoreCase = true)) {
+            return total.coerceAtLeast(1)
+        }
+        
+        return total
     }
 }
 
+@Serializable
 data class SimpleItem(
     val id: String = UUID.randomUUID().toString(),
     val text: String = ""
 )
 
+@Serializable
 data class Spell(
     val id: String = UUID.randomUUID().toString(),
     var name: String = "",
@@ -138,6 +158,7 @@ data class Spell(
     var description: String = ""
 )
 
+@Serializable
 data class CustomRoll(
     val id: String = UUID.randomUUID().toString(),
     var name: String = "Nova Rolagem",
@@ -151,6 +172,7 @@ data class CustomRoll(
     var pmCost: Int = 0
 )
 
+@Serializable
 data class RollComponent(
     val id: String = UUID.randomUUID().toString(),
     var count: Int = 1,

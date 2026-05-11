@@ -2,7 +2,9 @@ package com.galeria.defensores.models
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Parcelize
 data class DieProperty(
     var canCrit: Boolean = false,

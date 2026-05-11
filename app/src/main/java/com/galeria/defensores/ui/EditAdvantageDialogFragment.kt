@@ -11,11 +11,14 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.DialogFragment
-import com.galeria.defensores.R
+import com.galeria.defensores.data.DisadvantagesRepository
 import com.galeria.defensores.data.AdvantagesRepository
+import com.galeria.defensores.data.GaidenData
 import com.galeria.defensores.models.AdvantageItem
 import com.galeria.defensores.models.ModifierOption
+import androidx.fragment.app.DialogFragment
+import com.galeria.defensores.R
+import com.galeria.defensores.utils.TextFormatUtils
 import com.google.android.material.textfield.TextInputEditText
 
 class EditAdvantageDialogFragment(
@@ -57,14 +60,18 @@ class EditAdvantageDialogFragment(
 
         var advantage = incomingAdvantage
 
-        // Upgrade legacy item by name if it exists in the active rule system repository as modular
+        // Upgrade legacy item by name if it exists in any active repository as modular
         if (advantage != null && !advantage.isModular) {
-            val possibleMatch = AdvantagesRepository.getAllAdvantages().find { it.name.trim().equals(advantage?.name?.trim(), ignoreCase = true) }
-            if (possibleMatch != null && possibleMatch.isModular) {
+            val possibleAdvMatch = AdvantagesRepository.getAllAdvantages().find { it.name.trim().equals(advantage?.name?.trim(), ignoreCase = true) }
+            val possibleDisMatch = DisadvantagesRepository.getAllDisadvantages().find { it.name.trim().equals(advantage?.name?.trim(), ignoreCase = true) }
+            
+            val match = possibleAdvMatch ?: possibleDisMatch
+            
+            if (match != null && match.isModular) {
                 advantage = advantage.copy(
                     isModular = true,
-                    modifiers = possibleMatch.modifiers,
-                    baseCostPt = possibleMatch.baseCostPt
+                    modifiers = match.modifiers,
+                    baseCostPt = match.baseCostPt
                 )
             }
         }
@@ -126,7 +133,7 @@ class EditAdvantageDialogFragment(
                         referenceModularItem = AdvantageItem(
                             id = java.util.UUID.randomUUID().toString(),
                             name = editName.text.toString(),
-                            cost = "0 PT",
+                            cost = "0 pontos",
                             description = "",
                             isModular = true,
                             modifiers = mutableListOf()
@@ -199,7 +206,9 @@ class EditAdvantageDialogFragment(
             val name = editName.text.toString()
             val isModularNow = rbModular.isChecked
             val costStrValue = if (isModularNow) {
-                "${calculateCurrentTotalCost()} PT"
+                val totalCost = calculateCurrentTotalCost()
+                val ptLabel = if (Math.abs(totalCost) == 1) "ponto" else "pontos"
+                "$totalCost $ptLabel"
             } else {
                 editCost.text.toString()
             }
@@ -263,7 +272,8 @@ class EditAdvantageDialogFragment(
 
         fun updateCostField() {
             val total = calculateCurrentTotalCost()
-            view?.findViewById<TextView>(R.id.tv_total_cost_label)?.text = "Custo Total: $total PT"
+            val ptLabel = if (Math.abs(total) == 1) "ponto" else "pontos"
+            view?.findViewById<TextView>(R.id.tv_total_cost_label)?.text = "Custo Total: $total $ptLabel"
         }
 
         for (mod in item.modifiers) {
@@ -278,8 +288,14 @@ class EditAdvantageDialogFragment(
                 "${mod.name}: ${mod.description}"
             } else {
                 when {
-                    mod.costPt > 0 -> "${mod.name}  (+${mod.costPt}PT)"
-                    mod.costPt < 0 -> "${mod.name}  (${mod.costPt}PT)"
+                    mod.costPt > 0 -> {
+                        val ptLabel = if (Math.abs(mod.costPt) == 1) "ponto" else "pontos"
+                        "${mod.name}  (+${mod.costPt} $ptLabel)"
+                    }
+                    mod.costPt < 0 -> {
+                        val ptLabel = if (Math.abs(mod.costPt) == 1) "ponto" else "pontos"
+                        "${mod.name}  (${mod.costPt} $ptLabel)"
+                    }
                     else -> mod.name
                 }
             }

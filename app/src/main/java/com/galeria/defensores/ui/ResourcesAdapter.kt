@@ -19,17 +19,31 @@ class ResourcesAdapter(
 ) : RecyclerView.Adapter<ResourcesAdapter.ViewHolder>() {
 
     fun updateData(newResources: List<ResourceDefinition>, newCurrent: Map<String, Int>, newMax: Map<String, Int>) {
-        var changed = false
-        if (resources != newResources) changed = true
-        if (currentValues != newCurrent) changed = true
-        if (maxValues != newMax) changed = true
-        
-        if (changed) {
-            resources = newResources
-            currentValues = newCurrent
-            maxValues = newMax
-            notifyDataSetChanged()
+        val diffCallback = object : androidx.recyclerview.widget.DiffUtil.Callback() {
+            override fun getOldListSize(): Int = resources.size
+            override fun getNewListSize(): Int = newResources.size
+
+            override fun areItemsTheSame(oldPos: Int, newPos: Int): Boolean {
+                return resources[oldPos].key == newResources[newPos].key
+            }
+
+            override fun areContentsTheSame(oldPos: Int, newPos: Int): Boolean {
+                val oldRes = resources[oldPos]
+                val newRes = newResources[newPos]
+                val key = oldRes.key
+                return oldRes == newRes &&
+                        currentValues[key] == newCurrent[key] &&
+                        maxValues[key] == newMax[key]
+            }
         }
+
+        val diffResult = androidx.recyclerview.widget.DiffUtil.calculateDiff(diffCallback)
+        
+        resources = newResources
+        currentValues = newCurrent
+        maxValues = newMax
+        
+        diffResult.dispatchUpdatesTo(this)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -65,14 +79,13 @@ class ResourcesAdapter(
             label.text = res.name
             try {
                 label.setTextColor(android.graphics.Color.parseColor(res.color))
-                // Tint progress bar if possible
-                 progressBar.progressDrawable?.setTint(android.graphics.Color.parseColor(res.color))
+                progressBar.progressTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor(res.color))
             } catch (e: Exception) { }
 
             valueText.text = "$current / $max"
             
             progressBar.max = max
-            progressBar.progress = current
+            progressBar.setProgress(current, false)
 
             btnMinus1.setOnClickListener { onValueChange(res.key, -1) }
             btnPlus1.setOnClickListener { onValueChange(res.key, 1) }

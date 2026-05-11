@@ -1,6 +1,7 @@
 package com.galeria.defensores.data
 
 import com.galeria.defensores.models.AdvantageItem
+import com.galeria.defensores.data.GaidenData
 
 object DisadvantagesRepository {
     private val _disadvantages = DisadvantagesData.defaultDisadvantages.toMutableList()
@@ -33,11 +34,20 @@ object DisadvantagesRepository {
 
                      if (!isMod) {
                          // Attempt to upgrade from default disadvantages (legacy JSON)
-                         val defaultMatch = DisadvantagesData.defaultDisadvantages.find { it.name.equals(item.name, ignoreCase = true) }
+                         val defaultMatch = DisadvantagesData.defaultDisadvantages.find { it.name.trim().equals(item.name.trim(), ignoreCase = true) }
                          if (defaultMatch != null && defaultMatch.isModular) {
                              isMod = true
                              basePt = defaultMatch.baseCostPt
                              mods = defaultMatch.modifiers
+                         } else {
+                             // Attempt to upgrade from GaidenData
+                             val gaidenDisadvantages = GaidenData.createSystem().disadvantages
+                             val gaidenMatch = gaidenDisadvantages.find { it.name.trim().equals(item.name.trim(), ignoreCase = true) }
+                             if (gaidenMatch != null && gaidenMatch.isModular) {
+                                 isMod = true
+                                 basePt = gaidenMatch.baseCostPt
+                                 mods = gaidenMatch.modifiers
+                             }
                          }
                      }
 

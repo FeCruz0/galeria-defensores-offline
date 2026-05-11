@@ -25,7 +25,7 @@ object JsonToRoomMigrator {
     private suspend fun migrateCharacters(context: Context, db: AppDatabase) {
         val files = LocalFileManager.listFiles(context, CHAR_PREFIX)
         files.forEach { file ->
-            val char = LocalFileManager.readJson(context, file.name, Character::class.java)
+            val char = LocalFileManager.readJson<Character>(context, file.name)
             if (char != null) {
                 // Check if already in DB to avoid duplicates if migration runs twice
                 if (db.characterDao().getById(char.id) == null) {
@@ -39,7 +39,7 @@ object JsonToRoomMigrator {
     private suspend fun migrateTables(context: Context, db: AppDatabase) {
         val files = LocalFileManager.listFiles(context, TABLE_PREFIX)
         files.forEach { file ->
-            val table = LocalFileManager.readJson(context, file.name, Table::class.java)
+            val table = LocalFileManager.readJson<Table>(context, file.name)
             if (table != null) {
                 if (db.tableDao().getById(table.id) == null) {
                     db.tableDao().insert(TableEntity.fromTable(table))
@@ -52,7 +52,7 @@ object JsonToRoomMigrator {
     private suspend fun migrateRuleSystems(context: Context, db: AppDatabase) {
         val files = LocalFileManager.listFiles(context, RULE_PREFIX)
         files.forEach { file ->
-            val rs = LocalFileManager.readJson(context, file.name, RuleSystem::class.java)
+            val rs = LocalFileManager.readJson<RuleSystem>(context, file.name)
             if (rs != null) {
                 if (db.ruleSystemDao().getById(rs.id) == null) {
                     db.ruleSystemDao().insert(RuleSystemEntity.fromRuleSystem(rs))

@@ -2,10 +2,14 @@ package com.galeria.defensores.models
 
 
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class MessageType {
     TEXT, ROLL, SYSTEM, IMAGE
 }
 
+@Serializable
 data class ChatMessage(
     val id: String = "",
     val tableId: String = "",

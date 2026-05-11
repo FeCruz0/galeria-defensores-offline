@@ -15,7 +15,9 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
-
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
 @Singleton
 class BackupRepository @Inject constructor(
     private val characterRepository: CharacterRepository,
@@ -25,11 +27,11 @@ class BackupRepository @Inject constructor(
     suspend fun exportCharacter(context: Context, charId: String, uri: Uri): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                val charJson = LocalFileManager.readJson(context, "char_$charId.json", Character::class.java)
+                val charJson = characterRepository.getCharacter(charId).first()
                     ?: return@withContext false
                 
                 context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                    outputStream.write(com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(charJson).toByteArray())
+                    outputStream.write(Json { prettyPrint = true }.encodeToString(charJson).toByteArray())
                 }
                 true
             } catch (e: Exception) {
@@ -49,14 +51,14 @@ class BackupRepository @Inject constructor(
                     ZipOutputStream(BufferedOutputStream(outputStream)).use { zipOut ->
                         val tableEntry = ZipEntry("table.json")
                         zipOut.putNextEntry(tableEntry)
-                        val tableJson = com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(table)
+                        val tableJson = Json { prettyPrint = true }.encodeToString(table)
                         zipOut.write(tableJson.toByteArray())
                         zipOut.closeEntry()
 
                         for (char in characters) {
                             val charEntry = ZipEntry("characters/char_${char.id}.json")
                             zipOut.putNextEntry(charEntry)
-                            val charJson = com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(char)
+                            val charJson = Json { prettyPrint = true }.encodeToString(char)
                             zipOut.write(charJson.toByteArray())
                             zipOut.closeEntry()
                         }
@@ -108,7 +110,7 @@ class BackupRepository @Inject constructor(
                 val inputStream = context.contentResolver.openInputStream(uri) ?: return@withContext false
                 val jsonString = inputStream.bufferedReader().use { it.readText() }
                 
-                val char = com.google.gson.GsonBuilder().create().fromJson(jsonString, Character::class.java) ?: return@withContext false
+                val char = try { Json { ignoreUnknownKeys = true }.decodeFromString<Character>(jsonString) } catch (e: Exception) { null } ?: return@withContext false
                 
                 val newChar = char.copy(
                     id = java.util.UUID.randomUUID().toString(),
@@ -143,7 +145,7 @@ class BackupRepository @Inject constructor(
                             os.write(buffer, 0, count)
                         }
                         val json = os.toString("UTF-8")
-                        table = com.google.gson.GsonBuilder().create().fromJson(json, Table::class.java)
+                        table = try { Json { ignoreUnknownKeys = true }.decodeFromString<Table>(json) } catch (e: Exception) { null }
                     } else if (entry.name.startsWith("characters/") && entry.name.endsWith(".json")) {
                         val os = java.io.ByteArrayOutputStream()
                         val buffer = ByteArray(1024)
@@ -152,7 +154,7 @@ class BackupRepository @Inject constructor(
                             os.write(buffer, 0, count)
                         }
                         val json = os.toString("UTF-8")
-                        val char = com.google.gson.GsonBuilder().create().fromJson(json, Character::class.java)
+                        val char = try { Json { ignoreUnknownKeys = true }.decodeFromString<Character>(json) } catch (e: Exception) { null }
                         if (char != null) characters.add(char)
                     }
                     

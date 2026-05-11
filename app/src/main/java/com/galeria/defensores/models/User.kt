@@ -1,7 +1,9 @@
 package com.galeria.defensores.models
 
 import java.util.UUID
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class User(
     val id: String = UUID.randomUUID().toString(),
     val name: String = "", // nome_exibicao

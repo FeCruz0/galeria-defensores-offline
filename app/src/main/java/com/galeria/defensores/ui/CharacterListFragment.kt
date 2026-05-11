@@ -21,6 +21,7 @@ import androidx.appcompat.app.AlertDialog
 import android.widget.ImageButton
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlinx.coroutines.flow.first
 
 import com.galeria.defensores.models.Notification
 import com.galeria.defensores.models.NotificationStatus
@@ -101,11 +102,19 @@ class CharacterListFragment : Fragment() {
             viewLifecycleOwner.lifecycleScope.launch {
                 val currentUser = com.galeria.defensores.data.SessionManager.currentUser
                 if (currentUser != null && tableId != null) {
+                    val existingChars = characterRepository.getCharacters(tableId).first()
+                    var finalName = "Novo Defensor"
+                    var counter = 2
+                    while (existingChars.any { it.name.equals(finalName, ignoreCase = true) }) {
+                        finalName = "Novo Defensor $counter"
+                        counter++
+                    }
+
                     val newCharacter = Character(
                         tableId = tableId!!,
                         ownerId = currentUser.id,
                         ownerName = currentUser.name,
-                        name = "Novo Defensor",
+                        name = finalName,
                         forca = 0,
                         habilidade = 0,
                         resistencia = 0,

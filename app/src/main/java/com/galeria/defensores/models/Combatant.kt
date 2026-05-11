@@ -2,6 +2,9 @@ package com.galeria.defensores.models
 
 import java.util.UUID
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Combatant(
     val id: String = UUID.randomUUID().toString(),
     val characterId: String = "",

@@ -17,8 +17,10 @@ import kotlinx.coroutines.flow.first
 class RuleSystemRepository @Inject constructor(
     private val ruleSystemDao: RuleSystemDao
 ) {
-    private val BASE_SYSTEM_ID = "3det_alpha_base"
-    private val GAIDEN_SYSTEM_ID = "3det_gaiden_base"
+    companion object {
+        const val BASE_SYSTEM_ID = "3det_alpha_base"
+        const val GAIDEN_SYSTEM_ID = "3det_gaiden_base"
+    }
 
     private fun createBaseSystem(): RuleSystem {
         return RuleSystem(
@@ -76,10 +78,21 @@ class RuleSystemRepository @Inject constructor(
 
     suspend fun saveSystem(system: RuleSystem) {
         if (system.id == GAIDEN_SYSTEM_ID) return
+        
+        // Check if name changed to verify uniqueness only on rename or new creation
+        val existingDbEntity = ruleSystemDao.getById(system.id).first()
+        val nameChanged = existingDbEntity == null || !existingDbEntity.name.equals(system.name, ignoreCase = true)
+
+        if (system.name.isNotBlank() && nameChanged) {
+            val existing = getSystems().first()
+            if (existing.any { it.name.equals(system.name, ignoreCase = true) && it.id != system.id }) {
+                throw IllegalArgumentException("Já existe um sistema com o nome '${system.name}'. Escolha outro nome para salvar.")
+            }
+        }
         ruleSystemDao.insert(RuleSystemEntity.fromRuleSystem(system))
     }
 
-    suspend fun deleteSystem(id: String): Boolean {
+suspend fun deleteSystem(id: String): Boolean {
         if (id == BASE_SYSTEM_ID) return false
         if (id == GAIDEN_SYSTEM_ID) return false
         ruleSystemDao.deleteById(id)

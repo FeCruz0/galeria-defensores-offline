@@ -31,6 +31,12 @@ import javax.inject.Inject
  * Roll logic → RollViewModel
  * Rule-system editing → RuleSystemViewModel
  */
+sealed class CharacterUiState {
+    object Loading : CharacterUiState()
+    data class Success(val character: Character, val ruleSystem: com.galeria.defensores.models.RuleSystem) : CharacterUiState()
+    data class Error(val message: String) : CharacterUiState()
+}
+
 @HiltViewModel
 class CharacterViewModel @Inject constructor(
     application: Application,
@@ -40,11 +46,14 @@ class CharacterViewModel @Inject constructor(
     private val loadCharacterUseCase: LoadCharacterUseCase
 ) : AndroidViewModel(application) {
 
-    private val _character = MutableStateFlow<Character?>(null)
-    val character: StateFlow<Character?> = _character.asStateFlow()
+    private val _uiState = MutableStateFlow<CharacterUiState>(CharacterUiState.Loading)
+    val uiState: StateFlow<CharacterUiState> = _uiState.asStateFlow()
 
-    private val _ruleSystem = MutableStateFlow(com.galeria.defensores.models.RuleSystem())
-    val ruleSystem: StateFlow<com.galeria.defensores.models.RuleSystem> = _ruleSystem.asStateFlow()
+    private val currentCharacter: Character?
+        get() = (_uiState.value as? CharacterUiState.Success)?.character
+
+    private val currentRuleSystem: com.galeria.defensores.models.RuleSystem
+        get() = (_uiState.value as? CharacterUiState.Success)?.ruleSystem ?: com.galeria.defensores.models.RuleSystem()
 
     var isAnimationEnabled = true
     private val saveMutex = Mutex()
@@ -54,6 +63,18 @@ class CharacterViewModel @Inject constructor(
     // ────────────────────────────────────────────────────────────────────────
 
     fun loadCharacter(id: String?, tableId: String? = null) {
+        // Guard: if the ViewModel already holds the correct character, do not reload.
+        // This prevents the sheet from switching when the user types a name matching another character,
+        // because activityViewModels() is shared and onViewCreated calls loadCharacter on every resume.
+        val alreadyLoadedId = (uiState.value as? CharacterUiState.Success)?.character?.id
+        if (id != null && alreadyLoadedId == id) {
+            android.util.Log.d("CharacterDebug", "Skipping reload — character $id already active.")
+            return
+        }
+        
+        // Clear previous state to prevent old character data from flashing in the UI
+        _uiState.value = CharacterUiState.Loading
+        
         viewModelScope.launch {
             android.util.Log.d("CharacterDebug", "Loading character: id=$id, tableId=$tableId")
             loadCharacterUseCase(id, tableId).collect { result ->
@@ -61,16 +82,15 @@ class CharacterViewModel @Inject constructor(
                     is com.galeria.defensores.domain.usecases.CharacterResult.Success -> {
                         val char = result.character
                         val sys = result.ruleSystem
-                        _character.value = char
-                        _ruleSystem.value = sys
+                        _uiState.value = CharacterUiState.Success(char, sys)
                         sharedCharacterState.update(char)
                     }
                     is com.galeria.defensores.domain.usecases.CharacterResult.Error -> {
                         android.util.Log.e("CharacterDebug", "Error loading character", result.throwable)
                         val currentUser = com.galeria.defensores.data.SessionManager.currentUser
                         val fallback = Character(tableId = tableId ?: "", ownerId = currentUser?.id ?: "")
-                        _character.value = fallback
-                        // Already has a default value from initialization
+                        _uiState.value = CharacterUiState.Error("Falha ao carregar ficha.")
+                        
                         sharedCharacterState.update(fallback)
                     }
                 }
@@ -79,7 +99,7 @@ class CharacterViewModel @Inject constructor(
     }
 
     fun saveCharacter() {
-        _character.value?.let { char ->
+        currentCharacter?.let { char ->
             viewModelScope.launch {
                 saveMutex.withLock {
                     try {
@@ -93,10 +113,10 @@ class CharacterViewModel @Inject constructor(
     }
 
     fun deleteCharacter(onSuccess: () -> Unit, onError: (String) -> Unit) {
-        val charId = _character.value?.id ?: return
+        val charId = currentCharacter?.id ?: return
         viewModelScope.launch {
             if (characterRepository.deleteCharacter(charId)) {
-                _character.value = null
+                _uiState.value = CharacterUiState.Loading // Ou limpa estado.
                 sharedCharacterState.update(null)
                 onSuccess()
             } else {
@@ -110,7 +130,7 @@ class CharacterViewModel @Inject constructor(
     // ────────────────────────────────────────────────────────────────────────
 
     fun updateAttribute(attribute: String, value: Int) {
-        val char = _character.value ?: return
+        val char = currentCharacter ?: return
         val newValue = value.coerceIn(0, 99)
         val updatedChar = char.deepCopy().also { it.attributeValues[attribute] = newValue }
         when (attribute) {
@@ -118,8 +138,6 @@ class CharacterViewModel @Inject constructor(
             "habilidade" -> updatedChar.habilidade = newValue
             "resistencia" -> {
                 updatedChar.resistencia = newValue
-                updatedChar.currentPv = updatedChar.getMaxPv()
-                updatedChar.currentPm = updatedChar.getMaxPm()
             }
             "armadura"   -> updatedChar.armadura = newValue
             "poderFogo"  -> updatedChar.poderFogo = newValue
@@ -196,7 +214,7 @@ class CharacterViewModel @Inject constructor(
     // ────────────────────────────────────────────────────────────────────────
 
     fun addAdvantage(advantage: AdvantageItem) {
-        mutate { it.vantagens = it.vantagens.toMutableList().also { l -> l.add(advantage) } }
+        mutate { it.vantagens = it.vantagens.toMutableList().also { l -> l.add(advantage.copy(id = java.util.UUID.randomUUID().toString())) } }
     }
     fun updateAdvantage(advantage: AdvantageItem) {
         mutate { char ->
@@ -213,7 +231,7 @@ class CharacterViewModel @Inject constructor(
     }
 
     fun addDisadvantage(dis: AdvantageItem) {
-        mutate { it.desvantagens = it.desvantagens.toMutableList().also { l -> l.add(dis) } }
+        mutate { it.desvantagens = it.desvantagens.toMutableList().also { l -> l.add(dis.copy(id = java.util.UUID.randomUUID().toString())) } }
     }
     fun updateDisadvantage(dis: AdvantageItem) {
         mutate { char ->
@@ -230,7 +248,7 @@ class CharacterViewModel @Inject constructor(
     }
 
     fun addSkill(skill: AdvantageItem) {
-        mutate { it.pericias = it.pericias.toMutableList().also { l -> l.add(skill) } }
+        mutate { it.pericias = it.pericias.toMutableList().also { l -> l.add(skill.copy(id = java.util.UUID.randomUUID().toString())) } }
     }
     fun updateSkill(skill: AdvantageItem) {
         mutate { char ->
@@ -247,7 +265,7 @@ class CharacterViewModel @Inject constructor(
     }
 
     fun addSpecializations(specs: List<AdvantageItem>) {
-        mutate { it.especializacoes = it.especializacoes.toMutableList().also { l -> l.addAll(specs) } }
+        mutate { it.especializacoes = it.especializacoes.toMutableList().also { l -> l.addAll(specs.map { it.copy(id = java.util.UUID.randomUUID().toString()) }) } }
     }
     fun updateSpecialization(spec: AdvantageItem) {
         mutate { char ->
@@ -264,7 +282,7 @@ class CharacterViewModel @Inject constructor(
     }
 
     fun addInventoryItem(item: InventoryItem) {
-        mutate { it.inventario = it.inventario.toMutableList().also { l -> l.add(item) } }
+        mutate { it.inventario = it.inventario.toMutableList().also { l -> l.add(item.copy(id = java.util.UUID.randomUUID().toString())) } }
     }
     fun updateInventoryItem(item: InventoryItem) {
         mutate { char ->
@@ -286,7 +304,7 @@ class CharacterViewModel @Inject constructor(
     }
 
     fun addSpell(spell: Spell) {
-        mutate { it.magias = it.magias.toMutableList().also { l -> l.add(spell) } }
+        mutate { it.magias = it.magias.toMutableList().also { l -> l.add(spell.copy(id = java.util.UUID.randomUUID().toString())) } }
     }
     fun updateSpell(spell: Spell) {
         mutate { char ->
@@ -348,7 +366,7 @@ class CharacterViewModel @Inject constructor(
 
     /** Apply a mutation, then publish to LiveData and SharedCharacterState. */
     private fun mutate(block: (Character) -> Unit) {
-        val char = _character.value ?: return
+        val char = currentCharacter ?: return
         val newChar = char.deepCopy()
         block(newChar)
         publish(newChar)
@@ -357,7 +375,10 @@ class CharacterViewModel @Inject constructor(
 
     /** Emit to LiveData and bridge. */
     private fun publish(char: Character) {
-        _character.value = char
+        val currentState = _uiState.value
+        if (currentState is CharacterUiState.Success) {
+            _uiState.value = currentState.copy(character = char)
+        }
         sharedCharacterState.update(char)
     }
 }

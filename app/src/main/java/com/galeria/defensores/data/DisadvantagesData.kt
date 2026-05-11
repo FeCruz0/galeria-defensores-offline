@@ -6,7 +6,7 @@ import com.galeria.defensores.models.ModifierOption
 object DisadvantagesData {
     val defaultDisadvantages = listOf(
         AdvantageItem(name = "Ambiente Especial", cost = "-1 ponto", description = "Fora do ambiente nativo (após R dias), perde 1 Força e 1 Resistência por dia. Recupera com 24h no ambiente ou 1 PE."),
-        AdvantageItem(name = "Assombrado", cost = "-2 pontos", description = "Um fantasma atrapalha em combate (resultados 4-6 num dado impõem -1 em todas as características). Usa dobro de PM para magias."),
+        AdvantageItem(name = "Assombrado", cost = "-1 ou -2 pontos", description = "Atormentado por assombração (fantasma, mal-dição, etc). Role 1d6 no combate: 4, 5 ou 6 = -1 em FA e FD (-1pt) ou redutor em todas as Características (-2pts)."),
         AdvantageItem(name = "Bateria", cost = "-1 ponto", description = "Reserva de energia: 2 horas por ponto de R. Depois perde 1 Força e 1 Resistência por hora até 'desligar'."),
 
         // ─── CÓDIGO (Modular) ──────────────────────────────────────────────────
@@ -15,19 +15,19 @@ object DisadvantagesData {
             cost = "-1 ponto (cada)",
             description = "Princípios rígidos de conduta. Violar um Código custa 1 PD.",
             isModular = true,
-            baseCostPt = -1,
+            baseCostPt = 0,
             modifiers = listOf(
-                ModifierOption("co_abstinencia",    "1ª Lei de Asimov", 0, "Jamais causar mal a um ser humano, ou permitir que sofra mal"),
-                ModifierOption("co_cacador",        "2ª Lei de Asimov", 0, "Sempre obedecer ordens de humanos, exceto quando violam outros códigos"),
-                ModifierOption("co_arena",          "Arena",            0, "Nunca lutar fora dos seus terrenos escolhidos"),
-                ModifierOption("co_cavalheiro",     "Caçador",          0, "Nunca matar/capturar fêmeas grávidas/filhotes; nunca abandonar caça"),
-                ModifierOption("co_combate",        "Cavalheiro",       0, "Nunca atacar mulheres; sempre atender pedido de ajuda de uma mulher"),
-                ModifierOption("co_derrota",        "Combate",          0, "Nunca atacar oponentes indefesos ou em desvantagem numérica"),
-                ModifierOption("co_desafio",        "Derrota",          0, "Nunca aceitar derrota; deve lutar até 0 PVs e se matar se capturado"),
-                ModifierOption("co_gratidao",       "Gratidão",         0, "Se for salvo, deve servir o salvador até devolver o favor"),
-                ModifierOption("co_guerra",         "Heróis",           0, "Sempre cumprir palavras, proteger quem precisa, nunca recusar pedido de ajuda"),
-                ModifierOption("co_herois",         "Honestidade",      0, "Nunca roubar, trapacear, mentir, desobedecer a leis"),
-                ModifierOption("co_hierarquia",     "Redenção",         0, "Jamais atacar sem provocação; sempre aceitar rendição")
+                ModifierOption("co_asimov1",       "1ª Lei de Asimov", -1, "Jamais causar mal a um ser humano, ou permitir que sofra mal"),
+                ModifierOption("co_asimov2",       "2ª Lei de Asimov", -1, "Sempre obedecer ordens de humanos, exceto quando violam outros códigos"),
+                ModifierOption("co_combate",       "Combate",           -1, "Nunca atacar oponentes indefesos ou em desvantagem numérica"),
+                ModifierOption("co_cacador",        "Caçador",          -1, "Nunca matar/capturar fêmeas grávidas/filhotes; nunca abandonar caça"),
+                ModifierOption("co_cavalheiro",     "Cavalheiro",       -1, "Nunca atacar mulheres; sempre atender pedido de ajuda de uma mulher"),
+                ModifierOption("co_derrota",        "Derrota",          -1, "Nunca aceitar derrota; deve lutar até 0 PVs e se matar se capturado"),
+                ModifierOption("co_desafio",        "Desafio",          -1, "Jamais recusar desafios. Cumprir punições. Priorizar desafios individuais"),
+                ModifierOption("co_gratidao",       "Gratidão",         -1, "Se for salvo, deve servir o salvador até devolver o favor"),
+                ModifierOption("co_herois",         "Heróis",           -1, "Sempre cumprir palavras, proteger quem precisa, nunca recusar pedido de ajuda"),
+                ModifierOption("co_honestidade",    "Honestidade",      -1, "Nunca roubar, trapacear, mentir, desobedecer a leis"),
+                ModifierOption("co_redencao",       "Redenção",         -1, "Jamais atacar sem provocação; sempre aceitar rendição")
             )
         ),
 
@@ -38,14 +38,14 @@ object DisadvantagesData {
             cost = "-1 a -3 pontos",
             description = "Limitação física ou sensorial. Escolha a debilitação e sua gravidade.",
             isModular = true,
-            baseCostPt = -1,
+            baseCostPt = 0,
             modifiers = listOf(
-                ModifierOption("db_audicao",     "Audição Ruim",     0, "-1 para notar inimigos escondidos"),
+                ModifierOption("db_audicao",     "Audição Ruim",    -1, "-1 para notar inimigos escondidos"),
                 ModifierOption("db_cego",        "Cego",            -2, "-1 ataques corpo-a-corpo, -3 longa distância e esquivas"),
                 ModifierOption("db_mudo",        "Mudo",            -1, "Incapaz de falar; não conjura magias faladas; testes sociais difíceis"),
                 ModifierOption("db_surdo",       "Surdo",           -1, "-1 para notar inimigos. Não sabe se há alguém furtivo usando audição"),
                 ModifierOption("db_semfaro",     "Sem Faro",         0, "Não sente cheiro nem gosto"),
-                ModifierOption("db_visao",       "Visão Ruim",       0, "Míope ou caolho; -1 para esquivas e à distância; -1 para inimigos escondidos")
+                ModifierOption("db_visao",       "Visão Ruim",      -1, "Míope ou caolho; -1 para esquivas e à distância; -1 para inimigos escondidos")
             )
         ),
 

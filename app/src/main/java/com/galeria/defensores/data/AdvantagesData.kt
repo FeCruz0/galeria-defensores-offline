@@ -17,14 +17,14 @@ object AdvantagesData {
             cost = "1 ponto", 
             description = "Recebe H+2 em um tipo de terreno específico. Escolha o seu terreno. Para comprar Arenas extras, você precisa recomprar a vantagem.",
             isModular = true,
-            baseCostPt = 1,
+            baseCostPt = 0,
             modifiers = listOf(
-                ModifierOption("are_agua",          "Água",         0, "Praias, barcos, chuva, superfícies aquáticas ou submerso"),
-                ModifierOption("are_ceu",           "Céu",          0, "Combate aéreo (quando ambos voam)"),
-                ModifierOption("are_estereis",      "Ermos",        0, "Desertos, montanhas, geleiras, planícies"),
-                ModifierOption("are_urbanas",       "Cidades",      0, "Ruas, telhados, prédios, aposentos"),
-                ModifierOption("are_subterraneos",  "Subterrâneos", 0, "Cavernas, masmorras, esgotos"),
-                ModifierOption("are_outro",         "Um único lugar",0, "Um local específico definido com o Mestre")
+                ModifierOption("are_agua",          "Água",         1, "Praias, barcos, chuva, superfícies aquáticas ou submerso"),
+                ModifierOption("are_ceu",           "Céu",          1, "Combate aéreo (quando ambos voam)"),
+                ModifierOption("are_estereis",      "Ermos",        1, "Desertos, montanhas, geleiras, planícies"),
+                ModifierOption("are_urbanas",       "Cidades",      1, "Ruas, telhados, prédios, aposentos"),
+                ModifierOption("are_subterraneos",  "Subterrâneos", 1, "Cavernas, masmorras, esgotos"),
+                ModifierOption("are_outro",         "Um único lugar",1, "Um local específico definido com o Mestre")
             )
         ),
 
@@ -58,8 +58,8 @@ object AdvantagesData {
             isModular = true,
             baseCostPt = 1,
             modifiers = listOf(
-                ModifierOption("ae_amplo",          "Amplo (+2 pontos)",    2, "Atinge todos os alvos no alcance do ataque (+2 PMs)"),
-                ModifierOption("ae_lento",          "Lento (-1 ponto)",    -1, "Apenas para ataques com PdF. Alvo recebe H+2 na esquiva"),
+                ModifierOption("ae_amplo",          "Amplo",                2, "Atinge todos os alvos no alcance do ataque (+2 PMs)"),
+                ModifierOption("ae_lento",          "Lento",               -1, "Apenas para ataques com PdF. Alvo recebe H+2 na esquiva"),
                 ModifierOption("ae_paralisante",    "Paralisante",          1, "Além de dano, funciona como Vantagem Paralisia (+1 PM)"),
                 ModifierOption("ae_penetrante",     "Penetrante",           1, "Impõe A-2 contra o alvo na sua Força de Defesa (+1 PM)"),
                 ModifierOption("ae_perigoso",       "Perigoso",             1, "Acerto crítico com resultado 5 ou 6 no dado (+1 PM)"),
@@ -117,7 +117,7 @@ object AdvantagesData {
             cost = "1-2 pontos",
             description = "1 ponto: 3 sentidos à sua escolha. 2 pontos: todos os sentidos disponíveis na lista.",
             isModular = true,
-            baseCostPt = 1,
+            baseCostPt = 0,
             modifiers = listOf(
                 ModifierOption("se_audicao",        "Audição Aguçada",      0, "Ouvir sons muito baixos ou distantes."),
                 ModifierOption("se_faro",           "Faro Aguçado",         0, "Farejar como um perdigueiro."),

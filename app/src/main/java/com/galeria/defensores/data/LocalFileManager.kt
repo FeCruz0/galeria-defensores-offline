@@ -1,26 +1,29 @@
 package com.galeria.defensores.data
 
 import android.content.Context
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
 object LocalFileManager {
-    private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
+    val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
 
-    private fun getFilesDir(context: Context): File {
+    fun getFilesDir(context: Context): File {
         return context.filesDir
     }
 
-    suspend fun <T> saveJson(context: Context, fileName: String, data: T) {
+    suspend inline fun <reified T> saveJson(context: Context, fileName: String, data: T) {
+        val jsonString = try { json.encodeToString(data) } catch (e: Exception) { null }
         withContext(Dispatchers.IO) {
             try {
-                val file = File(getFilesDir(context), fileName)
-                val jsonString = gson.toJson(data)
-                file.writeText(jsonString)
-                android.util.Log.d("LocalFileManager", "Saved $fileName successfully.")
+                if (jsonString != null) {
+                    val file = File(getFilesDir(context), fileName)
+                    file.writeText(jsonString)
+                    android.util.Log.d("LocalFileManager", "Saved $fileName successfully.")
+                }
             } catch (e: Exception) {
                 android.util.Log.e("LocalFileManager", "Error saving $fileName", e)
                 e.printStackTrace()
@@ -28,13 +31,13 @@ object LocalFileManager {
         }
     }
 
-    suspend fun <T> readJson(context: Context, fileName: String, classOfT: Class<T>): T? {
+    suspend inline fun <reified T> readJson(context: Context, fileName: String): T? {
         return withContext(Dispatchers.IO) {
             try {
                 val file = File(getFilesDir(context), fileName)
                 if (file.exists()) {
                     val jsonString = file.readText()
-                    gson.fromJson(jsonString, classOfT)
+                    json.decodeFromString<T>(jsonString)
                 } else {
                     null
                 }

@@ -150,8 +150,15 @@ class DialogEditResourceDefinition(
         }
 
         btnDelete.setOnClickListener {
-            resource?.let { onDelete?.invoke(it) }
-            dismiss()
+            androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Excluir Recurso")
+                .setMessage("Tem certeza que deseja excluir o recurso '${resource?.name}'? Essa ação não pode ser desfeita.")
+                .setPositiveButton("Excluir") { _, _ ->
+                    resource?.let { onDelete?.invoke(it) }
+                    dismiss()
+                }
+                .setNegativeButton("Cancelar", null)
+                .show()
         }
 
         btnCancel.setOnClickListener {

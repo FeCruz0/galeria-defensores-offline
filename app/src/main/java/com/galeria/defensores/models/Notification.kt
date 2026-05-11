@@ -2,6 +2,9 @@ package com.galeria.defensores.models
 
 import java.util.UUID
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Notification(
     val id: String = UUID.randomUUID().toString(),
     val type: NotificationType = NotificationType.JOIN_REQUEST,
@@ -14,10 +17,12 @@ data class Notification(
     val timestamp: Long = System.currentTimeMillis()
 )
 
+@Serializable
 enum class NotificationType {
     JOIN_REQUEST
 }
 
+@Serializable
 enum class NotificationStatus {
     PENDING,
     ACCEPTED,

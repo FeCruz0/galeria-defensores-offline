@@ -126,7 +126,8 @@ class QuickRollBottomSheet(
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 // Character Flow
                 launch {
-                    viewModel.character.collect { char ->
+                    viewModel.uiState.collect { state ->
+                        val char = (state as? com.galeria.defensores.viewmodels.CharacterUiState.Success)?.character
                         if (char != null) {
                             setupStandardButtons(view) // Enable buttons
                             if (char.customRolls.isNotEmpty()) {
@@ -163,7 +164,7 @@ class QuickRollBottomSheet(
                             attrVal = request.attributeValue,
                             skillVal = request.skillValue,
                             attrName = request.attributeName,
-                            charId = viewModel.character.value?.id ?: "",
+                            charId = (viewModel.uiState.value as? com.galeria.defensores.viewmodels.CharacterUiState.Success)?.character?.id ?: "",
                             expectedResults = request.diceOverride,
                             canCrit = request.canCrit,
                             isNegative = request.isNegative,

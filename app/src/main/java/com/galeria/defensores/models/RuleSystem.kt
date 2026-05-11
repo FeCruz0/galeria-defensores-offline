@@ -1,7 +1,9 @@
 package com.galeria.defensores.models
 
 import java.util.UUID
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class RuleSystem(
     val id: String = UUID.randomUUID().toString(),
     var name: String = "3DeT Alpha",
@@ -16,6 +18,7 @@ data class RuleSystem(
     var diceConfig: DiceConfig = DiceConfig()
 )
 
+@Serializable
 data class ItemDefinition(
     val id: String = UUID.randomUUID().toString(),
     var name: String,
@@ -28,6 +31,7 @@ data class ItemDefinition(
     val baseCostPt: Int = 0
 )
 
+@Serializable
 data class AttributeDefinition(
     val id: String = UUID.randomUUID().toString(),
     var key: String, // Internal key: forca, habilidade...
@@ -37,6 +41,7 @@ data class AttributeDefinition(
     var displayOrder: Int = 0
 )
 
+@Serializable
 data class ResourceDefinition(
     val id: String = UUID.randomUUID().toString(),
     var key: String, // pv, pm
@@ -45,6 +50,7 @@ data class ResourceDefinition(
     var formula: String = "R * 5" // Formula string
 )
 
+@Serializable
 data class DiceConfig(
     var count: Int = 1,
     var faces: Int = 6
