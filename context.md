@@ -4,16 +4,20 @@
 App Android (Kotlin) para fichas de 3D&T (Alpha/Gaiden). Arquitetura MVVM, Hilt, Room, Kotlinx Serialization e build via Docker.
 
 ## Estado Atual
-1. **Estabilização**: Sistema de regras customizado está estável, sem crashes ao criar/editar recursos.
-2. **Persistência**: Migrado para Kotlinx Serialization; reatividade via StateFlow com carregamento one-shot (LoadCharacterUseCase) para evitar "Flow Echo".
-3. **UI**: Adaptadores de recursos e atributos unificados no `CharacterSheetFragment`.
+1. **Arquitetura**: Implementado Clean Architecture com Casos de Uso (ex: LoadCharacterUseCase), Injeção de Dependência via Hilt e reatividade via StateFlow.
+2. **Estabilização**: Sistema de regras customizado está estável, sem crashes ao criar/editar recursos.
+3. **Persistência**: Migrado para Room e Kotlinx Serialization; carregamento one-shot para evitar "Flow Echo".
+4. **UI**: Adaptadores unificados e barras de progresso funcionais.
 
 ## Últimas Alterações Realizadas
-- Fix na exclusão de recursos customizados (confirmação adicionada e sincronização de dados corrigida).
-- Tentativa de correção de "flicker" nas barras de progresso (desativado `supportsChangeAnimations` no RecyclerView e usado `setProgress(v, false)` no `ResourcesAdapter`).
+- Fix (UI): Barra de progresso dos recursos corrigida usando `progressTintList` para manter a proporção visual e o fundo cinza.
+- Fix (Logic): Alteração em 'Resistência' agora afeta apenas o valor máximo de PV/PM, mantendo o valor atual intacto.
+- Refactor: Limpeza de arquivos legados (Firebase, backups antigos e logs).
+- Test: Implementação de testes unitários com MockK para o `ResourcesAdapter`.
 
-## Pendência Crítica (Próximo Passo)
-- **Barra de Progresso (Recursos)**: Apesar da remoção do flicker, as barras (PV, PM, etc.) não estão atualizando visualmente de forma proporcional aos pontos (comportamento de "barra de jogo"). O texto numérico atualiza, mas a barra visual (`ProgressBar`) não reflete a mudança de forma correta.
+## Próximos Passos
+- Monitorar estabilidade geral após a migração completa para Room.
+- [Aguardando novas definições do usuário]
 
 ## Regras de Ouro (AI-Rules)
 - **TDD Incremental**: Escrever teste -> Parar -> Aguardar OK -> Implementar.
