@@ -7,12 +7,27 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import com.galeria.defensores.R
 import com.galeria.defensores.models.ResourceDefinition
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 class ResourcesAdapterTest {
+
+    private val mockColorStateList = mockk<android.content.res.ColorStateList>(relaxed = true)
+
+    @Before
+    fun setUp() {
+        mockkStatic(android.graphics.Color::class)
+        mockkStatic(android.content.res.ColorStateList::class)
+        every { android.graphics.Color.parseColor(any()) } returns 0xFF0000.toInt()
+        every { android.content.res.ColorStateList.valueOf(any<Int>()) } returns mockColorStateList
+    }
+
+    @After
+    fun tearDown() {
+        unmockkAll()
+    }
 
     @Test
     fun `test bind sets progress and max correctly`() {
@@ -43,10 +58,14 @@ class ResourcesAdapterTest {
     @Test
     fun `test bind tints only progress layer`() {
         val view = mockk<View>(relaxed = true)
+        val label = mockk<TextView>(relaxed = true)
+        val valueText = mockk<TextView>(relaxed = true)
         val progressBar = mockk<ProgressBar>(relaxed = true)
         val progressDrawable = mockk<LayerDrawable>(relaxed = true)
         val progressLayer = mockk<Drawable>(relaxed = true)
         
+        every { view.findViewById<TextView>(R.id.status_label) } returns label
+        every { view.findViewById<TextView>(R.id.status_value) } returns valueText
         every { view.findViewById<ProgressBar>(R.id.status_bar) } returns progressBar
         every { progressBar.progressDrawable } returns progressDrawable
         every { progressDrawable.findDrawableByLayerId(android.R.id.progress) } returns progressLayer
@@ -59,6 +78,6 @@ class ResourcesAdapterTest {
         holder.bind(res, 10, 20)
         
         // This should pass now that we use progressTintList
-        verify { progressBar.progressTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FF0000")) }
+        verify { progressBar.progressTintList = mockColorStateList }
     }
 }

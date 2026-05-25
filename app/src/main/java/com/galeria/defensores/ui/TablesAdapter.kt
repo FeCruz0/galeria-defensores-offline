@@ -11,6 +11,7 @@ import com.galeria.defensores.models.Table
 
 class TablesAdapter(
     private val tables: List<Table>,
+    private val systemNamesMap: Map<String, String>,
     private val onTableClick: (Table) -> Unit,
     private val onEditClick: (Table) -> Unit,
     private val onDeleteClick: (Table) -> Unit,
@@ -19,6 +20,7 @@ class TablesAdapter(
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val name: TextView = view.findViewById(R.id.text_table_name)
+        val system: TextView = view.findViewById(R.id.text_table_system)
         val description: TextView = view.findViewById(R.id.text_table_description)
         val btnMore: ImageButton = view.findViewById(R.id.btn_more)
     }
@@ -32,6 +34,8 @@ class TablesAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val table = tables[position]
         holder.name.text = table.name
+        val systemName = systemNamesMap[table.ruleSystemId] ?: "Desconhecido (${table.ruleSystemId})"
+        holder.system.text = "Sistema: $systemName"
         holder.description.text = com.galeria.defensores.utils.TextFormatUtils.formatParagraphSpacing(table.description)
         holder.description.setLineSpacing(0f, 1.2f)
         

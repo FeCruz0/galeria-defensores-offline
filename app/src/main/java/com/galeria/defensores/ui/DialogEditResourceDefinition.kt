@@ -145,8 +145,12 @@ class DialogEditResourceDefinition(
                     color = selectedColor
                 )
             }
-            onSave(newRes)
-            dismiss()
+            try {
+                onSave(newRes)
+                dismiss()
+            } catch (e: Exception) {
+                Toast.makeText(context, e.message ?: "Erro ao salvar recurso", Toast.LENGTH_LONG).show()
+            }
         }
 
         btnDelete.setOnClickListener {

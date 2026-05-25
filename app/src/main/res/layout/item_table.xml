@@ -41,6 +41,16 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/text_table_system"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="#000000"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            android:text="Regra: 3DeT Alpha" />
+
+        <TextView
             android:id="@+id/text_table_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

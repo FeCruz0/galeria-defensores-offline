@@ -14,6 +14,7 @@ import com.galeria.defensores.models.Character
 import com.galeria.defensores.models.ResourceDefinition
 import com.galeria.defensores.models.RuleSystem
 import com.galeria.defensores.models.UniqueAdvantage
+import com.galeria.defensores.models.validateUniqueNameAndKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -73,11 +74,13 @@ class RuleSystemViewModel @Inject constructor(
     // --- Rule System Editing: Attributes ---
 
     fun addAttributeDefinition(attr: AttributeDefinition) {
+        currentRuleSystem.validateUniqueNameAndKey(attr.id, attr.key, attr.name)
         val newAttrs = currentRuleSystem.attributes.toMutableList().also { it.add(attr) }
         saveRuleSystem(currentRuleSystem.copy(attributes = newAttrs))
     }
 
     fun updateAttributeDefinition(attr: AttributeDefinition) {
+        currentRuleSystem.validateUniqueNameAndKey(attr.id, attr.key, attr.name)
         val system = currentRuleSystem
         val newAttrs = system.attributes.toMutableList()
         val index = newAttrs.indexOfFirst { it.id == attr.id }
@@ -117,11 +120,13 @@ class RuleSystemViewModel @Inject constructor(
     // --- Rule System Editing: Resources ---
 
     fun addResourceDefinition(res: ResourceDefinition) {
+        currentRuleSystem.validateUniqueNameAndKey(res.id, res.key, res.name)
         val newList = currentRuleSystem.resources.toMutableList().also { it.add(res) }
         saveRuleSystem(currentRuleSystem.copy(resources = newList))
     }
 
     fun updateResourceDefinition(res: ResourceDefinition) {
+        currentRuleSystem.validateUniqueNameAndKey(res.id, res.key, res.name)
         val newList = currentRuleSystem.resources.toMutableList()
         val index = newList.indexOfFirst { it.id == res.id }
         if (index != -1) {
@@ -143,27 +148,39 @@ class RuleSystemViewModel @Inject constructor(
         "{ \"error\": \"Failed to export system\" }"
     }
 
-    fun importSystemJson(json: String): Boolean {
-        return try {
-            val importedSystem = Json { ignoreUnknownKeys = true }.decodeFromString<RuleSystem>(json)
-            if (importedSystem.attributes.isEmpty() && importedSystem.resources.isEmpty()) return false
-            val current = _ruleSystem.value ?: RuleSystem()
-            val updated = current.copy(
-                name = importedSystem.name,
-                description = importedSystem.description,
-                attributes = importedSystem.attributes,
-                resources = importedSystem.resources,
-                diceConfig = importedSystem.diceConfig
-            )
-            saveRuleSystem(updated)
-            true
-        } catch (e: Exception) {
-            android.util.Log.e("SystemImport", "Error parsing JSON", e)
-            false
+    fun importSystemJson(json: String, onComplete: (Boolean, RuleSystem?) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val importedSystem = Json { ignoreUnknownKeys = true }.decodeFromString<RuleSystem>(json)
+                if (importedSystem.attributes.isEmpty() && importedSystem.resources.isEmpty()) {
+                    onComplete(false, null)
+                    return@launch
+                }
+                val tableId = currentTableId
+                val newSystem = importedSystem.copy(
+                    id = java.util.UUID.randomUUID().toString(),
+                    isBaseSystem = false
+                )
+                ruleSystemRepository.saveSystem(newSystem)
+                
+                if (!tableId.isNullOrEmpty()) {
+                    val table = tableRepository.getTableOnce(tableId)
+                    if (table != null) {
+                        val updatedTable = table.copy(ruleSystemId = newSystem.id)
+                        tableRepository.updateTable(updatedTable)
+                    }
+                }
+                
+                _ruleSystem.value = newSystem
+                onComplete(true, newSystem)
+            } catch (e: Exception) {
+                android.util.Log.e("SystemImport", "Error parsing/saving JSON", e)
+                onComplete(false, null)
+            }
         }
     }
 
-    fun saveSystemAs(newName: String, onComplete: (Boolean) -> Unit) {
+    fun saveSystemAs(newName: String, onComplete: (Boolean, RuleSystem?) -> Unit) {
         val current = _ruleSystem.value ?: return
         val newSystem = current.copy(
             id = java.util.UUID.randomUUID().toString(),
@@ -173,9 +190,20 @@ class RuleSystemViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 ruleSystemRepository.saveSystem(newSystem)
-                onComplete(true)
+                
+                val tableId = currentTableId
+                if (!tableId.isNullOrEmpty()) {
+                    val table = tableRepository.getTableOnce(tableId)
+                    if (table != null) {
+                        val updatedTable = table.copy(ruleSystemId = newSystem.id)
+                        tableRepository.updateTable(updatedTable)
+                    }
+                }
+                
+                _ruleSystem.value = newSystem
+                onComplete(true, newSystem)
             } catch (e: Exception) {
-                onComplete(false)
+                onComplete(false, null)
             }
         }
     }

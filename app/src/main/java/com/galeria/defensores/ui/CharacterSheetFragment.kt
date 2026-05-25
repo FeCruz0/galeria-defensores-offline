@@ -130,10 +130,13 @@ class CharacterSheetFragment : Fragment() {
                         input.bufferedReader().readText()
                     }
                     if (json != null) {
-                        if (ruleSystemViewModel.importSystemJson(json)) {
-                            Toast.makeText(context, "Sistema importado com sucesso!", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, "Erro ao importar sistema. Conteúdo inválido.", Toast.LENGTH_SHORT).show()
+                        ruleSystemViewModel.importSystemJson(json) { success, newSystem ->
+                            if (success && newSystem != null) {
+                                viewModel.updateRuleSystem(newSystem)
+                                Toast.makeText(context, "Sistema importado com sucesso!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Erro ao importar sistema. Conteúdo inválido.", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 } catch (e: Exception) {
@@ -239,43 +242,50 @@ class CharacterSheetFragment : Fragment() {
         val avatarImage = view.findViewById<ImageView>(R.id.img_character_avatar)
         val editAvatarIcon = view.findViewById<ImageView>(R.id.img_edit_avatar_icon)
 
-        view.findViewById<View>(R.id.btn_system_options).setOnClickListener {
-            Toast.makeText(context, "Botão Opções Clicado", Toast.LENGTH_SHORT).show()
-            val dialog = DialogSystemOptions(
-                onSaveAsClick = {
-                     DialogSaveSystem { newName ->
-                         ruleSystemViewModel.saveSystemAs(newName) { success ->
-                             if (success) {
-                                 Toast.makeText(context, "Sistema salvo como '$newName'!", Toast.LENGTH_SHORT).show()
-                             } else {
-                                 Toast.makeText(context, "Erro ao salvar sistema.", Toast.LENGTH_SHORT).show()
+        val btnSystemOptions = view.findViewById<View>(R.id.btn_system_options)
+        if (!tableId.isNullOrEmpty()) {
+            btnSystemOptions.visibility = View.GONE
+        } else {
+            btnSystemOptions.visibility = View.VISIBLE
+            btnSystemOptions.setOnClickListener {
+                Toast.makeText(context, "Botão Opções Clicado", Toast.LENGTH_SHORT).show()
+                val dialog = DialogSystemOptions(
+                    onSaveAsClick = {
+                         DialogSaveSystem { newName ->
+                             ruleSystemViewModel.saveSystemAs(newName) { success, newSystem ->
+                                 if (success && newSystem != null) {
+                                     viewModel.updateRuleSystem(newSystem)
+                                     Toast.makeText(context, "Sistema salvo como '$newName'!", Toast.LENGTH_SHORT).show()
+                                 } else {
+                                     Toast.makeText(context, "Erro ao salvar sistema.", Toast.LENGTH_SHORT).show()
+                                 }
                              }
-                         }
-                     }.show(parentFragmentManager, "SaveSystem")
-                },
-                onExportClick = {
-                    val sysName = ruleSystemViewModel.ruleSystem.value?.name ?: "sistema"
-                    val safeName = sysName.replace("[^a-zA-Z0-9.-]".toRegex(), "_")
-                    systemExportLauncher.launch("system_${safeName}.json")
-                },
-                onImportClick = {
-                    systemImportLauncher.launch(arrayOf("application/json", "application/octet-stream"))
-                },
-                onResetClick = {
-                    androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                        .setTitle("Restaurar Sistema Padrão?")
-                        .setMessage("Isso irá reverter o sistema '3DeT Alpha' para as regras originais. \n\nCUIDADO: Se você editou o sistema padrão sem salvar como cópia, suas alterações serão perdidas.")
-                        .setPositiveButton("Restaurar") { _, _ ->
-                            ruleSystemViewModel.resetBaseSystem { success ->
-                                if (success) Toast.makeText(context, "Sistema restaurado!", Toast.LENGTH_SHORT).show()
-                                else Toast.makeText(context, "Erro ao restaurar.", Toast.LENGTH_SHORT).show()
+                         }.show(parentFragmentManager, "SaveSystem")
+                    },
+                    onExportClick = {
+                        val sysName = ruleSystemViewModel.ruleSystem.value?.name ?: "sistema"
+                        val safeName = sysName.replace("[^a-zA-Z0-9.-]".toRegex(), "_")
+                        systemExportLauncher.launch("system_${safeName}.json")
+                    },
+                    onImportClick = {
+                        systemImportLauncher.launch(arrayOf("application/json", "application/octet-stream"))
+                    },
+                    onResetClick = {
+                        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                            .setTitle("Restaurar Sistema Padrão?")
+                            .setMessage("Isso irá reverter o sistema '3DeT Alpha' para as regras originais. \n\nCUIDADO: Se você editou o sistema padrão sem salvar como cópia, suas alterações serão perdidas.")
+                            .setPositiveButton("Restaurar") { _, _ ->
+                                ruleSystemViewModel.resetBaseSystem { success ->
+                                    if (success) Toast.makeText(context, "Sistema restaurado!", Toast.LENGTH_SHORT).show()
+                                    else Toast.makeText(context, "Erro ao restaurar.", Toast.LENGTH_SHORT).show()
+                                }
                             }
-                        }
-                        .setNegativeButton("Cancelar", null)
-                        .show()
-                }
-            )
-            dialog.show(parentFragmentManager, "SystemOptions")
+                            .setNegativeButton("Cancelar", null)
+                            .show()
+                    }
+                )
+                dialog.show(parentFragmentManager, "SystemOptions")
+            }
         }
 
         val btnBack = view.findViewById<android.widget.ImageButton>(R.id.btn_reset)

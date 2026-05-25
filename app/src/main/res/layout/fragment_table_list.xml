@@ -182,6 +182,35 @@
                 app:tint="#FFFFFF" />
         </LinearLayout>
 
+        <!-- Manage Systems FAB (Sub-menu) -->
+        <LinearLayout
+            android:id="@+id/layout_fab_manage_systems"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gerenciar Sistemas"
+                android:textColor="@color/text_primary"
+                android:background="@color/card_background"
+                android:padding="4dp"
+                android:layout_marginEnd="8dp" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_manage_systems"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_preferences"
+                app:fabSize="mini"
+                app:backgroundTint="#8B5CF6"
+                app:tint="#FFFFFF" />
+        </LinearLayout>
+
         <!-- Main FAB -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_menu"

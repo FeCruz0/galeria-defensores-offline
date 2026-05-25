@@ -93,11 +93,16 @@ class TableListFragment : Fragment() {
                         if (SessionManager.currentUser == null) {
                             SessionManager.refreshUser()
                         }
-                        
+
                         val sortedTables = tables.sortedBy { it.name }
+
+                        // Build a map of systemId -> systemName for subtitle display
+                        val allSystems = ruleSystemRepository.getSystems().first()
+                        val systemNamesMap = allSystems.associate { it.id to it.name }
 
                         val adapter = TablesAdapter(
                             tables = sortedTables,
+                            systemNamesMap = systemNamesMap,
                             onTableClick = { table ->
                                 val fragment = TableContainerFragment.newInstance(table.id)
                                 parentFragmentManager.beginTransaction()
@@ -133,18 +138,28 @@ class TableListFragment : Fragment() {
         val fabMenu = view.findViewById<FloatingActionButton>(R.id.fab_menu)
         val layoutFabSettings = view.findViewById<View>(R.id.layout_fab_settings)
         val layoutFabCreateTable = view.findViewById<View>(R.id.layout_fab_create_table)
+        val layoutFabMyCharacters = view.findViewById<View>(R.id.layout_fab_my_characters)
+        val layoutFabImportTable = view.findViewById<View>(R.id.layout_fab_import_table)
+        val layoutFabManageSystems = view.findViewById<View>(R.id.layout_fab_manage_systems)
 
-        val layoutFabMyCharacters = view.findViewById<View>(R.id.layout_fab_my_characters) // Added
         val fabSettings = view.findViewById<FloatingActionButton>(R.id.fab_settings)
         val fabCreateTable = view.findViewById<FloatingActionButton>(R.id.fab_create_table)
         val fabProfile = view.findViewById<FloatingActionButton>(R.id.fab_profile)
-        val fabMyCharacters = view.findViewById<FloatingActionButton>(R.id.fab_my_characters) // Added
-        
+        val fabMyCharacters = view.findViewById<FloatingActionButton>(R.id.fab_my_characters)
+        val fabImportTable = view.findViewById<FloatingActionButton>(R.id.fab_import_table)
+        val fabManageSystems = view.findViewById<FloatingActionButton>(R.id.fab_manage_systems)
+
         var isMenuOpen = false
 
-        // Import Table Logic
-        val layoutFabImportTable = view.findViewById<View>(R.id.layout_fab_import_table)
-        val fabImportTable = view.findViewById<FloatingActionButton>(R.id.fab_import_table)
+        fun closeFabMenu() {
+            isMenuOpen = false
+            layoutFabSettings.visibility = View.GONE
+            layoutFabCreateTable.visibility = View.GONE
+            layoutFabMyCharacters.visibility = View.GONE
+            layoutFabImportTable.visibility = View.GONE
+            layoutFabManageSystems.visibility = View.GONE
+            fabMenu.setImageResource(R.drawable.ic_more_vert)
+        }
 
         fabMenu.setOnClickListener {
             isMenuOpen = !isMenuOpen
@@ -152,39 +167,32 @@ class TableListFragment : Fragment() {
                 layoutFabSettings.visibility = View.VISIBLE
                 layoutFabCreateTable.visibility = View.VISIBLE
                 layoutFabMyCharacters.visibility = View.VISIBLE
-                layoutFabImportTable.visibility = View.VISIBLE // Added
+                layoutFabImportTable.visibility = View.VISIBLE
+                layoutFabManageSystems.visibility = View.VISIBLE
                 fabMenu.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
             } else {
-                layoutFabSettings.visibility = View.GONE
-                layoutFabCreateTable.visibility = View.GONE
-                layoutFabMyCharacters.visibility = View.GONE
-                layoutFabImportTable.visibility = View.GONE // Added
-                fabMenu.setImageResource(R.drawable.ic_more_vert)
+                closeFabMenu()
             }
         }
 
         fabCreateTable.setOnClickListener {
             showAddTableDialog {
                 loadTables()
-                // Close menu after action
-                isMenuOpen = false
-                layoutFabSettings.visibility = View.GONE
-                layoutFabCreateTable.visibility = View.GONE
-                layoutFabMyCharacters.visibility = View.GONE
-                layoutFabImportTable.visibility = View.GONE // Added
-                fabMenu.setImageResource(R.drawable.ic_more_vert)
+                closeFabMenu()
             }
         }
 
         fabImportTable.setOnClickListener {
-            importTableLauncher.launch(arrayOf("application/zip", "application/octet-stream")) // Zip mainly
-             // Close menu after action
-            isMenuOpen = false
-            layoutFabSettings.visibility = View.GONE
-            layoutFabCreateTable.visibility = View.GONE
-            layoutFabMyCharacters.visibility = View.GONE
-            layoutFabImportTable.visibility = View.GONE
-            fabMenu.setImageResource(R.drawable.ic_more_vert)
+            importTableLauncher.launch(arrayOf("application/zip", "application/octet-stream"))
+            closeFabMenu()
+        }
+
+        fabManageSystems.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, SystemManagementFragment())
+                .addToBackStack(null)
+                .commit()
+            closeFabMenu()
         }
 
         fabSettings.setOnClickListener {
@@ -192,30 +200,15 @@ class TableListFragment : Fragment() {
                 .replace(R.id.fragment_container, SettingsFragment())
                 .addToBackStack(null)
                 .commit()
-            
-            // Close menu after action
-            isMenuOpen = false
-            layoutFabSettings.visibility = View.GONE
-            layoutFabCreateTable.visibility = View.GONE
-            layoutFabMyCharacters.visibility = View.GONE // Added
-            fabMenu.setImageResource(R.drawable.ic_more_vert)
+            closeFabMenu()
         }
 
-
-
-        // New Listener
         fabMyCharacters.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, MyCharactersFragment())
                 .addToBackStack(null)
                 .commit()
-
-            // Close menu
-            isMenuOpen = false
-            layoutFabSettings.visibility = View.GONE
-            layoutFabCreateTable.visibility = View.GONE
-            layoutFabMyCharacters.visibility = View.GONE
-            fabMenu.setImageResource(R.drawable.ic_more_vert)
+            closeFabMenu()
         }
     }
 

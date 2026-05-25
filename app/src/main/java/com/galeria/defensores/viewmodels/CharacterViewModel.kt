@@ -381,4 +381,11 @@ class CharacterViewModel @Inject constructor(
         }
         sharedCharacterState.update(char)
     }
+
+    fun updateRuleSystem(system: com.galeria.defensores.models.RuleSystem) {
+        val currentState = _uiState.value
+        if (currentState is CharacterUiState.Success) {
+            _uiState.value = currentState.copy(ruleSystem = system)
+        }
+    }
 }

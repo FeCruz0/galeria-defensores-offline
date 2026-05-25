@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/page_background">
+
+    <!-- Top Management Control Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/header_background"
+        android:padding="12dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_revert"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="#FECACA"
+            android:contentDescription="Voltar" />
+
+        <!-- Spinner for selecting rule system -->
+        <Spinner
+            android:id="@+id/spinner_rule_systems"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:backgroundTint="#FFFFFF" />
+
+        <ImageButton
+            android:id="@+id/btn_save_system"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_save"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="#34D399"
+            android:layout_marginEnd="4dp"
+            android:contentDescription="Salvar Alterações" />
+
+        <ImageButton
+            android:id="@+id/btn_revert_system"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="#F87171"
+            android:layout_marginEnd="4dp"
+            android:contentDescription="Descartar Alterações" />
+
+        <ImageButton
+            android:id="@+id/btn_export_system"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_share"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="#60A5FA"
+            android:layout_marginEnd="4dp"
+            android:contentDescription="Exportar JSON" />
+
+        <ImageButton
+            android:id="@+id/btn_import_system"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_add"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="#3B82F6"
+            android:layout_marginEnd="4dp"
+            android:contentDescription="Importar JSON" />
+
+        <ImageButton
+            android:id="@+id/btn_delete_system"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_delete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="#EF4444"
+            android:contentDescription="Excluir Sistema" />
+    </LinearLayout>
+
+    <!-- System Metadata Editing Card -->
+    <include
+        android:id="@+id/layout_system_metadata"
+        layout="@layout/view_system_metadata"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Embedded Sandbox Character Sheet -->
+    <include
+        android:id="@+id/sandbox_sheet"
+        layout="@layout/fragment_character_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>

@@ -159,8 +159,12 @@ class DialogEditAttributeDefinition(
                     color = selectedColor
                 )
             }
-            onSave(newAttr)
-            dismiss()
+            try {
+                onSave(newAttr)
+                dismiss()
+            } catch (e: Exception) {
+                Toast.makeText(context, e.message ?: "Erro ao salvar atributo", Toast.LENGTH_LONG).show()
+            }
         }
 
         btnDelete.setOnClickListener {

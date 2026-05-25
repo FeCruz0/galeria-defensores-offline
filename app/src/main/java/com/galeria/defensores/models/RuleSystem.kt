@@ -72,3 +72,33 @@ fun defaultResources(): List<ResourceDefinition> {
         ResourceDefinition(key = "pm", name = "Pontos de Magia", color = "#3B82F6", formula = "R * 5")
     )
 }
+
+fun RuleSystem.validateUniqueNameAndKey(id: String, key: String, name: String) {
+    val cleanKey = key.trim().lowercase()
+    val cleanName = name.trim().lowercase()
+
+    // Check attributes
+    attributes.forEach { attr ->
+        if (attr.id != id) {
+            if (attr.key.trim().lowercase() == cleanKey) {
+                throw IllegalArgumentException("A chave '$key' já está em uso por outro atributo.")
+            }
+            if (attr.name.trim().lowercase() == cleanName) {
+                throw IllegalArgumentException("O nome '$name' já está em uso por outro atributo.")
+            }
+        }
+    }
+
+    // Check resources
+    resources.forEach { res ->
+        if (res.id != id) {
+            if (res.key.trim().lowercase() == cleanKey) {
+                throw IllegalArgumentException("A chave '$key' já está em uso por outro recurso.")
+            }
+            if (res.name.trim().lowercase() == cleanName) {
+                throw IllegalArgumentException("O nome '$name' já está em uso por outro recurso.")
+            }
+        }
+    }
+}
+
