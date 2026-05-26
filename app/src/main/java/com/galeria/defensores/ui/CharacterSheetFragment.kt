@@ -692,14 +692,16 @@ class CharacterSheetFragment : Fragment() {
                         val sys = state.ruleSystem
                         
                         // Keep RuleSystemViewModel in sync for its own editing functions
-                        if (ruleSystemViewModel.ruleSystem.value.id != sys.id) {
+                        val effectiveTableId = tableId ?: char.tableId
+                        val effectiveTableIdOrNull = effectiveTableId.takeIf { it.isNotEmpty() }
+                        val sysChanged = ruleSystemViewModel.ruleSystem.value.id != sys.id
+                        if (sysChanged) {
                             ruleSystemViewModel.loadRuleSystem(sys)
                         }
-                        
-                        val effectiveTableId = tableId ?: char.tableId
-                        if (effectiveTableId.isNotEmpty() && !adaptersInitialized) {
-                            ruleSystemViewModel.loadDamageTypes(effectiveTableId)
-                            ruleSystemViewModel.loadUniqueAdvantages(effectiveTableId)
+                        // Load damage types on first init OR when system changes
+                        if (!adaptersInitialized || sysChanged) {
+                            ruleSystemViewModel.loadDamageTypes(effectiveTableIdOrNull)
+                            ruleSystemViewModel.loadUniqueAdvantages(effectiveTableIdOrNull)
                         }
 
                         // 1. Basic Info
@@ -757,8 +759,38 @@ class CharacterSheetFragment : Fragment() {
                             }
                         }
 
-                        // 5. Spinners
-                        // Spinners are updated reactively via availableDamageTypes flow in another launch block
+                        // 5. Spinners Selection Update
+                        val spinnerForca = view.findViewById<android.widget.Spinner>(R.id.spinner_damage_forca)
+                        val spinnerPdf = view.findViewById<android.widget.Spinner>(R.id.spinner_damage_pdf)
+                        val damageTypes = ruleSystemViewModel.availableDamageTypes.value
+                        if (damageTypes.isNotEmpty()) {
+                            val indexF = damageTypes.indexOf(char.damageTypeForca).coerceAtLeast(0)
+                            if (spinnerForca.selectedItemPosition != indexF) {
+                                spinnerForca.onItemSelectedListener = null
+                                spinnerForca.setSelection(indexF)
+                                spinnerForca.post {
+                                    spinnerForca.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+                                        override fun onItemSelected(p0: android.widget.AdapterView<*>?, p1: View?, pos: Int, p3: Long) {
+                                            if (char.damageTypeForca != damageTypes[pos]) viewModel.updateDamageType(damageTypes[pos], false)
+                                        }
+                                        override fun onNothingSelected(p0: android.widget.AdapterView<*>?) {}
+                                    }
+                                }
+                            }
+                            val indexP = damageTypes.indexOf(char.damageTypePdf).coerceAtLeast(0)
+                            if (spinnerPdf.selectedItemPosition != indexP) {
+                                spinnerPdf.onItemSelectedListener = null
+                                spinnerPdf.setSelection(indexP)
+                                spinnerPdf.post {
+                                    spinnerPdf.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+                                        override fun onItemSelected(p0: android.widget.AdapterView<*>?, p1: View?, pos: Int, p3: Long) {
+                                            if (char.damageTypePdf != damageTypes[pos]) viewModel.updateDamageType(damageTypes[pos], true)
+                                        }
+                                        override fun onNothingSelected(p0: android.widget.AdapterView<*>?) {}
+                                    }
+                                }
+                            }
+                        }
                         // 6. Attributes and Adapters
                         updateAttributeValues(char)
                         val currentUser = com.galeria.defensores.data.SessionManager.currentUser

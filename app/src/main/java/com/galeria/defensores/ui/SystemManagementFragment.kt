@@ -399,8 +399,15 @@ class SystemManagementFragment : Fragment() {
         // Damage type management (sandbox uses no tableId — defaults)
         sheetView.findViewById<View>(R.id.btn_manage_damage_types).setOnClickListener {
             val sys = viewModel.selectedSystem.value ?: return@setOnClickListener
-            // Show a simple informational toast in sandbox
-            Toast.makeText(context, "Tipos de dano do sistema: ${sys.damageTypes.joinToString(", ").ifEmpty { "Padrão do sistema" }}", Toast.LENGTH_LONG).show()
+            if (sys.isBaseSystem) {
+                showBaseSystemWarning()
+                return@setOnClickListener
+            }
+            ManageDamageTypesDialogFragment(
+                availableTypesFlow = viewModel.damageTypes,
+                onAdd = { viewModel.addDamageType(it) },
+                onRemove = { viewModel.removeDamageType(it) }
+            ).show(parentFragmentManager, "SM_ManageDamageTypes")
         }
 
         // Roll buttons delegate to rollViewModel (reads SharedCharacterState updated by SystemManagementViewModel)
@@ -610,7 +617,47 @@ class SystemManagementFragment : Fragment() {
                     }
                 }
 
-                // 6. Roll result display
+                // 6. Damage type spinners in sandbox
+                launch {
+                    viewModel.damageTypes.collect { damageTypes ->
+                        if (damageTypes.isEmpty()) return@collect
+                        val spinnerF = sheetView.findViewById<android.widget.Spinner>(R.id.spinner_damage_forca)
+                        val spinnerPdf = sheetView.findViewById<android.widget.Spinner>(R.id.spinner_damage_pdf)
+                        val char = viewModel.sandboxCharacter.value
+
+                        val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, damageTypes)
+                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+                        spinnerF.onItemSelectedListener = null
+                        spinnerPdf.onItemSelectedListener = null
+                        spinnerF.adapter = adapter
+                        spinnerPdf.adapter = adapter
+
+                        val indexF = damageTypes.indexOf(char?.damageTypeForca).coerceAtLeast(0)
+                        val indexP = damageTypes.indexOf(char?.damageTypePdf).coerceAtLeast(0)
+                        spinnerF.setSelection(indexF)
+                        spinnerPdf.setSelection(indexP)
+
+                        spinnerF.post {
+                            spinnerF.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+                                override fun onItemSelected(p: android.widget.AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                                    viewModel.updateDamageType(damageTypes[pos], false)
+                                }
+                                override fun onNothingSelected(p: android.widget.AdapterView<*>?) {}
+                            }
+                        }
+                        spinnerPdf.post {
+                            spinnerPdf.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+                                override fun onItemSelected(p: android.widget.AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                                    viewModel.updateDamageType(damageTypes[pos], true)
+                                }
+                                override fun onNothingSelected(p: android.widget.AdapterView<*>?) {}
+                            }
+                        }
+                    }
+                }
+
+                // 7. Roll result display
                 launch {
                     rollViewModel.lastRoll.collect { result ->
                         val rollCard = sheetView.findViewById<androidx.cardview.widget.CardView>(R.id.card_roll_result)

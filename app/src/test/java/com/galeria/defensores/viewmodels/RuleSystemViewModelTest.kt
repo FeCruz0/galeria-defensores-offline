@@ -327,4 +327,22 @@ class RuleSystemViewModelTest {
             // expected
         }
     }
+
+    @Test
+    fun `loadDamageTypes when tableId is null loads dynamic system default damage types`() = runTest(testDispatcher) {
+        val customSystem = RuleSystem(
+            id = "custom_sys",
+            name = "Custom System",
+            damageTypes = mutableListOf("Fogo", "Frio", "Luz")
+        )
+        viewModel.loadRuleSystem(customSystem)
+
+        viewModel.loadDamageTypes(null)
+
+        val damageTypes = viewModel.availableDamageTypes.value
+        assertEquals(3, damageTypes.size)
+        assertTrue(damageTypes.contains("Fogo"))
+        assertTrue(damageTypes.contains("Frio"))
+        assertTrue(damageTypes.contains("Luz"))
+    }
 }

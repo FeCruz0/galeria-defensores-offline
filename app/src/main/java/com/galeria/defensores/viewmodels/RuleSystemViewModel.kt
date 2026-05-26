@@ -225,10 +225,15 @@ class RuleSystemViewModel @Inject constructor(
 
     // --- Damage Types ---
 
+    private fun getSystemDefaultDamageTypes(): List<String> {
+        return currentRuleSystem.damageTypes.ifEmpty { defaultDamageTypes }
+    }
+
     fun loadDamageTypes(tableId: String?) {
         currentTableId = tableId
+        val baseDamageTypes = getSystemDefaultDamageTypes()
         if (tableId.isNullOrEmpty()) {
-            _availableDamageTypes.value = defaultDamageTypes.sorted()
+            _availableDamageTypes.value = baseDamageTypes.sorted()
             return
         }
         viewModelScope.launch {
@@ -236,8 +241,7 @@ class RuleSystemViewModel @Inject constructor(
                 val customTypes = table?.customDamageTypes ?: emptyList()
                 val deletedDefaults = customTypes.filter { it.startsWith("-") }.map { it.drop(1) }
                 val addedCustoms = customTypes.filter { !it.startsWith("-") }
-                
-                _availableDamageTypes.value = (defaultDamageTypes.filterNot { it in deletedDefaults } + addedCustoms).distinct().sorted()
+                _availableDamageTypes.value = (baseDamageTypes.filterNot { it in deletedDefaults } + addedCustoms).distinct().sorted()
             }
         }
     }
@@ -245,9 +249,10 @@ class RuleSystemViewModel @Inject constructor(
     fun addCustomDamageType(type: String) {
         val tableId = currentTableId ?: return
         if (type.isBlank()) return
+        val baseDamageTypes = getSystemDefaultDamageTypes()
         viewModelScope.launch {
             val table = tableRepository.getTableOnce(tableId) ?: return@launch
-            if (defaultDamageTypes.contains(type)) {
+            if (baseDamageTypes.contains(type)) {
                 if (table.customDamageTypes.remove("-$type")) {
                     tableRepository.updateTable(table)
                 }
@@ -260,12 +265,13 @@ class RuleSystemViewModel @Inject constructor(
 
     fun removeCustomDamageType(type: String) {
         val tableId = currentTableId ?: return
+        val baseDamageTypes = getSystemDefaultDamageTypes()
         viewModelScope.launch {
             val table = tableRepository.getTableOnce(tableId) ?: return@launch
-            if (defaultDamageTypes.contains(type)) {
+            if (baseDamageTypes.contains(type)) {
                 if (!table.customDamageTypes.contains("-$type")) {
-                     table.customDamageTypes.add("-$type")
-                     tableRepository.updateTable(table)
+                    table.customDamageTypes.add("-$type")
+                    tableRepository.updateTable(table)
                 }
             } else {
                 if (table.customDamageTypes.remove(type)) tableRepository.updateTable(table)

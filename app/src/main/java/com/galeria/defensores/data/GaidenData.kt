@@ -18,8 +18,8 @@ object GaidenData {
             resources = defaultResources().toMutableList(),
             diceConfig = DiceConfig(1, 6),
             damageTypes = mutableListOf(
-                "Ácido", "Fogo", "Frio", "Elétrico", "Psíquico", 
-                "Químico", "Sônico", "Veneno", "Lacerante", "Contusão"
+                "Lacerante", "Contusão", "Ácido", "Fogo", "Frio", "Elétrico", "Psíquico", 
+                "Químico", "Sônico", "Veneno", "Luz", "Trevas"
             ),
             advantages = getAdvantages(),
             disadvantages = getDisadvantages(),

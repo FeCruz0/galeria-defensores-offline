@@ -30,7 +30,11 @@ class RuleSystemRepository @Inject constructor(
             isBaseSystem = true,
             attributes = defaultAttributes().toMutableList(),
             resources = defaultResources().toMutableList(),
-            diceConfig = DiceConfig(1, 6)
+            diceConfig = DiceConfig(1, 6),
+            damageTypes = mutableListOf(
+                "Corte", "Perfuração", "Esmagamento",
+                "Fogo", "Frio", "Elétrico", "Químico", "Sônico"
+            )
         )
     }
 

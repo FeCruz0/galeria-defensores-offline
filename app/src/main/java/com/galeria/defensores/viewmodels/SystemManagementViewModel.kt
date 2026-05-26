@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -52,6 +53,11 @@ class SystemManagementViewModel @Inject constructor(
 
     private val _customUniqueAdvantages = MutableStateFlow<List<UniqueAdvantage>>(emptyList())
     val customUniqueAdvantages: StateFlow<List<UniqueAdvantage>> = _customUniqueAdvantages.asStateFlow()
+
+    /** Reactive list of damage types for the currently selected system. */
+    val damageTypes: StateFlow<List<String>> = _selectedSystem
+        .map { it?.damageTypes?.sorted() ?: emptyList() }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     private var originalSystem: RuleSystem? = null
 
@@ -150,6 +156,25 @@ class SystemManagementViewModel @Inject constructor(
     }
 
     // --- Structural Customization ---
+
+    fun addDamageType(type: String) {
+        val current = _selectedSystem.value ?: return
+        val trimmed = type.trim()
+        if (trimmed.isBlank()) return
+        if (current.damageTypes.any { it.equals(trimmed, ignoreCase = true) }) return
+        val newTypes = current.damageTypes.toMutableList().also { it.add(trimmed) }
+        _selectedSystem.value = current.copy(damageTypes = newTypes)
+        checkDirty()
+    }
+
+    fun removeDamageType(type: String) {
+        val current = _selectedSystem.value ?: return
+        val newTypes = current.damageTypes.toMutableList()
+        if (newTypes.remove(type)) {
+            _selectedSystem.value = current.copy(damageTypes = newTypes)
+            checkDirty()
+        }
+    }
 
     fun updateMetadata(name: String, description: String) {
         val current = _selectedSystem.value ?: return
